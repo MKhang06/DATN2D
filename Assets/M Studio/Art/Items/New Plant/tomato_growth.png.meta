@@ -1,9 +1,15 @@
 fileFormatVersion: 2
 guid: cfbc4902a2e4349e2986894ea4d8330b
+  serializedVersion: 1
+  productId: 215013
+  packageName: M Farm RPG Assets Pack
+  packageVersion: 1.2
+  assetPath: Assets/M Studio/Art/Items/New Plant/tomato_growth.png
+  uploadId: 488911
 TextureImporter:
   internalIDToNameTable: []
   externalObjects: {}
-  serializedVersion: 11
+  serializedVersion: 13
   mipmaps:
     mipMapMode: 0
     enableMipMap: 0
@@ -20,11 +26,12 @@ TextureImporter:
     externalNormalMap: 0
     heightScale: 0.25
     normalMapFilter: 0
+    flipGreenChannel: 0
   isReadable: 0
   streamingMipmaps: 0
   streamingMipmapsPriority: 0
   vTOnly: 0
-  ignoreMasterTextureLimit: 0
+  ignoreMipmapLimit: 0
   grayScaleToAlpha: 0
   generateCubemap: 6
   cubemapConvolution: 0
@@ -63,8 +70,10 @@ TextureImporter:
   textureFormatSet: 0
   ignorePngGamma: 0
   applyGammaDecoding: 0
+  swizzle: 50462976
+  cookieLightType: 1
   platformSettings:
-  - serializedVersion: 3
+  - serializedVersion: 4
     buildTarget: DefaultTexturePlatform
     maxTextureSize: 512
     resizeAlgorithm: 0
@@ -74,9 +83,10 @@ TextureImporter:
     crunchedCompression: 0
     allowsAlphaSplitting: 0
     overridden: 0
+    ignorePlatformSupport: 0
     androidETC2FallbackOverride: 0
     forceMaximumCompressionQuality_BC6H_BC7: 0
-  - serializedVersion: 3
+  - serializedVersion: 4
     buildTarget: Standalone
     maxTextureSize: 2048
     resizeAlgorithm: 0
@@ -86,9 +96,10 @@ TextureImporter:
     crunchedCompression: 0
     allowsAlphaSplitting: 0
     overridden: 0
+    ignorePlatformSupport: 0
     androidETC2FallbackOverride: 0
     forceMaximumCompressionQuality_BC6H_BC7: 0
-  - serializedVersion: 3
+  - serializedVersion: 4
     buildTarget: Server
     maxTextureSize: 2048
     resizeAlgorithm: 0
@@ -98,9 +109,10 @@ TextureImporter:
     crunchedCompression: 0
     allowsAlphaSplitting: 0
     overridden: 0
+    ignorePlatformSupport: 0
     androidETC2FallbackOverride: 0
     forceMaximumCompressionQuality_BC6H_BC7: 0
-  - serializedVersion: 3
+  - serializedVersion: 4
     buildTarget: WebGL
     maxTextureSize: 2048
     resizeAlgorithm: 0
@@ -110,6 +122,7 @@ TextureImporter:
     crunchedCompression: 0
     allowsAlphaSplitting: 0
     overridden: 0
+    ignorePlatformSupport: 0
     androidETC2FallbackOverride: 0
     forceMaximumCompressionQuality_BC6H_BC7: 0
   spriteSheet:
@@ -123,14 +136,15 @@ TextureImporter:
         y: 0
         width: 20
         height: 40
-      alignment: 9
-      pivot: {x: 0.5, y: 0.11}
+      alignment: 0
+      pivot: {x: 0, y: 0}
       border: {x: 0, y: 0, z: 0, w: 0}
+      customData: 
       outline: []
       physicsShape: []
       tessellationDetail: 0
       bones: []
-      spriteID: 909cbecf7343041edbfdc32352a7fdd1
+      spriteID: 8ac8ffd4caad923489fdb200fa8cee10
       internalID: -2007405922
       vertices: []
       indices: 
@@ -144,14 +158,15 @@ TextureImporter:
         y: 0
         width: 20
         height: 40
-      alignment: 9
-      pivot: {x: 0.5, y: 0.11}
+      alignment: 0
+      pivot: {x: 0, y: 0}
       border: {x: 0, y: 0, z: 0, w: 0}
+      customData: 
       outline: []
       physicsShape: []
       tessellationDetail: 0
       bones: []
-      spriteID: aed31cb17e7ea401f8fe1aea3efca6e3
+      spriteID: 925708b16f4fd0141b8bce94211e7d94
       internalID: 875008789
       vertices: []
       indices: 
@@ -165,14 +180,15 @@ TextureImporter:
         y: 0
         width: 20
         height: 40
-      alignment: 9
-      pivot: {x: 0.5, y: 0.11}
+      alignment: 0
+      pivot: {x: 0, y: 0}
       border: {x: 0, y: 0, z: 0, w: 0}
+      customData: 
       outline: []
       physicsShape: []
       tessellationDetail: 0
       bones: []
-      spriteID: 96c5d57838c8e450fa96d23c6fcdcd3e
+      spriteID: c46e1e3911eaa2f4abc8639ae29f37ee
       internalID: 1324347211
       vertices: []
       indices: 
@@ -186,14 +202,15 @@ TextureImporter:
         y: 0
         width: 20
         height: 40
-      alignment: 9
-      pivot: {x: 0.5, y: 0.11}
+      alignment: 0
+      pivot: {x: 0, y: 0}
       border: {x: 0, y: 0, z: 0, w: 0}
+      customData: 
       outline: []
       physicsShape: []
       tessellationDetail: 0
       bones: []
-      spriteID: 93bf6280cbc1c4ef8ab05f7e1593f240
+      spriteID: 2a5620b4fb6c5014a82b20a2f4340709
       internalID: 1065365656
       vertices: []
       indices: 
@@ -207,20 +224,22 @@ TextureImporter:
         y: 0
         width: 20
         height: 40
-      alignment: 9
-      pivot: {x: 0.5, y: 0.11}
+      alignment: 0
+      pivot: {x: 0, y: 0}
       border: {x: 0, y: 0, z: 0, w: 0}
+      customData: 
       outline: []
       physicsShape: []
       tessellationDetail: 0
       bones: []
-      spriteID: 31172cb8e628b4e0995b03e79d58b8d9
-      internalID: 675625077
+      spriteID: c704627bb84ca67429a58783552f7f81
+      internalID: -1340463712
       vertices: []
       indices: 
       edges: []
       weights: []
     outline: []
+    customData: 
     physicsShape: []
     bones: []
     spriteID: 5e97eb03825dee720800000000000000
@@ -230,22 +249,16 @@ TextureImporter:
     edges: []
     weights: []
     secondaryTextures: []
+    spriteCustomMetadata:
+      entries: []
     nameFileIdTable:
-      tomato_growth_3: 1065365656
-      tomato_growth_4: 675625077
-      tomato_growth_2: 1324347211
       tomato_growth_0: -2007405922
       tomato_growth_1: 875008789
-  spritePackingTag: 
+      tomato_growth_2: 1324347211
+      tomato_growth_3: 1065365656
+      tomato_growth_4: -1340463712
+  mipmapLimitGroupName: 
   pSDRemoveMatte: 0
-  pSDShowRemoveMatteOption: 0
   userData: 
   assetBundleName: 
   assetBundleVariant: 
-AssetOrigin:
-  serializedVersion: 1
-  productId: 215013
-  packageName: M Farm RPG Assets Pack
-  packageVersion: 1.2
-  assetPath: Assets/M Studio/Art/Items/New Plant/tomato_growth.png
-  uploadId: 488911
