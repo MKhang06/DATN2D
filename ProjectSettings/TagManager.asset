@@ -2,7 +2,7 @@
 %TAG !u! tag:unity3d.com,2011:
 --- !u!78 &1
 TagManager:
-  serializedVersion: 2
+  serializedVersion: 3
   tags: []
   layers:
   - Default
@@ -41,3 +41,47 @@ TagManager:
   - name: Default
     uniqueID: 0
     locked: 0
+  - name: Body
+    uniqueID: 3640979911
+    locked: 0
+  - name: Arm
+    uniqueID: 2520256133
+    locked: 0
+  - name: hair
+    uniqueID: 3147590871
+    locked: 0
+  - name: MainGround
+    uniqueID: 730167547
+    locked: 0
+  - name: Mountain
+    uniqueID: 243124025
+    locked: 0
+  - name: Grass
+    uniqueID: 2643864449
+    locked: 0
+  - name: Bushes
+    uniqueID: 4225097383
+    locked: 0
+  - name: Rocks
+    uniqueID: 2845078249
+    locked: 0
+  - name: Tree
+    uniqueID: 2399500969
+    locked: 0
+  - name: Building
+    uniqueID: 3329802115
+    locked: 0
+  - name: Farmtile
+    uniqueID: 1097726569
+    locked: 0
+  - name: Water
+    uniqueID: 1675348919
+    locked: 0
+  - name: Crops
+    uniqueID: 1344116285
+    locked: 0
+  - name: UI
+    uniqueID: 41817851
+    locked: 0
+  m_RenderingLayers:
+  - Default
