@@ -22,6 +22,10 @@ public class ShopNPC : MonoBehaviour
     [SerializeField] private TMP_Text npcMenuNameText;
     [SerializeField] private TMP_Text dialogueText;
 
+    [Header("Relationship")]
+    [SerializeField] private NPCRelationship relationship;
+
+    [SerializeField] private TMP_Text friendshipText;
     private bool playerInRange;
 
     private readonly string[] greetings =
@@ -87,6 +91,9 @@ private readonly string[] farmingTips =
 
         if (npcMenuPanel != null)
             npcMenuPanel.SetActive(false);
+
+        if (relationship == null)
+        relationship = GetComponent<NPCRelationship>();
     }
 
     private void Update()
@@ -98,6 +105,7 @@ private readonly string[] farmingTips =
 
         if (Input.GetKeyDown(KeyCode.Escape))
             CloseNPCMenu();
+        UpdateFriendshipUI();
     }
 
     public void OpenNPCMenu()
@@ -121,6 +129,30 @@ private readonly string[] farmingTips =
 
         if (interactPromptUI != null)
             interactPromptUI.SetActive(false);
+
+        if (relationship != null)
+{
+    if (relationship.friendship >= 100)
+    {
+        dialogueText.text =
+            "Ồ, người bạn thân nhất của tôi đã đến rồi. Hôm nay cần gì nào?";
+    }
+    else if (relationship.friendship >= 50)
+    {
+        dialogueText.text =
+            "Chào người bạn đáng tin cậy. Mùa vụ gần đây thế nào?";
+    }
+    else if (relationship.friendship >= 25)
+    {
+        dialogueText.text =
+            "Rất vui được gặp lại cậu.";
+    }
+    else
+    {
+        dialogueText.text =
+            greetings[Random.Range(0, greetings.Length)];
+    }
+}
     }
 
     public void CloseNPCMenu()
@@ -212,15 +244,21 @@ private readonly string[] farmingTips =
 
     if (npcMood != null)
         npcMood.IncreaseMood(1f);
+
+    if (relationship != null)
+    relationship.AddFriendship(1);
 }
 
     public void OpenShopFromMenu()
-    {
-        CloseNPCMenu();
+{
+    CloseNPCMenu();
 
-        if (shopManager != null)
-            shopManager.OpenShop(npcMood);
-    }
+    if (relationship != null)
+        relationship.AddFriendship(2);
+
+    if (shopManager != null)
+        shopManager.OpenShop(npcMood);
+}
 
     private void OnTriggerEnter2D(Collider2D other)
     {
@@ -263,6 +301,9 @@ private readonly string[] farmingTips =
 
     if (npcMood != null)
         npcMood.IncreaseMood(2f);
+
+    if (relationship != null)
+        relationship.AddFriendship(1);
 }
 public void AskNews()
 {
@@ -271,6 +312,9 @@ public void AskNews()
 
     if (npcMood != null)
         npcMood.IncreaseMood(1f);
+
+    if (relationship != null)
+        relationship.AddFriendship(1);
 }
 
 public void AskFarmingTips()
@@ -280,5 +324,29 @@ public void AskFarmingTips()
 
     if (npcMood != null)
         npcMood.IncreaseMood(1f);
+
+    if (relationship != null)
+        relationship.AddFriendship(1);
+}
+private void UpdateFriendshipUI()
+{
+    if (friendshipText == null ||
+        relationship == null)
+        return;
+
+    string rank = "Người lạ";
+
+    if (relationship.friendship >= 100)
+        rank = "Bạn thân";
+    else if (relationship.friendship >= 50)
+        rank = "Bạn tốt";
+    else if (relationship.friendship >= 25)
+        rank = "Thân thiện";
+    else if (relationship.friendship >= 10)
+        rank = "Quen biết";
+
+    friendshipText.text =
+        "♥ " + rank +
+        " (" + relationship.friendship + "/100)";
 }
 }
