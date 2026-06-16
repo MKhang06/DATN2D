@@ -13696,6 +13696,55 @@ CanvasRenderer:
   m_PrefabAsset: {fileID: 0}
   m_GameObject: {fileID: 909251788}
   m_CullTransparentMesh: 1
+--- !u!1 &912008268
+GameObject:
+  m_ObjectHideFlags: 0
+  m_CorrespondingSourceObject: {fileID: 0}
+  m_PrefabInstance: {fileID: 0}
+  m_PrefabAsset: {fileID: 0}
+  serializedVersion: 6
+  m_Component:
+  - component: {fileID: 912008270}
+  - component: {fileID: 912008269}
+  m_Layer: 0
+  m_Name: CursorManager
+  m_TagString: Untagged
+  m_Icon: {fileID: 0}
+  m_NavMeshLayer: 0
+  m_StaticEditorFlags: 0
+  m_IsActive: 1
+--- !u!114 &912008269
+MonoBehaviour:
+  m_ObjectHideFlags: 0
+  m_CorrespondingSourceObject: {fileID: 0}
+  m_PrefabInstance: {fileID: 0}
+  m_PrefabAsset: {fileID: 0}
+  m_GameObject: {fileID: 912008268}
+  m_Enabled: 1
+  m_EditorHideFlags: 0
+  m_Script: {fileID: 11500000, guid: a7acfb1947923d940ba28ae379ba563e, type: 3}
+  m_Name: 
+  m_EditorClassIdentifier: 
+  defaultCursor: {fileID: 2800000, guid: cc54813f77c896448b26667b03b6f930, type: 3}
+  hoeCursor: {fileID: 2800000, guid: cc54813f77c896448b26667b03b6f930, type: 3}
+  wateringCursor: {fileID: 2800000, guid: cc54813f77c896448b26667b03b6f930, type: 3}
+  hotspot: {x: 0, y: 0}
+  cursorMode: 0
+--- !u!4 &912008270
+Transform:
+  m_ObjectHideFlags: 0
+  m_CorrespondingSourceObject: {fileID: 0}
+  m_PrefabInstance: {fileID: 0}
+  m_PrefabAsset: {fileID: 0}
+  m_GameObject: {fileID: 912008268}
+  serializedVersion: 2
+  m_LocalRotation: {x: 0, y: 0, z: 0, w: 1}
+  m_LocalPosition: {x: 454.69977, y: 797.1444, z: 8.104456}
+  m_LocalScale: {x: 1, y: 1, z: 1}
+  m_ConstrainProportionsScale: 0
+  m_Children: []
+  m_Father: {fileID: 0}
+  m_LocalEulerAnglesHint: {x: 0, y: 0, z: 0}
 --- !u!1 &919384506
 GameObject:
   m_ObjectHideFlags: 0
@@ -30846,6 +30895,14 @@ PrefabInstance:
     serializedVersion: 3
     m_TransformParent: {fileID: 0}
     m_Modifications:
+    - target: {fileID: 555804817488940233, guid: 0b13ecfbe49197747ade198e011f0b5e, type: 3}
+      propertyPath: toolHolder
+      value: 
+      objectReference: {fileID: 9113155354489064521}
+    - target: {fileID: 555804817488940233, guid: 0b13ecfbe49197747ade198e011f0b5e, type: 3}
+      propertyPath: playerSprite
+      value: 
+      objectReference: {fileID: 9113155354489064537}
     - target: {fileID: 1587316195062963707, guid: 0b13ecfbe49197747ade198e011f0b5e, type: 3}
       propertyPath: m_LocalPosition.x
       value: 1.86
@@ -30965,6 +31022,11 @@ MonoBehaviour:
   m_Script: {fileID: 11500000, guid: 0ba277342dccf524d831532be92ae764, type: 3}
   m_Name: 
   m_EditorClassIdentifier: 
+--- !u!212 &9113155354489064537 stripped
+SpriteRenderer:
+  m_CorrespondingSourceObject: {fileID: 6872815030562296168, guid: 0b13ecfbe49197747ade198e011f0b5e, type: 3}
+  m_PrefabInstance: {fileID: 6210251248469213981}
+  m_PrefabAsset: {fileID: 0}
 --- !u!4 &9147638238123142805
 Transform:
   m_ObjectHideFlags: 0
@@ -31009,3 +31071,4 @@ SceneRoots:
   - {fileID: 1686552981}
   - {fileID: 1814543796}
   - {fileID: 385695870}
+  - {fileID: 912008270}

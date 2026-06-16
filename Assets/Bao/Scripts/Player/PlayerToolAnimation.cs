@@ -62,6 +62,12 @@ public class PlayerToolAnimation : MonoBehaviour
     private float currentAngle;
     private Coroutine activeToolLoop;
 
+   private void Update()
+{
+    if (isUsingTool)
+        return;
+}
+
     private void Awake()
     {
         if (playerController == null)
@@ -430,4 +436,17 @@ public class PlayerToolAnimation : MonoBehaviour
             wateringCanRenderer.flipY = dir == Vector2.left;
     }
 }
+    public void LookAtMouse(Vector3 mouseWorldPos)
+{
+    if (isUsingTool) return;
+
+    if (hoeTransform != null && hoeSprite != null && hoeSprite.activeSelf)
+        RotateToolToMouse(hoeTransform, hoeRenderer, mouseWorldPos);
+
+    if (wateringCanTransform != null &&
+        wateringCanSprite != null &&
+        wateringCanSprite.activeSelf)
+        RotateToolToMouse(wateringCanTransform, wateringCanRenderer, mouseWorldPos);
+}
+
 }
