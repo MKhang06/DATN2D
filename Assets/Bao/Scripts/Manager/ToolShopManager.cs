@@ -18,6 +18,7 @@ public class ToolShopManager : MonoBehaviour
     [SerializeField] private TMP_Text messageText;
     [SerializeField] private TMP_Text mainButtonText;
     [SerializeField] private TMP_Text relationshipText;
+    [SerializeField] private TMP_Text moneyText;
 
     [Header("Discount")]
     [SerializeField] private float maxDiscountPercent = 30f;
@@ -370,6 +371,13 @@ public class ToolShopManager : MonoBehaviour
         }
 
         UpdateRelationshipUI();
+        if (moneyText != null && playerStats != null)
+        {
+            moneyText.text =
+                "Tiền hiện có:\n" +
+                playerStats.Money +
+                "G";
+        }
     }
 
     private void UpdateRelationshipUI()

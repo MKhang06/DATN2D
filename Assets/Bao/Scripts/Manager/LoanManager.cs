@@ -17,6 +17,8 @@ public class LoanManager : MonoBehaviour
     [SerializeField] private TMP_Text interestText;
     [SerializeField] private TMP_Text messageText;
     [SerializeField] private TMP_InputField amountInput;
+    [SerializeField] private TMP_Text moneyText;
+    [SerializeField] private TMP_Text relationshipText;
 
     [Header("Loan Settings")]
     [SerializeField] private int baseLoanLimit = 500;
@@ -235,6 +237,29 @@ public class LoanManager : MonoBehaviour
 
         if (interestText != null)
             interestText.text = "Lãi suất:\n" + interestPercent.ToString("0") + "%";
+
+        if (moneyText != null && playerStats != null)
+        {
+            moneyText.text =
+                "Tiền hiện có:\n" +
+                playerStats.Money + "G";
+        }
+        if (relationshipText != null)
+        {
+            if (relationship != null)
+            {
+                relationshipText.text =
+                    "Quan hệ:\n" +
+                    GetRelationshipName() +
+                    "\n" +
+                    relationship.friendship + "%";
+            }
+            else
+            {
+                relationshipText.text =
+                    "Quan hệ:\nNgười lạ\n0%";
+            }
+        }
     }
 
     private void SetMessage(string message)
