@@ -67,5 +67,5 @@
         "*.sln": "*.csproj",
         "*.slnx": "*.csproj"
     },
-    "dotnet.defaultSolution": "DATN2D.slnx"
+    "dotnet.defaultSolution": "DATN2D_Git.slnx"
 }
