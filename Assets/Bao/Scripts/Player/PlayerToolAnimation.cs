@@ -37,11 +37,11 @@ public class PlayerToolAnimation : MonoBehaviour
     [SerializeField] private AudioClip waterSound;
 
     [Header("Camera Shake")]
-[SerializeField] private CameraShake cameraShake;
-[SerializeField] private float hoeShakeDuration = 0.08f;
-[SerializeField] private float hoeShakeStrength = 0.04f;
-[SerializeField] private float waterShakeDuration = 0.03f;
-[SerializeField] private float waterShakeStrength = 0.01f;
+    [SerializeField] private CameraShake cameraShake;
+    [SerializeField] private float hoeShakeDuration = 0.08f;
+    [SerializeField] private float hoeShakeStrength = 0.04f;
+    [SerializeField] private float waterShakeDuration = 0.03f;
+    [SerializeField] private float waterShakeStrength = 0.01f;
 
     [Header("Settings")]
     [SerializeField] private float hoeDuration = 0.7f;
@@ -61,12 +61,6 @@ public class PlayerToolAnimation : MonoBehaviour
     private bool isUsingTool;
     private float currentAngle;
     private Coroutine activeToolLoop;
-
-   private void Update()
-{
-    if (isUsingTool)
-        return;
-}
 
     private void Awake()
     {
@@ -95,35 +89,37 @@ public class PlayerToolAnimation : MonoBehaviour
     {
         if (isUsingTool) return;
 
-        currentState = isWalking
-            ? PlayerActionState.Walking
-            : PlayerActionState.Idle;
+        currentState =
+            isWalking
+                ? PlayerActionState.Walking
+                : PlayerActionState.Idle;
     }
 
     public void ShowHoe()
-{
-    if (isUsingTool) return;
+    {
+        if (isUsingTool) return;
 
-    HideWateringCan();
+        HideWateringCan();
 
-    if (hoeSprite != null)
-        hoeSprite.SetActive(true);
+        if (hoeSprite != null)
+            hoeSprite.SetActive(true);
 
-    if (hoeTransform != null)
-        hoeTransform.localRotation = Quaternion.identity;
-}
+        if (hoeTransform != null)
+            hoeTransform.localRotation = Quaternion.identity;
+    }
+
     public void ShowWateringCan()
-{
-    if (isUsingTool) return;
+    {
+        if (isUsingTool) return;
 
-    HideHoe();
+        HideHoe();
 
-    if (wateringCanSprite != null)
-        wateringCanSprite.SetActive(true);
+        if (wateringCanSprite != null)
+            wateringCanSprite.SetActive(true);
 
-    if (wateringCanTransform != null)
-        wateringCanTransform.localRotation = Quaternion.identity;
-}
+        if (wateringCanTransform != null)
+            wateringCanTransform.localRotation = Quaternion.identity;
+    }
 
     public void HideHoe()
     {
@@ -137,31 +133,50 @@ public class PlayerToolAnimation : MonoBehaviour
             wateringCanSprite.SetActive(false);
     }
 
+    public void LookAtMouse(Vector3 mouseWorldPos)
+{
+    if (isUsingTool) return;
+
+    if (hoeTransform != null && hoeSprite != null && hoeSprite.activeSelf)
+        RotateToolToMouse(hoeTransform, hoeRenderer, mouseWorldPos);
+
+    if (wateringCanTransform != null &&
+        wateringCanSprite != null &&
+        wateringCanSprite.activeSelf)
+        RotateToolToMouse(wateringCanTransform, wateringCanRenderer, mouseWorldPos);
+}
     private void RotateToolToMouse(
-        Transform tool,
-        SpriteRenderer renderer,
-        Vector3 mouseWorldPos)
+    Transform tool,
+    SpriteRenderer renderer,
+    Vector3 mouseWorldPos)
+{
+    if (tool == null) return;
+
+    Vector2 dir = mouseWorldPos - tool.position;
+
+    if (dir.sqrMagnitude <= 0.001f)
+        return;
+
+    currentAngle = Mathf.Atan2(dir.y, dir.x) * Mathf.Rad2Deg;
+
+    tool.rotation = Quaternion.Euler(0f, 0f, currentAngle);
+
+    if (renderer != null)
     {
-        Vector2 dir = mouseWorldPos - tool.position;
-
-        currentAngle = Mathf.Atan2(dir.y, dir.x) * Mathf.Rad2Deg;
-        tool.rotation = Quaternion.Euler(0, 0, currentAngle);
-
-        if (renderer != null)
-            renderer.flipY = dir.x < 0;
+        renderer.flipX = false;
+        renderer.flipY = dir.x < 0f;
     }
+}
 
     public void UseHoe(System.Action onComplete)
     {
         if (isUsingTool) return;
-
         StartCoroutine(HoeRoutine(onComplete));
     }
 
     public void UseWateringCan(System.Action onComplete)
     {
         if (isUsingTool) return;
-
         StartCoroutine(WateringRoutine(onComplete));
     }
 
@@ -183,7 +198,7 @@ public class PlayerToolAnimation : MonoBehaviour
         StopActiveLoop();
 
         if (hoeTransform != null)
-            hoeTransform.rotation = Quaternion.Euler(0, 0, startAngle);
+            hoeTransform.rotation = Quaternion.Euler(0f, 0f, startAngle);
 
         onComplete?.Invoke();
 
@@ -210,7 +225,7 @@ public class PlayerToolAnimation : MonoBehaviour
         StopWaterSound();
 
         if (wateringCanTransform != null)
-            wateringCanTransform.rotation = Quaternion.Euler(0, 0, startAngle);
+            wateringCanTransform.rotation = Quaternion.Euler(0f, 0f, startAngle);
 
         onComplete?.Invoke();
 
@@ -257,57 +272,57 @@ public class PlayerToolAnimation : MonoBehaviour
     }
 
     private IEnumerator HoeSwingLoop(float baseAngle)
-{
-    while (isUsingTool)
     {
-        yield return RotateTool(
-            hoeTransform,
-            baseAngle,
-            baseAngle + hoeWindupAngle,
-            hoeWindupTime
-        );
+        while (isUsingTool)
+        {
+            yield return RotateTool(
+                hoeTransform,
+                baseAngle,
+                baseAngle + hoeWindupAngle,
+                hoeWindupTime
+            );
 
-        if (cameraShake != null)
-            cameraShake.Shake(hoeShakeDuration, hoeShakeStrength);
+            if (cameraShake != null)
+                cameraShake.Shake(hoeShakeDuration, hoeShakeStrength);
 
-        yield return RotateTool(
-            hoeTransform,
-            baseAngle + hoeWindupAngle,
-            baseAngle - hoeHitAngle,
-            hoeHitTime
-        );
+            yield return RotateTool(
+                hoeTransform,
+                baseAngle + hoeWindupAngle,
+                baseAngle - hoeHitAngle,
+                hoeHitTime
+            );
 
-        yield return RotateTool(
-            hoeTransform,
-            baseAngle - hoeHitAngle,
-            baseAngle,
-            hoeReturnTime
-        );
+            yield return RotateTool(
+                hoeTransform,
+                baseAngle - hoeHitAngle,
+                baseAngle,
+                hoeReturnTime
+            );
+        }
     }
-}
 
     private IEnumerator WateringSwingLoop(float baseAngle)
-{
-    while (isUsingTool)
     {
-        if (cameraShake != null)
-            cameraShake.Shake(waterShakeDuration, waterShakeStrength);
+        while (isUsingTool)
+        {
+            if (cameraShake != null)
+                cameraShake.Shake(waterShakeDuration, waterShakeStrength);
 
-        yield return RotateTool(
-            wateringCanTransform,
-            baseAngle,
-            baseAngle - wateringTiltAngle,
-            wateringTiltTime
-        );
+            yield return RotateTool(
+                wateringCanTransform,
+                baseAngle,
+                baseAngle - wateringTiltAngle,
+                wateringTiltTime
+            );
 
-        yield return RotateTool(
-            wateringCanTransform,
-            baseAngle - wateringTiltAngle,
-            baseAngle,
-            wateringReturnTime
-        );
+            yield return RotateTool(
+                wateringCanTransform,
+                baseAngle - wateringTiltAngle,
+                baseAngle,
+                wateringReturnTime
+            );
+        }
     }
-}
 
     private IEnumerator RotateTool(
         Transform tool,
@@ -327,12 +342,12 @@ public class PlayerToolAnimation : MonoBehaviour
             float t = Mathf.Clamp01(timer / duration);
             float angle = Mathf.LerpAngle(fromAngle, toAngle, t);
 
-            tool.rotation = Quaternion.Euler(0, 0, angle);
+            tool.rotation = Quaternion.Euler(0f, 0f, angle);
 
             yield return null;
         }
 
-        tool.rotation = Quaternion.Euler(0, 0, toAngle);
+        tool.rotation = Quaternion.Euler(0f, 0f, toAngle);
     }
 
     private void StopActiveLoop()
@@ -379,8 +394,7 @@ public class PlayerToolAnimation : MonoBehaviour
 
     private void StopHoeSound()
     {
-        if (hoeAudioSource == null)
-            return;
+        if (hoeAudioSource == null) return;
 
         hoeAudioSource.Stop();
         hoeAudioSource.loop = false;
@@ -406,47 +420,4 @@ public class PlayerToolAnimation : MonoBehaviour
         waterAudioSource.loop = false;
         waterAudioSource.clip = null;
     }
-
-    public void UpdateToolDirection(Vector2 dir)
-{
-    float angle = 0f;
-
-    if (dir == Vector2.up)
-        angle = 90f;
-    else if (dir == Vector2.down)
-        angle = -90f;
-    else if (dir == Vector2.left)
-        angle = 180f;
-    else if (dir == Vector2.right)
-        angle = 0f;
-
-    if (hoeTransform != null && hoeSprite.activeSelf)
-    {
-        hoeTransform.rotation = Quaternion.Euler(0, 0, angle);
-
-        if (hoeRenderer != null)
-            hoeRenderer.flipY = dir == Vector2.left;
-    }
-
-    if (wateringCanTransform != null && wateringCanSprite.activeSelf)
-    {
-        wateringCanTransform.rotation = Quaternion.Euler(0, 0, angle);
-
-        if (wateringCanRenderer != null)
-            wateringCanRenderer.flipY = dir == Vector2.left;
-    }
-}
-    public void LookAtMouse(Vector3 mouseWorldPos)
-{
-    if (isUsingTool) return;
-
-    if (hoeTransform != null && hoeSprite != null && hoeSprite.activeSelf)
-        RotateToolToMouse(hoeTransform, hoeRenderer, mouseWorldPos);
-
-    if (wateringCanTransform != null &&
-        wateringCanSprite != null &&
-        wateringCanSprite.activeSelf)
-        RotateToolToMouse(wateringCanTransform, wateringCanRenderer, mouseWorldPos);
-}
-
 }

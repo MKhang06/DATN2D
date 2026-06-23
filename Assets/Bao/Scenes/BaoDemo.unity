@@ -153,8 +153,8 @@ RectTransform:
   m_LocalEulerAnglesHint: {x: 0, y: 0, z: 0}
   m_AnchorMin: {x: 0.5, y: 0.5}
   m_AnchorMax: {x: 0.5, y: 0.5}
-  m_AnchoredPosition: {x: 101.8, y: 5.4}
-  m_SizeDelta: {x: 80, y: 30}
+  m_AnchoredPosition: {x: 121, y: 21}
+  m_SizeDelta: {x: 135.3386, y: 35.8693}
   m_Pivot: {x: 0.5, y: 0.5}
 --- !u!114 &32749577
 MonoBehaviour:
@@ -203,8 +203,8 @@ MonoBehaviour:
   m_faceColor:
     serializedVersion: 2
     rgba: 4294967295
-  m_fontSize: 24
-  m_fontSizeBase: 24
+  m_fontSize: 46
+  m_fontSizeBase: 46
   m_fontWeight: 400
   m_enableAutoSizing: 0
   m_fontSizeMin: 18
@@ -18320,12 +18320,12 @@ RectTransform:
   m_Children:
   - {fileID: 564982416}
   - {fileID: 2127174172}
-  m_Father: {fileID: 1146894177}
+  m_Father: {fileID: 0}
   m_LocalEulerAnglesHint: {x: 0, y: 0, z: 0}
   m_AnchorMin: {x: 0.5, y: 0.5}
   m_AnchorMax: {x: 0.5, y: 0.5}
-  m_AnchoredPosition: {x: 0, y: 120}
-  m_SizeDelta: {x: 250, y: 25}
+  m_AnchoredPosition: {x: 0, y: 0}
+  m_SizeDelta: {x: 100, y: 100}
   m_Pivot: {x: 0.5, y: 0.5}
 --- !u!114 &1141610032
 MonoBehaviour:
@@ -18471,7 +18471,7 @@ GameObject:
   m_Icon: {fileID: 0}
   m_NavMeshLayer: 0
   m_StaticEditorFlags: 0
-  m_IsActive: 0
+  m_IsActive: 1
 --- !u!114 &1146894174
 MonoBehaviour:
   m_ObjectHideFlags: 0
@@ -18548,7 +18548,6 @@ RectTransform:
   m_ConstrainProportionsScale: 0
   m_Children:
   - {fileID: 1988877375}
-  - {fileID: 1141610031}
   - {fileID: 1367538893}
   - {fileID: 1131455468}
   - {fileID: 814019675}
@@ -22553,7 +22552,7 @@ GameObject:
   m_Icon: {fileID: 0}
   m_NavMeshLayer: 0
   m_StaticEditorFlags: 0
-  m_IsActive: 1
+  m_IsActive: 0
 --- !u!114 &1371389695
 MonoBehaviour:
   m_ObjectHideFlags: 0
@@ -22961,7 +22960,7 @@ RectTransform:
   m_LocalEulerAnglesHint: {x: 0, y: 0, z: 0}
   m_AnchorMin: {x: 0.5, y: 0.5}
   m_AnchorMax: {x: 0.5, y: 0.5}
-  m_AnchoredPosition: {x: 97.1, y: 0}
+  m_AnchoredPosition: {x: 97.1, y: 11}
   m_SizeDelta: {x: 120, y: 32}
   m_Pivot: {x: 0.5, y: 0.5}
 --- !u!114 &1416953449
@@ -23011,8 +23010,8 @@ MonoBehaviour:
   m_faceColor:
     serializedVersion: 2
     rgba: 4294967295
-  m_fontSize: 24
-  m_fontSizeBase: 24
+  m_fontSize: 46
+  m_fontSizeBase: 46
   m_fontWeight: 400
   m_enableAutoSizing: 0
   m_fontSizeMin: 18
@@ -34454,6 +34453,14 @@ PrefabInstance:
       propertyPath: toolProgressUI
       value: 
       objectReference: {fileID: 1141610032}
+    - target: {fileID: 7036532019099043392, guid: 0b13ecfbe49197747ade198e011f0b5e, type: 3}
+      propertyPath: m_SpriteSortPoint
+      value: 1
+      objectReference: {fileID: 0}
+    - target: {fileID: 7439253678124404292, guid: 0b13ecfbe49197747ade198e011f0b5e, type: 3}
+      propertyPath: m_SpriteSortPoint
+      value: 1
+      objectReference: {fileID: 0}
     - target: {fileID: 8951891740236506941, guid: 0b13ecfbe49197747ade198e011f0b5e, type: 3}
       propertyPath: m_Name
       value: Player
@@ -34497,6 +34504,7 @@ SceneRoots:
   - {fileID: 185407144}
   - {fileID: 6210251248469213981}
   - {fileID: 298477449}
+  - {fileID: 1141610031}
   - {fileID: 1146894177}
   - {fileID: 530482160}
   - {fileID: 1814543796}

@@ -53,22 +53,14 @@ public class PlayerToolController : MonoBehaviour
             if (currentTool == ToolType.Hoe)
             {
                 currentTool = ToolType.None;
-
-                if (toolAnimation != null)
-                    toolAnimation.HideHoe();
-
-                if (CursorManager.Instance != null)
-                    CursorManager.Instance.SetDefaultCursor();
+                toolAnimation?.HideHoe();
+                CursorManager.Instance?.SetDefaultCursor();
             }
             else
             {
                 currentTool = ToolType.Hoe;
-
-                if (toolAnimation != null)
-                    toolAnimation.ShowHoe();
-
-                if (CursorManager.Instance != null)
-                    CursorManager.Instance.SetHoeCursor();
+                toolAnimation?.ShowHoe();
+                CursorManager.Instance?.SetHoeCursor();
             }
         }
 
@@ -77,22 +69,14 @@ public class PlayerToolController : MonoBehaviour
             if (currentTool == ToolType.WateringCan)
             {
                 currentTool = ToolType.None;
-
-                if (toolAnimation != null)
-                    toolAnimation.HideWateringCan();
-
-                if (CursorManager.Instance != null)
-                    CursorManager.Instance.SetDefaultCursor();
+                toolAnimation?.HideWateringCan();
+                CursorManager.Instance?.SetDefaultCursor();
             }
             else
             {
                 currentTool = ToolType.WateringCan;
-
-                if (toolAnimation != null)
-                    toolAnimation.ShowWateringCan();
-
-                if (CursorManager.Instance != null)
-                    CursorManager.Instance.SetWateringCursor();
+                toolAnimation?.ShowWateringCan();
+                CursorManager.Instance?.SetWateringCursor();
             }
         }
     }
@@ -126,7 +110,8 @@ public class PlayerToolController : MonoBehaviour
             EventSystem.current.IsPointerOverGameObject())
             return;
 
-        Vector2 mouseWorldPos = cam.ScreenToWorldPoint(Input.mousePosition);
+        Vector2 mouseWorldPos =
+            cam.ScreenToWorldPoint(Input.mousePosition);
 
         Collider2D hit = Physics2D.OverlapCircle(
             mouseWorldPos,
@@ -137,7 +122,6 @@ public class PlayerToolController : MonoBehaviour
         if (hit == null) return;
 
         FarmTile tile = hit.GetComponent<FarmTile>();
-
         if (tile == null) return;
 
         if (currentTool == ToolType.Hoe)
@@ -160,16 +144,9 @@ public class PlayerToolController : MonoBehaviour
         playerStats.AddXP(2);
 
         if (toolAnimation != null)
-        {
-            toolAnimation.UseHoe(() =>
-            {
-                tile.Hoe();
-            });
-        }
+            toolAnimation.UseHoe(() => tile.Hoe());
         else
-        {
             tile.Hoe();
-        }
     }
 
     private void UseWateringCan(FarmTile tile)
@@ -186,21 +163,13 @@ public class PlayerToolController : MonoBehaviour
         playerStats.AddXP(1);
 
         if (toolAnimation != null)
-        {
-            toolAnimation.UseWateringCan(() =>
-            {
-                tile.Water();
-            });
-        }
+            toolAnimation.UseWateringCan(() => tile.Water());
         else
-        {
             tile.Water();
-        }
     }
 
     private void OnDisable()
     {
-        if (CursorManager.Instance != null)
-            CursorManager.Instance.SetDefaultCursor();
+        CursorManager.Instance?.SetDefaultCursor();
     }
 }

@@ -38,7 +38,9 @@ public class PlayerController : MonoBehaviour
 
     private void Update()
     {
-        bool wantsRun = Keyboard.current.leftShiftKey.isPressed;
+        bool wantsRun =
+            Keyboard.current != null &&
+            Keyboard.current.leftShiftKey.isPressed;
 
         isRunning =
             wantsRun &&
@@ -46,10 +48,13 @@ public class PlayerController : MonoBehaviour
             playerStats != null &&
             playerStats.HasStamina();
 
-        if (isRunning)
-            playerStats.DrainStamina();
-        else
-            playerStats.RegenStamina();
+        if (playerStats != null)
+        {
+            if (isRunning)
+                playerStats.DrainStamina();
+            else
+                playerStats.RegenStamina();
+        }
 
         UpdateAnimation();
     }
@@ -61,9 +66,9 @@ public class PlayerController : MonoBehaviour
         if (moveInput.sqrMagnitude > 0.01f)
         {
             if (Mathf.Abs(moveInput.x) > Mathf.Abs(moveInput.y))
-                lastInput = new Vector2(Mathf.Sign(moveInput.x), 0);
+                lastInput = new Vector2(Mathf.Sign(moveInput.x), 0f);
             else
-                lastInput = new Vector2(0, Mathf.Sign(moveInput.y));
+                lastInput = new Vector2(0f, Mathf.Sign(moveInput.y));
         }
 
         UpdateAnimation();
@@ -83,7 +88,9 @@ public class PlayerController : MonoBehaviour
 
     private void UpdateAnimation()
     {
-        bool isMoving = moveInput.sqrMagnitude > 0.01f && canMove;
+        bool isMoving =
+            moveInput.sqrMagnitude > 0.01f &&
+            canMove;
 
         animator.SetFloat("InputX", moveInput.x);
         animator.SetFloat("InputY", moveInput.y);
