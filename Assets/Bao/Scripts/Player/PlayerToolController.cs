@@ -7,9 +7,11 @@ public class PlayerToolController : MonoBehaviour
     {
         None,
         Hoe,
-        WateringCan
+        WateringCan,
+        Axe,
+        Pickaxe,
+        Sickle
     }
-
     [Header("Tool")]
     public ToolType currentTool = ToolType.None;
 
@@ -49,36 +51,33 @@ public class PlayerToolController : MonoBehaviour
     private void ChangeTool()
     {
         if (Input.GetKeyDown(KeyCode.Q))
-        {
-            if (currentTool == ToolType.Hoe)
-            {
-                currentTool = ToolType.None;
-                toolAnimation?.HideHoe();
-                CursorManager.Instance?.SetDefaultCursor();
-            }
-            else
-            {
-                currentTool = ToolType.Hoe;
-                toolAnimation?.ShowHoe();
-                CursorManager.Instance?.SetHoeCursor();
-            }
-        }
+            ToggleTool(ToolType.Hoe);
 
         if (Input.GetKeyDown(KeyCode.E))
+            ToggleTool(ToolType.WateringCan);
+
+        if (Input.GetKeyDown(KeyCode.R))
+            ToggleTool(ToolType.Axe);
+
+        if (Input.GetKeyDown(KeyCode.T))
+            ToggleTool(ToolType.Pickaxe);
+
+        if (Input.GetKeyDown(KeyCode.Y))
+            ToggleTool(ToolType.Sickle);
+    }
+
+    private void ToggleTool(ToolType tool)
+    {
+        if (currentTool == tool)
         {
-            if (currentTool == ToolType.WateringCan)
-            {
-                currentTool = ToolType.None;
-                toolAnimation?.HideWateringCan();
-                CursorManager.Instance?.SetDefaultCursor();
-            }
-            else
-            {
-                currentTool = ToolType.WateringCan;
-                toolAnimation?.ShowWateringCan();
-                CursorManager.Instance?.SetWateringCursor();
-            }
+            currentTool = ToolType.None;
+            toolAnimation.HideAllTools();
+            CursorManager.Instance?.SetDefaultCursor();
+            return;
         }
+
+        currentTool = tool;
+        toolAnimation.ShowTool(tool);
     }
 
     private void RotateToolToMouse()
@@ -124,10 +123,28 @@ public class PlayerToolController : MonoBehaviour
         FarmTile tile = hit.GetComponent<FarmTile>();
         if (tile == null) return;
 
-        if (currentTool == ToolType.Hoe)
-            UseHoe(tile);
-        else if (currentTool == ToolType.WateringCan)
-            UseWateringCan(tile);
+        switch (currentTool)
+        {
+            case ToolType.Hoe:
+                UseHoe(tile);
+                break;
+
+            case ToolType.WateringCan:
+                UseWateringCan(tile);
+                break;
+
+            case ToolType.Axe:
+                UseAxe(tile);
+                break;
+
+            case ToolType.Pickaxe:
+                UsePickaxe(tile);
+                break;
+
+            case ToolType.Sickle:
+                UseSickle(tile);
+                break;
+        }
     }
 
     private void UseHoe(FarmTile tile)
@@ -167,6 +184,56 @@ public class PlayerToolController : MonoBehaviour
         else
             tile.Water();
     }
+    private void UseAxe(FarmTile tile)
+{
+    if (!playerStats.HasEnergy(20f))
+    {
+        Debug.Log("Không đủ Energy để dùng rìu!");
+        return;
+    }
+
+    playerStats.UseEnergy(20f);
+    playerStats.AddXP(3);
+
+    toolAnimation.UseAxe(() =>
+    {
+        tile.Axe();
+    });
+}
+
+private void UsePickaxe(FarmTile tile)
+{
+    if (!playerStats.HasEnergy(20f))
+    {
+        Debug.Log("Không đủ Energy để dùng cuốc chim!");
+        return;
+    }
+
+    playerStats.UseEnergy(20f);
+    playerStats.AddXP(3);
+
+    toolAnimation.UsePickaxe(() =>
+    {
+        tile.Pickaxe();
+    });
+}
+
+private void UseSickle(FarmTile tile)
+{
+    if (!playerStats.HasEnergy(8f))
+    {
+        Debug.Log("Không đủ Energy để dùng liềm!");
+        return;
+    }
+
+    playerStats.UseEnergy(8f);
+    playerStats.AddXP(2);
+
+    toolAnimation.UseSickle(() =>
+    {
+        tile.Sickle();
+    });
+}
 
     private void OnDisable()
     {

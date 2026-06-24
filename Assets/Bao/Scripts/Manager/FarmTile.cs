@@ -57,4 +57,18 @@ public class FarmTile : MonoBehaviour
                 break;
         }
     }
+    public void Axe()
+{
+    Debug.Log("Chặt cây");
+}
+
+public void Pickaxe()
+{
+    Debug.Log("Đập đá");
+}
+
+public void Sickle()
+{
+    Debug.Log("Cắt cỏ");
+}
 }

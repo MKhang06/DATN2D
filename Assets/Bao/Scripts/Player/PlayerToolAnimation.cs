@@ -8,7 +8,10 @@ public class PlayerToolAnimation : MonoBehaviour
         Idle,
         Walking,
         Hoeing,
-        Watering
+        Watering,
+        Axeing,
+        Pickaxing,
+        Sickling
     }
 
     [Header("State")]
@@ -30,6 +33,21 @@ public class PlayerToolAnimation : MonoBehaviour
     [SerializeField] private ParticleSystem waterParticle;
     [SerializeField] private Transform waterSpawnPoint;
 
+    [Header("Axe")]
+    [SerializeField] private GameObject axeSprite;
+    [SerializeField] private Transform axeTransform;
+    [SerializeField] private SpriteRenderer axeRenderer;
+
+    [Header("Pickaxe")]
+    [SerializeField] private GameObject pickaxeSprite;
+    [SerializeField] private Transform pickaxeTransform;
+    [SerializeField] private SpriteRenderer pickaxeRenderer;
+
+    [Header("Sickle")]
+    [SerializeField] private GameObject sickleSprite;
+    [SerializeField] private Transform sickleTransform;
+    [SerializeField] private SpriteRenderer sickleRenderer;
+
     [Header("Sound")]
     [SerializeField] private AudioSource hoeAudioSource;
     [SerializeField] private AudioSource waterAudioSource;
@@ -46,6 +64,7 @@ public class PlayerToolAnimation : MonoBehaviour
     [Header("Settings")]
     [SerializeField] private float hoeDuration = 0.7f;
     [SerializeField] private float wateringDuration = 1.0f;
+    [SerializeField] private float simpleToolDuration = 0.45f;
 
     [SerializeField] private float hoeWindupAngle = 30f;
     [SerializeField] private float hoeHitAngle = 65f;
@@ -73,11 +92,7 @@ public class PlayerToolAnimation : MonoBehaviour
         if (waterAudioSource == null)
             waterAudioSource = GetComponent<AudioSource>();
 
-        if (hoeSprite != null)
-            hoeSprite.SetActive(false);
-
-        if (wateringCanSprite != null)
-            wateringCanSprite.SetActive(false);
+        HideAllTools();
     }
 
     public bool IsBusy()
@@ -89,17 +104,55 @@ public class PlayerToolAnimation : MonoBehaviour
     {
         if (isUsingTool) return;
 
-        currentState =
-            isWalking
-                ? PlayerActionState.Walking
-                : PlayerActionState.Idle;
+        currentState = isWalking
+            ? PlayerActionState.Walking
+            : PlayerActionState.Idle;
+    }
+
+    public void HideAllTools()
+    {
+        if (hoeSprite != null) hoeSprite.SetActive(false);
+        if (wateringCanSprite != null) wateringCanSprite.SetActive(false);
+        if (axeSprite != null) axeSprite.SetActive(false);
+        if (pickaxeSprite != null) pickaxeSprite.SetActive(false);
+        if (sickleSprite != null) sickleSprite.SetActive(false);
+    }
+
+    public void ShowTool(PlayerToolController.ToolType tool)
+    {
+        if (isUsingTool) return;
+
+        HideAllTools();
+
+        switch (tool)
+        {
+            case PlayerToolController.ToolType.Hoe:
+                ShowHoe();
+                break;
+
+            case PlayerToolController.ToolType.WateringCan:
+                ShowWateringCan();
+                break;
+
+            case PlayerToolController.ToolType.Axe:
+                if (axeSprite != null) axeSprite.SetActive(true);
+                break;
+
+            case PlayerToolController.ToolType.Pickaxe:
+                if (pickaxeSprite != null) pickaxeSprite.SetActive(true);
+                break;
+
+            case PlayerToolController.ToolType.Sickle:
+                if (sickleSprite != null) sickleSprite.SetActive(true);
+                break;
+        }
     }
 
     public void ShowHoe()
     {
         if (isUsingTool) return;
 
-        HideWateringCan();
+        HideAllTools();
 
         if (hoeSprite != null)
             hoeSprite.SetActive(true);
@@ -112,7 +165,7 @@ public class PlayerToolAnimation : MonoBehaviour
     {
         if (isUsingTool) return;
 
-        HideHoe();
+        HideAllTools();
 
         if (wateringCanSprite != null)
             wateringCanSprite.SetActive(true);
@@ -134,39 +187,47 @@ public class PlayerToolAnimation : MonoBehaviour
     }
 
     public void LookAtMouse(Vector3 mouseWorldPos)
-{
-    if (isUsingTool) return;
-
-    if (hoeTransform != null && hoeSprite != null && hoeSprite.activeSelf)
-        RotateToolToMouse(hoeTransform, hoeRenderer, mouseWorldPos);
-
-    if (wateringCanTransform != null &&
-        wateringCanSprite != null &&
-        wateringCanSprite.activeSelf)
-        RotateToolToMouse(wateringCanTransform, wateringCanRenderer, mouseWorldPos);
-}
-    private void RotateToolToMouse(
-    Transform tool,
-    SpriteRenderer renderer,
-    Vector3 mouseWorldPos)
-{
-    if (tool == null) return;
-
-    Vector2 dir = mouseWorldPos - tool.position;
-
-    if (dir.sqrMagnitude <= 0.001f)
-        return;
-
-    currentAngle = Mathf.Atan2(dir.y, dir.x) * Mathf.Rad2Deg;
-
-    tool.rotation = Quaternion.Euler(0f, 0f, currentAngle);
-
-    if (renderer != null)
     {
-        renderer.flipX = false;
-        renderer.flipY = dir.x < 0f;
+        if (isUsingTool) return;
+
+        if (hoeTransform != null && hoeSprite != null && hoeSprite.activeSelf)
+            RotateToolToMouse(hoeTransform, hoeRenderer, mouseWorldPos);
+
+        if (wateringCanTransform != null && wateringCanSprite != null && wateringCanSprite.activeSelf)
+            RotateToolToMouse(wateringCanTransform, wateringCanRenderer, mouseWorldPos);
+
+        if (axeTransform != null && axeSprite != null && axeSprite.activeSelf)
+            RotateToolToMouse(axeTransform, axeRenderer, mouseWorldPos);
+
+        if (pickaxeTransform != null && pickaxeSprite != null && pickaxeSprite.activeSelf)
+            RotateToolToMouse(pickaxeTransform, pickaxeRenderer, mouseWorldPos);
+
+        if (sickleTransform != null && sickleSprite != null && sickleSprite.activeSelf)
+            RotateToolToMouse(sickleTransform, sickleRenderer, mouseWorldPos);
     }
-}
+
+    private void RotateToolToMouse(
+        Transform tool,
+        SpriteRenderer renderer,
+        Vector3 mouseWorldPos)
+    {
+        if (tool == null) return;
+
+        Vector2 dir = mouseWorldPos - tool.position;
+
+        if (dir.sqrMagnitude <= 0.001f)
+            return;
+
+        currentAngle = Mathf.Atan2(dir.y, dir.x) * Mathf.Rad2Deg;
+
+        tool.rotation = Quaternion.Euler(0f, 0f, currentAngle);
+
+        if (renderer != null)
+        {
+            renderer.flipX = false;
+            renderer.flipY = dir.x < 0f;
+        }
+    }
 
     public void UseHoe(System.Action onComplete)
     {
@@ -180,6 +241,42 @@ public class PlayerToolAnimation : MonoBehaviour
         StartCoroutine(WateringRoutine(onComplete));
     }
 
+    public void UseAxe(System.Action onComplete)
+    {
+        if (isUsingTool) return;
+
+        StartCoroutine(SimpleToolRoutine(
+            axeTransform,
+            PlayerActionState.Axeing,
+            "Đang chặt cây...",
+            onComplete
+        ));
+    }
+
+    public void UsePickaxe(System.Action onComplete)
+    {
+        if (isUsingTool) return;
+
+        StartCoroutine(SimpleToolRoutine(
+            pickaxeTransform,
+            PlayerActionState.Pickaxing,
+            "Đang đập đá...",
+            onComplete
+        ));
+    }
+
+    public void UseSickle(System.Action onComplete)
+    {
+        if (isUsingTool) return;
+
+        StartCoroutine(SimpleToolRoutine(
+            sickleTransform,
+            PlayerActionState.Sickling,
+            "Đang dùng liềm...",
+            onComplete
+        ));
+    }
+
     private IEnumerator HoeRoutine(System.Action onComplete)
     {
         BeginAction(PlayerActionState.Hoeing, "Đang cuốc đất...");
@@ -188,9 +285,7 @@ public class PlayerToolAnimation : MonoBehaviour
 
         PlayHoeSound();
 
-        activeToolLoop = StartCoroutine(
-            HoeSwingLoop(startAngle)
-        );
+        activeToolLoop = StartCoroutine(HoeSwingLoop(startAngle));
 
         yield return RunProgress(hoeDuration);
 
@@ -214,9 +309,7 @@ public class PlayerToolAnimation : MonoBehaviour
         PlayWaterParticle();
         PlayWaterSoundLoop();
 
-        activeToolLoop = StartCoroutine(
-            WateringSwingLoop(startAngle)
-        );
+        activeToolLoop = StartCoroutine(WateringSwingLoop(startAngle));
 
         yield return RunProgress(wateringDuration);
 
@@ -226,6 +319,29 @@ public class PlayerToolAnimation : MonoBehaviour
 
         if (wateringCanTransform != null)
             wateringCanTransform.rotation = Quaternion.Euler(0f, 0f, startAngle);
+
+        onComplete?.Invoke();
+
+        FinishAction();
+    }
+
+    private IEnumerator SimpleToolRoutine(
+        Transform tool,
+        PlayerActionState state,
+        string message,
+        System.Action onComplete)
+    {
+        BeginAction(state, message);
+
+        float startAngle = currentAngle;
+
+        yield return RotateTool(tool, startAngle, startAngle + 40f, simpleToolDuration * 0.25f);
+
+        if (cameraShake != null)
+            cameraShake.Shake(hoeShakeDuration, hoeShakeStrength);
+
+        yield return RotateTool(tool, startAngle + 40f, startAngle - 55f, simpleToolDuration * 0.35f);
+        yield return RotateTool(tool, startAngle - 55f, startAngle, simpleToolDuration * 0.25f);
 
         onComplete?.Invoke();
 
@@ -275,29 +391,13 @@ public class PlayerToolAnimation : MonoBehaviour
     {
         while (isUsingTool)
         {
-            yield return RotateTool(
-                hoeTransform,
-                baseAngle,
-                baseAngle + hoeWindupAngle,
-                hoeWindupTime
-            );
+            yield return RotateTool(hoeTransform, baseAngle, baseAngle + hoeWindupAngle, hoeWindupTime);
 
             if (cameraShake != null)
                 cameraShake.Shake(hoeShakeDuration, hoeShakeStrength);
 
-            yield return RotateTool(
-                hoeTransform,
-                baseAngle + hoeWindupAngle,
-                baseAngle - hoeHitAngle,
-                hoeHitTime
-            );
-
-            yield return RotateTool(
-                hoeTransform,
-                baseAngle - hoeHitAngle,
-                baseAngle,
-                hoeReturnTime
-            );
+            yield return RotateTool(hoeTransform, baseAngle + hoeWindupAngle, baseAngle - hoeHitAngle, hoeHitTime);
+            yield return RotateTool(hoeTransform, baseAngle - hoeHitAngle, baseAngle, hoeReturnTime);
         }
     }
 
@@ -308,19 +408,8 @@ public class PlayerToolAnimation : MonoBehaviour
             if (cameraShake != null)
                 cameraShake.Shake(waterShakeDuration, waterShakeStrength);
 
-            yield return RotateTool(
-                wateringCanTransform,
-                baseAngle,
-                baseAngle - wateringTiltAngle,
-                wateringTiltTime
-            );
-
-            yield return RotateTool(
-                wateringCanTransform,
-                baseAngle - wateringTiltAngle,
-                baseAngle,
-                wateringReturnTime
-            );
+            yield return RotateTool(wateringCanTransform, baseAngle, baseAngle - wateringTiltAngle, wateringTiltTime);
+            yield return RotateTool(wateringCanTransform, baseAngle - wateringTiltAngle, baseAngle, wateringReturnTime);
         }
     }
 
