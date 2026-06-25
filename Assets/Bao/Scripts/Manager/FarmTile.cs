@@ -23,12 +23,16 @@ public class FarmTile : MonoBehaviour
     }
 
     public void Hoe()
-    {
-        if (currentState != SoilState.Normal) return;
+{
+    if (currentState != SoilState.Normal) return;
 
+    if (WeatherManager.Instance != null && WeatherManager.Instance.IsRaining)
+        currentState = SoilState.Watered;
+    else
         currentState = SoilState.Hoed;
-        UpdateTileVisual();
-    }
+
+    UpdateTileVisual();
+}
 
     public void Water()
     {
@@ -36,6 +40,15 @@ public class FarmTile : MonoBehaviour
 
         currentState = SoilState.Watered;
         UpdateTileVisual();
+    }
+
+    public void WaterByRain()
+    {
+        if (currentState == SoilState.Hoed)
+        {
+            currentState = SoilState.Watered;
+            UpdateTileVisual();
+        }
     }
 
     private void UpdateTileVisual()
@@ -57,18 +70,19 @@ public class FarmTile : MonoBehaviour
                 break;
         }
     }
+
     public void Axe()
-{
-    Debug.Log("Chặt cây");
-}
+    {
+        Debug.Log("Chặt cây");
+    }
 
-public void Pickaxe()
-{
-    Debug.Log("Đập đá");
-}
+    public void Pickaxe()
+    {
+        Debug.Log("Đập đá");
+    }
 
-public void Sickle()
-{
-    Debug.Log("Cắt cỏ");
-}
+    public void Sickle()
+    {
+        Debug.Log("Cắt cỏ");
+    }
 }

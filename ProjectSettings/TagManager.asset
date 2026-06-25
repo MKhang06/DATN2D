@@ -86,5 +86,8 @@ TagManager:
   - name: UI
     uniqueID: 41817851
     locked: 0
+  - name: Effects
+    uniqueID: 1474857399
+    locked: 0
   m_RenderingLayers:
   - Default
