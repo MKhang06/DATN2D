@@ -1,5 +1,6 @@
 using System.IO;
 using UnityEngine;
+using UnityEngine.InputSystem;
 
 public class SaveManager : MonoBehaviour
 {
@@ -8,34 +9,34 @@ public class SaveManager : MonoBehaviour
     [Header("References")]
     [SerializeField] private PlayerStats playerStats;
     [SerializeField] private Transform player;
+    [SerializeField] private SaveLoadNotificationUI notificationUI;
 
     private string SavePath =>
         Path.Combine(Application.persistentDataPath, "save.json");
 
     private void Update()
+{
+    if (Input.GetKeyDown(KeyCode.F5))
     {
-        if (Input.GetKeyDown(KeyCode.F5))
-            SaveGame();
+        SaveGame();
 
-        if (Input.GetKeyDown(KeyCode.F9))
-            LoadGame();
+        if (notificationUI != null)
+            notificationUI.ShowMessage(" Đã lưu game");
     }
+
+    if (Input.GetKeyDown(KeyCode.F9))
+    {
+        LoadGame();
+
+        if (notificationUI != null)
+            notificationUI.ShowMessage(" Đã tải game");
+    }
+}
 
     private void Awake()
     {
         Instance = this;
     }
-
-    private void Start()
-    {
-        LoadGame();
-    }
-
-    private void OnApplicationQuit()
-    {
-        SaveGame();
-    }
-
     public void SaveGame()
     {
         SaveData data = new SaveData();
@@ -49,7 +50,7 @@ public class SaveManager : MonoBehaviour
         string json = JsonUtility.ToJson(data, true);
         File.WriteAllText(SavePath, json);
 
-        Debug.Log("Đã lưu game: " + SavePath);
+        Debug.Log("<color=green>GAME SAVED (F5)</color>");
     }
 
     public void LoadGame()
@@ -69,7 +70,7 @@ public class SaveManager : MonoBehaviour
         LoadAnimals(data);
         LoadBuildings(data);
 
-        Debug.Log("Đã tải game.");
+        Debug.Log("<color=cyan>GAME LOADED (F9)</color>");
     }
 
     private void SavePlayer(SaveData data)
