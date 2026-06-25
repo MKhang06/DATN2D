@@ -106,7 +106,12 @@ public class PlayerStats : MonoBehaviour
 
     public void AddMoney(int amount)
     {
-        Money += amount;
+        float multiplier = 1f;
+
+        if (CharacterPassiveManager.Instance != null)
+            multiplier = CharacterPassiveManager.Instance.MoneyMultiplier;
+
+        Money += Mathf.RoundToInt(amount * multiplier);
     }
 
     public bool SpendMoney(int amount)
@@ -124,7 +129,12 @@ public class PlayerStats : MonoBehaviour
 
     public void AddXP(int amount)
     {
-        CurrentXP += amount;
+        float multiplier = 1f;
+
+        if (CharacterPassiveManager.Instance != null)
+            multiplier = CharacterPassiveManager.Instance.XpMultiplier;
+
+        CurrentXP += Mathf.RoundToInt(amount * multiplier);
 
         while (CurrentXP >= RequiredXP)
         {
@@ -173,4 +183,14 @@ public class PlayerStats : MonoBehaviour
     }
 
     #endregion
+    public void RestoreEnergy(float amount)
+    {
+        currentEnergy = Mathf.Clamp(currentEnergy + amount, 0, maxEnergy);
+    }
+
+    public void AddMaxStamina(float amount)
+    {
+        maxStamina += amount;
+        currentStamina = maxStamina;
+    }
 }

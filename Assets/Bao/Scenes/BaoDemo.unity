@@ -14994,6 +14994,11 @@ CanvasRenderer:
   m_PrefabAsset: {fileID: 0}
   m_GameObject: {fileID: 1188480942}
   m_CullTransparentMesh: 1
+--- !u!1 &1195798365 stripped
+GameObject:
+  m_CorrespondingSourceObject: {fileID: 8951891740236506941, guid: 0b13ecfbe49197747ade198e011f0b5e, type: 3}
+  m_PrefabInstance: {fileID: 6210251248469213981}
+  m_PrefabAsset: {fileID: 0}
 --- !u!1 &1222334318
 GameObject:
   m_ObjectHideFlags: 0
@@ -18425,6 +18430,10 @@ PrefabInstance:
       propertyPath: m_LocalEulerAnglesHint.z
       value: 0
       objectReference: {fileID: 0}
+    - target: {fileID: 3964385454645102578, guid: 0b13ecfbe49197747ade198e011f0b5e, type: 3}
+      propertyPath: Money
+      value: 1
+      objectReference: {fileID: 0}
     - target: {fileID: 4394923195038152579, guid: 0b13ecfbe49197747ade198e011f0b5e, type: 3}
       propertyPath: axeSprite
       value: 
@@ -18511,7 +18520,10 @@ PrefabInstance:
     - targetCorrespondingSourceObject: {fileID: 754109313421579143, guid: 0b13ecfbe49197747ade198e011f0b5e, type: 3}
       insertIndex: 4
       addedObject: {fileID: 1089364816}
-    m_AddedComponents: []
+    m_AddedComponents:
+    - targetCorrespondingSourceObject: {fileID: 8951891740236506941, guid: 0b13ecfbe49197747ade198e011f0b5e, type: 3}
+      insertIndex: -1
+      addedObject: {fileID: 9113155354489064545}
   m_SourcePrefab: {fileID: 100100000, guid: 0b13ecfbe49197747ade198e011f0b5e, type: 3}
 --- !u!4 &6210251248469213982 stripped
 Transform:
@@ -18642,7 +18654,7 @@ MonoBehaviour:
   m_CorrespondingSourceObject: {fileID: 3964385454645102578, guid: 0b13ecfbe49197747ade198e011f0b5e, type: 3}
   m_PrefabInstance: {fileID: 6210251248469213981}
   m_PrefabAsset: {fileID: 0}
-  m_GameObject: {fileID: 0}
+  m_GameObject: {fileID: 1195798365}
   m_Enabled: 1
   m_EditorHideFlags: 0
   m_Script: {fileID: 11500000, guid: 0ba277342dccf524d831532be92ae764, type: 3}
@@ -18653,6 +18665,25 @@ SpriteRenderer:
   m_CorrespondingSourceObject: {fileID: 6872815030562296168, guid: 0b13ecfbe49197747ade198e011f0b5e, type: 3}
   m_PrefabInstance: {fileID: 6210251248469213981}
   m_PrefabAsset: {fileID: 0}
+--- !u!114 &9113155354489064545
+MonoBehaviour:
+  m_ObjectHideFlags: 0
+  m_CorrespondingSourceObject: {fileID: 0}
+  m_PrefabInstance: {fileID: 0}
+  m_PrefabAsset: {fileID: 0}
+  m_GameObject: {fileID: 1195798365}
+  m_Enabled: 1
+  m_EditorHideFlags: 0
+  m_Script: {fileID: 11500000, guid: 6c98c5fbe3042f149946918311205f6c, type: 3}
+  m_Name: 
+  m_EditorClassIdentifier: 
+  selectedCharacter: 0
+  rinMoveSpeedMultiplier: 1.2
+  mayEnergyCostMultiplier: 0.8
+  kaiXpMultiplier: 1.25
+  maxMoneyMultiplier: 1.2
+  hanaDailyEnergyRestore: 20
+  leonMaxStaminaBonus: 20
 --- !u!1660057539 &9223372036854775807
 SceneRoots:
   m_ObjectHideFlags: 0

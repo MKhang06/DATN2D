@@ -12,6 +12,7 @@ public class PlayerToolController : MonoBehaviour
         Pickaxe,
         Sickle
     }
+
     [Header("Tool")]
     public ToolType currentTool = ToolType.None;
 
@@ -68,6 +69,8 @@ public class PlayerToolController : MonoBehaviour
 
     private void ToggleTool(ToolType tool)
     {
+        if (toolAnimation == null) return;
+
         if (currentTool == tool)
         {
             currentTool = ToolType.None;
@@ -151,13 +154,15 @@ public class PlayerToolController : MonoBehaviour
     {
         if (playerStats == null) return;
 
-        if (!playerStats.HasEnergy(15f))
+        float cost = GetEnergyCost(15f);
+
+        if (!playerStats.HasEnergy(cost))
         {
             Debug.Log("Không đủ Energy để cuốc đất!");
             return;
         }
 
-        playerStats.UseEnergy(15f);
+        playerStats.UseEnergy(cost);
         playerStats.AddXP(2);
 
         if (toolAnimation != null)
@@ -170,13 +175,15 @@ public class PlayerToolController : MonoBehaviour
     {
         if (playerStats == null) return;
 
-        if (!playerStats.HasEnergy(10f))
+        float cost = GetEnergyCost(10f);
+
+        if (!playerStats.HasEnergy(cost))
         {
             Debug.Log("Không đủ Energy để tưới nước!");
             return;
         }
 
-        playerStats.UseEnergy(10f);
+        playerStats.UseEnergy(cost);
         playerStats.AddXP(1);
 
         if (toolAnimation != null)
@@ -184,56 +191,79 @@ public class PlayerToolController : MonoBehaviour
         else
             tile.Water();
     }
+
     private void UseAxe(FarmTile tile)
-{
-    if (!playerStats.HasEnergy(20f))
     {
-        Debug.Log("Không đủ Energy để dùng rìu!");
-        return;
+        if (playerStats == null) return;
+
+        float cost = GetEnergyCost(20f);
+
+        if (!playerStats.HasEnergy(cost))
+        {
+            Debug.Log("Không đủ Energy để dùng rìu!");
+            return;
+        }
+
+        playerStats.UseEnergy(cost);
+        playerStats.AddXP(3);
+
+        if (toolAnimation != null)
+            toolAnimation.UseAxe(() => tile.Axe());
+        else
+            tile.Axe();
     }
 
-    playerStats.UseEnergy(20f);
-    playerStats.AddXP(3);
-
-    toolAnimation.UseAxe(() =>
+    private void UsePickaxe(FarmTile tile)
     {
-        tile.Axe();
-    });
-}
+        if (playerStats == null) return;
 
-private void UsePickaxe(FarmTile tile)
-{
-    if (!playerStats.HasEnergy(20f))
-    {
-        Debug.Log("Không đủ Energy để dùng cuốc chim!");
-        return;
+        float cost = GetEnergyCost(20f);
+
+        if (!playerStats.HasEnergy(cost))
+        {
+            Debug.Log("Không đủ Energy để dùng cuốc chim!");
+            return;
+        }
+
+        playerStats.UseEnergy(cost);
+        playerStats.AddXP(3);
+
+        if (toolAnimation != null)
+            toolAnimation.UsePickaxe(() => tile.Pickaxe());
+        else
+            tile.Pickaxe();
     }
 
-    playerStats.UseEnergy(20f);
-    playerStats.AddXP(3);
-
-    toolAnimation.UsePickaxe(() =>
+    private void UseSickle(FarmTile tile)
     {
-        tile.Pickaxe();
-    });
-}
+        if (playerStats == null) return;
 
-private void UseSickle(FarmTile tile)
-{
-    if (!playerStats.HasEnergy(8f))
-    {
-        Debug.Log("Không đủ Energy để dùng liềm!");
-        return;
+        float cost = GetEnergyCost(8f);
+
+        if (!playerStats.HasEnergy(cost))
+        {
+            Debug.Log("Không đủ Energy để dùng liềm!");
+            return;
+        }
+
+        playerStats.UseEnergy(cost);
+        playerStats.AddXP(2);
+
+        if (toolAnimation != null)
+            toolAnimation.UseSickle(() => tile.Sickle());
+        else
+            tile.Sickle();
     }
 
-    playerStats.UseEnergy(8f);
-    playerStats.AddXP(2);
-
-    toolAnimation.UseSickle(() =>
+    private float GetEnergyCost(float baseCost)
     {
-        tile.Sickle();
-    });
-}
+        float multiplier = 1f;
+
+        if (CharacterPassiveManager.Instance != null)
+            multiplier = CharacterPassiveManager.Instance.EnergyCostMultiplier;
+
+        return baseCost * multiplier;
+    }
 
     private void OnDisable()
     {

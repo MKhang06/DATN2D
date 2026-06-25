@@ -82,7 +82,12 @@ public class PlayerController : MonoBehaviour
             return;
         }
 
-        float speed = isRunning ? runSpeed : walkSpeed;
+        float passiveSpeed = 1f;
+
+        if (CharacterPassiveManager.Instance != null)
+            passiveSpeed = CharacterPassiveManager.Instance.MoveSpeedMultiplier;
+
+        float speed = (isRunning ? runSpeed : walkSpeed) * passiveSpeed;
         rb.linearVelocity = moveInput.normalized * speed;
     }
 
