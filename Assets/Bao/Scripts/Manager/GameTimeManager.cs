@@ -129,4 +129,15 @@ public class GameTimeManager : MonoBehaviour
                 return "";
         }
     }
+    public void SetTime(
+    int day,
+    int hour,
+    int minute,
+    Season season)
+    {
+        currentDay = day;
+        currentHour = hour;
+        currentMinute = minute;
+        currentSeason = season;
+    }
 }

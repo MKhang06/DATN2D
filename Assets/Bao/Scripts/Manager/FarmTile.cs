@@ -23,16 +23,16 @@ public class FarmTile : MonoBehaviour
     }
 
     public void Hoe()
-{
-    if (currentState != SoilState.Normal) return;
+    {
+        if (currentState != SoilState.Normal) return;
 
-    if (WeatherManager.Instance != null && WeatherManager.Instance.IsRaining)
-        currentState = SoilState.Watered;
-    else
-        currentState = SoilState.Hoed;
+        if (WeatherManager.Instance != null && WeatherManager.Instance.IsRaining)
+            currentState = SoilState.Watered;
+        else
+            currentState = SoilState.Hoed;
 
-    UpdateTileVisual();
-}
+        UpdateTileVisual();
+    }
 
     public void Water()
     {
@@ -51,7 +51,7 @@ public class FarmTile : MonoBehaviour
         }
     }
 
-    private void UpdateTileVisual()
+    public void UpdateTileVisual()
     {
         if (sr == null) return;
 
@@ -84,5 +84,29 @@ public class FarmTile : MonoBehaviour
     public void Sickle()
     {
         Debug.Log("Cắt cỏ");
+    }
+    [Header("Crop Save")]
+    public bool hasCrop;
+    public int growthStage;
+
+    public FarmTileSaveData GetSaveData()
+    {
+        return new FarmTileSaveData
+        {
+            gridX = gridX,
+            gridY = gridY,
+            state = currentState,
+            hasCrop = hasCrop,
+            growthStage = growthStage
+        };
+    }
+
+    public void LoadSaveData(FarmTileSaveData data)
+    {
+        currentState = data.state;
+        hasCrop = data.hasCrop;
+        growthStage = data.growthStage;
+
+        UpdateTileVisual();
     }
 }
