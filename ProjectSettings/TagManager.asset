@@ -86,5 +86,11 @@ TagManager:
   - name: UI
     uniqueID: 41817851
     locked: 0
+  - name: House
+    uniqueID: 1918237985
+    locked: 0
+  - name: NPC
+    uniqueID: 1203334469
+    locked: 0
   m_RenderingLayers:
   - Default

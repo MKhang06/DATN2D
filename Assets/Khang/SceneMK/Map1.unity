@@ -119,6 +119,37 @@ NavMeshSettings:
     debug:
       m_Flags: 0
   m_NavMeshData: {fileID: 0}
+--- !u!1 &109333308
+GameObject:
+  m_ObjectHideFlags: 0
+  m_CorrespondingSourceObject: {fileID: 0}
+  m_PrefabInstance: {fileID: 0}
+  m_PrefabAsset: {fileID: 0}
+  serializedVersion: 6
+  m_Component:
+  - component: {fileID: 109333309}
+  m_Layer: 0
+  m_Name: Point_A
+  m_TagString: Untagged
+  m_Icon: {fileID: 0}
+  m_NavMeshLayer: 0
+  m_StaticEditorFlags: 0
+  m_IsActive: 1
+--- !u!4 &109333309
+Transform:
+  m_ObjectHideFlags: 0
+  m_CorrespondingSourceObject: {fileID: 0}
+  m_PrefabInstance: {fileID: 0}
+  m_PrefabAsset: {fileID: 0}
+  m_GameObject: {fileID: 109333308}
+  serializedVersion: 2
+  m_LocalRotation: {x: 0, y: 0, z: 0, w: 1}
+  m_LocalPosition: {x: 6.15, y: 0, z: 0}
+  m_LocalScale: {x: 1, y: 1, z: 1}
+  m_ConstrainProportionsScale: 0
+  m_Children: []
+  m_Father: {fileID: 155488270}
+  m_LocalEulerAnglesHint: {x: 0, y: 0, z: 0}
 --- !u!1 &155488268
 GameObject:
   m_ObjectHideFlags: 0
@@ -129,8 +160,9 @@ GameObject:
   m_Component:
   - component: {fileID: 155488270}
   - component: {fileID: 155488269}
+  - component: {fileID: 155488271}
   m_Layer: 0
-  m_Name: Girl_001_0
+  m_Name: Girl_npc
   m_TagString: Untagged
   m_Icon: {fileID: 0}
   m_NavMeshLayer: 0
@@ -177,8 +209,8 @@ SpriteRenderer:
   m_AutoUVMaxDistance: 0.5
   m_AutoUVMaxAngle: 89
   m_LightmapParameters: {fileID: 0}
-  m_SortingLayerID: -1146191125
-  m_SortingLayer: 1
+  m_SortingLayerID: 1203334469
+  m_SortingLayer: 17
   m_SortingOrder: 0
   m_Sprite: {fileID: 14502509, guid: 85f3f75b0912741b0bc48e7f38554cd2, type: 3}
   m_Color: {r: 1, g: 1, b: 1, a: 1}
@@ -203,9 +235,26 @@ Transform:
   m_LocalPosition: {x: 0.6158738, y: -7.5582123, z: 0}
   m_LocalScale: {x: 1, y: 1, z: 1}
   m_ConstrainProportionsScale: 0
-  m_Children: []
+  m_Children:
+  - {fileID: 109333309}
+  - {fileID: 1780673974}
   m_Father: {fileID: 0}
   m_LocalEulerAnglesHint: {x: 0, y: 0, z: 0}
+--- !u!114 &155488271
+MonoBehaviour:
+  m_ObjectHideFlags: 0
+  m_CorrespondingSourceObject: {fileID: 0}
+  m_PrefabInstance: {fileID: 0}
+  m_PrefabAsset: {fileID: 0}
+  m_GameObject: {fileID: 155488268}
+  m_Enabled: 1
+  m_EditorHideFlags: 0
+  m_Script: {fileID: 11500000, guid: e63b7e88d0509ec4197bfd7ccd313fe9, type: 3}
+  m_Name: 
+  m_EditorClassIdentifier: 
+  moveSpeed: 2
+  waitTime: 3
+  waypoints: []
 --- !u!1 &171612323
 GameObject:
   m_ObjectHideFlags: 0
@@ -217,7 +266,7 @@ GameObject:
   - component: {fileID: 171612325}
   - component: {fileID: 171612324}
   m_Layer: 0
-  m_Name: Old Man_0
+  m_Name: npc old
   m_TagString: Untagged
   m_Icon: {fileID: 0}
   m_NavMeshLayer: 0
@@ -264,8 +313,8 @@ SpriteRenderer:
   m_AutoUVMaxDistance: 0.5
   m_AutoUVMaxAngle: 89
   m_LightmapParameters: {fileID: 0}
-  m_SortingLayerID: -1146191125
-  m_SortingLayer: 1
+  m_SortingLayerID: 1203334469
+  m_SortingLayer: 17
   m_SortingOrder: 0
   m_Sprite: {fileID: 338383346, guid: c44807a4111dc43248353acf5e058a39, type: 3}
   m_Color: {r: 1, g: 1, b: 1, a: 1}
@@ -351,8 +400,8 @@ SpriteRenderer:
   m_AutoUVMaxDistance: 0.5
   m_AutoUVMaxAngle: 89
   m_LightmapParameters: {fileID: 0}
-  m_SortingLayerID: -1146191125
-  m_SortingLayer: 1
+  m_SortingLayerID: 1918237985
+  m_SortingLayer: 16
   m_SortingOrder: 0
   m_Sprite: {fileID: 21300000, guid: 55a5bd44420c244b6af7e049703c8f2a, type: 3}
   m_Color: {r: 1, g: 1, b: 1, a: 1}
@@ -1925,7 +1974,7 @@ GameObject:
   - component: {fileID: 972795412}
   - component: {fileID: 972795411}
   m_Layer: 0
-  m_Name: Girl_003_0
+  m_Name: Girl_npc3
   m_TagString: Untagged
   m_Icon: {fileID: 0}
   m_NavMeshLayer: 0
@@ -1972,8 +2021,8 @@ SpriteRenderer:
   m_AutoUVMaxDistance: 0.5
   m_AutoUVMaxAngle: 89
   m_LightmapParameters: {fileID: 0}
-  m_SortingLayerID: -1146191125
-  m_SortingLayer: 1
+  m_SortingLayerID: 1203334469
+  m_SortingLayer: 17
   m_SortingOrder: 0
   m_Sprite: {fileID: -1291131760149906504, guid: f994fee8748d14563837658ccb47c37c, type: 3}
   m_Color: {r: 1, g: 1, b: 1, a: 1}
@@ -565872,8 +565921,8 @@ SpriteRenderer:
   m_AutoUVMaxDistance: 0.5
   m_AutoUVMaxAngle: 89
   m_LightmapParameters: {fileID: 0}
-  m_SortingLayerID: -1146191125
-  m_SortingLayer: 1
+  m_SortingLayerID: 1918237985
+  m_SortingLayer: 16
   m_SortingOrder: 0
   m_Sprite: {fileID: 21300000, guid: 262dff601ea0d42aeb42d82c81d08fd7, type: 3}
   m_Color: {r: 1, g: 1, b: 1, a: 1}
@@ -565901,6 +565950,37 @@ Transform:
   m_Children: []
   m_Father: {fileID: 0}
   m_LocalEulerAnglesHint: {x: 0, y: 0, z: 0}
+--- !u!1 &1780673973
+GameObject:
+  m_ObjectHideFlags: 0
+  m_CorrespondingSourceObject: {fileID: 0}
+  m_PrefabInstance: {fileID: 0}
+  m_PrefabAsset: {fileID: 0}
+  serializedVersion: 6
+  m_Component:
+  - component: {fileID: 1780673974}
+  m_Layer: 0
+  m_Name: Point_B
+  m_TagString: Untagged
+  m_Icon: {fileID: 0}
+  m_NavMeshLayer: 0
+  m_StaticEditorFlags: 0
+  m_IsActive: 1
+--- !u!4 &1780673974
+Transform:
+  m_ObjectHideFlags: 0
+  m_CorrespondingSourceObject: {fileID: 0}
+  m_PrefabInstance: {fileID: 0}
+  m_PrefabAsset: {fileID: 0}
+  m_GameObject: {fileID: 1780673973}
+  serializedVersion: 2
+  m_LocalRotation: {x: 0, y: 0, z: 0, w: 1}
+  m_LocalPosition: {x: -2.8, y: -6.2, z: 0}
+  m_LocalScale: {x: 1, y: 1, z: 1}
+  m_ConstrainProportionsScale: 0
+  m_Children: []
+  m_Father: {fileID: 155488270}
+  m_LocalEulerAnglesHint: {x: 0, y: 0, z: 0}
 --- !u!1 &1835106680
 GameObject:
   m_ObjectHideFlags: 0
@@ -565912,7 +565992,7 @@ GameObject:
   - component: {fileID: 1835106682}
   - component: {fileID: 1835106681}
   m_Layer: 0
-  m_Name: Girl_002_0
+  m_Name: Girl_npc2
   m_TagString: Untagged
   m_Icon: {fileID: 0}
   m_NavMeshLayer: 0
@@ -565959,8 +566039,8 @@ SpriteRenderer:
   m_AutoUVMaxDistance: 0.5
   m_AutoUVMaxAngle: 89
   m_LightmapParameters: {fileID: 0}
-  m_SortingLayerID: -1146191125
-  m_SortingLayer: 1
+  m_SortingLayerID: 1203334469
+  m_SortingLayer: 17
   m_SortingOrder: 0
   m_Sprite: {fileID: 1007033402911347040, guid: 48c266ae0734348198694bc6282c5264, type: 3}
   m_Color: {r: 1, g: 1, b: 1, a: 1}
@@ -566046,8 +566126,8 @@ SpriteRenderer:
   m_AutoUVMaxDistance: 0.5
   m_AutoUVMaxAngle: 89
   m_LightmapParameters: {fileID: 0}
-  m_SortingLayerID: -1146191125
-  m_SortingLayer: 1
+  m_SortingLayerID: 1203334469
+  m_SortingLayer: 17
   m_SortingOrder: 0
   m_Sprite: {fileID: -1898641840708472883, guid: 0afae80c9b1f6440e9abece120bd36c3, type: 3}
   m_Color: {r: 1, g: 1, b: 1, a: 1}
