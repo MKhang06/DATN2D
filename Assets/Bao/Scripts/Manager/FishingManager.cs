@@ -8,6 +8,7 @@ public class FishingManager : MonoBehaviour
     [SerializeField] private InventoryManager inventoryManager;
     [SerializeField] private PlayerController playerController;
     [SerializeField] private PlayerToolAnimation toolAnimation;
+    [SerializeField] private ToolProgressUI progressUI;
 
     [Header("Fishing Objects")]
     [SerializeField] private GameObject bobberObject;
@@ -73,6 +74,10 @@ public class FishingManager : MonoBehaviour
 
         if (splashObject != null)
             splashObject.SetActive(false);
+        if (progressUI != null)
+        {
+            progressUI.player = transform;
+        }
     }
 
     private void Update()
@@ -123,6 +128,8 @@ public class FishingManager : MonoBehaviour
         LockPlayerFishing();
 
         PlayFishingSound(castSound);
+        if (progressUI != null)
+            progressUI.Show("Đang câu cá...");
 
         fishingRoutine = StartCoroutine(FishingRoutine());
     }
@@ -156,12 +163,28 @@ public class FishingManager : MonoBehaviour
         }
 
         float waitTime = Random.Range(waitMin, waitMax);
-        yield return new WaitForSeconds(waitTime);
+
+        float timer = waitTime;
+
+        while (timer > 0f)
+        {
+            timer -= Time.deltaTime;
+
+            if (progressUI != null)
+                progressUI.SetProgress(timer / waitTime);
+
+            yield return null;
+        }
 
         if (!isFishing)
             yield break;
 
         fishBiting = true;
+        if (progressUI != null)
+        {
+            progressUI.Show("Cá cắn! Nhấn SPACE");
+            progressUI.SetProgress(1f);
+        }
 
         if (biteIconObject != null)
         {
@@ -226,6 +249,8 @@ public class FishingManager : MonoBehaviour
         {
             fishName = fishNames[index];
         }
+        if (progressUI != null)
+            progressUI.Hide();
 
         Sprite fishSprite = fishSprites[index];
 
@@ -259,6 +284,8 @@ public class FishingManager : MonoBehaviour
 
         fishBiting = false;
         isFishing = false;
+        if (progressUI != null)
+            progressUI.Hide();
 
         if (biteIconObject != null)
             biteIconObject.SetActive(false);

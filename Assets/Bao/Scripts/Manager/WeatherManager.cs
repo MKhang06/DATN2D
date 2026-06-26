@@ -1,5 +1,6 @@
 using UnityEngine;
 using System.Collections;
+using UnityEngine.Rendering.Universal;
 
 public class WeatherManager : MonoBehaviour
 {
@@ -37,6 +38,16 @@ public class WeatherManager : MonoBehaviour
     [SerializeField] private AudioSource rainAudio;
     [SerializeField] private AudioSource stormAudio;
 
+    [Header("Lightning")]
+    [SerializeField] private Light2D lightningLight;
+    [SerializeField] private float minFlashDelay = 4f;
+    [SerializeField] private float maxFlashDelay = 10f;
+    [SerializeField] private float minFlashIntensity = 1.5f;
+    [SerializeField] private float maxFlashIntensity = 3.5f;
+    [SerializeField] private float flashDuration = 0.12f;
+
+    private Coroutine thunderRoutine;
+
     public WeatherType CurrentWeather => currentWeather;
 
     public bool IsRaining =>
@@ -49,6 +60,12 @@ public class WeatherManager : MonoBehaviour
     private void Awake()
     {
         Instance = this;
+
+        if (lightningLight != null)
+        {
+            lightningLight.enabled = false;
+            lightningLight.intensity = 0f;
+        }
     }
 
     private void OnEnable()
@@ -61,6 +78,8 @@ public class WeatherManager : MonoBehaviour
     {
         if (GameTimeManager.Instance != null)
             GameTimeManager.Instance.OnDayChanged -= GenerateWeatherForNewDay;
+
+        StopThunder();
     }
 
     private void Start()
@@ -150,67 +169,111 @@ public class WeatherManager : MonoBehaviour
         switch (currentWeather)
         {
             case WeatherType.Sunny:
-
                 PlayAudio(birdAudio);
-
                 break;
 
             case WeatherType.Cloudy:
-
                 PlayAudio(windAudio);
-
                 break;
 
             case WeatherType.Rainy:
-
                 PlayParticle(rainParticle);
-
                 PlayAudio(rainAudio);
-
                 break;
 
             case WeatherType.Stormy:
-
                 PlayParticle(rainParticle);
-
                 PlayAudio(rainAudio);
+                StartThunder();
+                break;
 
+            case WeatherType.Snowy:
+                PlayParticle(snowParticle);
                 PlayAudio(windAudio);
-
-                StartCoroutine(ThunderRoutine());
-
                 break;
         }
     }
 
-    private void StopAllWeatherEffects()
-    {
-        StopParticle(rainParticle);
-        StopParticle(snowParticle);
-
-        StopAudio(rainAudio);
-        StopAudio(stormAudio);
-        StopAudio(windAudio);
-    }
     private void StopAll()
     {
         StopParticle(rainParticle);
+        StopParticle(snowParticle);
 
         StopAudio(birdAudio);
         StopAudio(windAudio);
         StopAudio(rainAudio);
         StopAudio(stormAudio);
+
+        StopThunder();
     }
+
+    private void StartThunder()
+    {
+        StopThunder();
+        thunderRoutine = StartCoroutine(ThunderRoutine());
+    }
+
+    private void StopThunder()
+    {
+        if (thunderRoutine != null)
+        {
+            StopCoroutine(thunderRoutine);
+            thunderRoutine = null;
+        }
+
+        if (lightningLight != null)
+        {
+            lightningLight.enabled = false;
+            lightningLight.intensity = 0f;
+        }
+    }
+
     private IEnumerator ThunderRoutine()
     {
         while (currentWeather == WeatherType.Stormy)
         {
-            yield return new WaitForSeconds(Random.Range(6f, 15f));
+            yield return new WaitForSeconds(
+                Random.Range(minFlashDelay, maxFlashDelay)
+            );
+
+            yield return StartCoroutine(FlashLightning());
 
             if (stormAudio != null)
                 stormAudio.Play();
         }
     }
+
+    private IEnumerator FlashLightning()
+{
+    if (lightningLight == null)
+        yield break;
+
+    lightningLight.enabled = true;
+
+    lightningLight.intensity =
+        Random.Range(minFlashIntensity, maxFlashIntensity);
+
+    lightningLight.pointLightOuterRadius =
+        Random.Range(25f, 35f);
+
+    lightningLight.pointLightInnerRadius =
+        Random.Range(10f, 15f);
+
+    yield return new WaitForSeconds(0.08f);
+
+    lightningLight.intensity = 0;
+
+    yield return new WaitForSeconds(0.04f);
+
+    lightningLight.intensity =
+        Random.Range(minFlashIntensity * 0.6f,
+                     maxFlashIntensity * 0.8f);
+
+    yield return new WaitForSeconds(0.05f);
+
+    lightningLight.intensity = 0;
+    lightningLight.enabled = false;
+}
 
     private void PlayParticle(ParticleSystem particle)
     {
@@ -244,12 +307,13 @@ public class WeatherManager : MonoBehaviour
     }
 
     private void WaterAllFarmTiles()
-    {
-        FarmTile[] tiles = FindObjectsOfType<FarmTile>();
+{
+    FarmTile[] tiles =
+        FindObjectsByType<FarmTile>(FindObjectsSortMode.None);
 
-        foreach (FarmTile tile in tiles)
-            tile.WaterByRain();
-    }
+    foreach (FarmTile tile in tiles)
+        tile.WaterByRain();
+}
 
     public string GetWeatherText()
     {
@@ -274,6 +338,7 @@ public class WeatherManager : MonoBehaviour
                 return "";
         }
     }
+
     [ContextMenu("TEST/Set Sunny")]
     public void TestSetSunny()
     {
