@@ -10,7 +10,8 @@ public class PlayerToolController : MonoBehaviour
         WateringCan,
         Axe,
         Pickaxe,
-        Sickle
+        Sickle,
+        FishingRod
     }
 
     [Header("Tool")]
@@ -23,6 +24,7 @@ public class PlayerToolController : MonoBehaviour
     [Header("References")]
     [SerializeField] private PlayerToolAnimation toolAnimation;
     [SerializeField] private PlayerStats playerStats;
+    [SerializeField] private FishingManager fishingManager;
 
     private Camera cam;
 
@@ -35,6 +37,9 @@ public class PlayerToolController : MonoBehaviour
 
         if (playerStats == null)
             playerStats = GetComponent<PlayerStats>();
+
+        if (fishingManager == null)
+            fishingManager = GetComponent<FishingManager>();
     }
 
     private void Update()
@@ -65,6 +70,9 @@ public class PlayerToolController : MonoBehaviour
 
         if (Input.GetKeyDown(KeyCode.Y))
             ToggleTool(ToolType.Sickle);
+
+        if (Input.GetKeyDown(KeyCode.F) || Input.GetKeyDown(KeyCode.U))
+            ToggleTool(ToolType.FishingRod);
     }
 
     private void ToggleTool(ToolType tool)
@@ -103,17 +111,35 @@ public class PlayerToolController : MonoBehaviour
     {
         if (currentTool == ToolType.None) return;
 
+        if (EventSystem.current != null &&
+            EventSystem.current.IsPointerOverGameObject())
+            return;
+
+        if (currentTool == ToolType.FishingRod)
+        {
+            if (toolAnimation != null)
+            {
+                toolAnimation.UseFishingRod(() =>
+                {
+                    if (fishingManager != null)
+                        fishingManager.TryStartFishing();
+                });
+            }
+            else
+            {
+                if (fishingManager != null)
+                    fishingManager.TryStartFishing();
+            }
+
+            return;
+        }
+
         if (cam == null)
             cam = Camera.main;
 
         if (cam == null) return;
 
-        if (EventSystem.current != null &&
-            EventSystem.current.IsPointerOverGameObject())
-            return;
-
-        Vector2 mouseWorldPos =
-            cam.ScreenToWorldPoint(Input.mousePosition);
+        Vector2 mouseWorldPos = cam.ScreenToWorldPoint(Input.mousePosition);
 
         Collider2D hit = Physics2D.OverlapCircle(
             mouseWorldPos,

@@ -11,7 +11,8 @@ public class PlayerToolAnimation : MonoBehaviour
         Watering,
         Axeing,
         Pickaxing,
-        Sickling
+        Sickling,
+        Fishing
     }
 
     [Header("State")]
@@ -47,6 +48,10 @@ public class PlayerToolAnimation : MonoBehaviour
     [SerializeField] private GameObject sickleSprite;
     [SerializeField] private Transform sickleTransform;
     [SerializeField] private SpriteRenderer sickleRenderer;
+    [Header("Fishing Rod")]
+    [SerializeField] private GameObject fishingRodSprite;
+    [SerializeField] private Transform fishingRodTransform;
+    [SerializeField] private SpriteRenderer fishingRodRenderer;
 
     [Header("Sound")]
     [SerializeField] private AudioSource hoeAudioSource;
@@ -80,6 +85,7 @@ public class PlayerToolAnimation : MonoBehaviour
     private bool isUsingTool;
     private float currentAngle;
     private Coroutine activeToolLoop;
+    private bool fishingLock;
 
     private void Awake()
     {
@@ -116,6 +122,8 @@ public class PlayerToolAnimation : MonoBehaviour
         if (axeSprite != null) axeSprite.SetActive(false);
         if (pickaxeSprite != null) pickaxeSprite.SetActive(false);
         if (sickleSprite != null) sickleSprite.SetActive(false);
+        if (fishingRodSprite != null)
+            fishingRodSprite.SetActive(false);
     }
 
     public void ShowTool(PlayerToolController.ToolType tool)
@@ -144,6 +152,11 @@ public class PlayerToolAnimation : MonoBehaviour
 
             case PlayerToolController.ToolType.Sickle:
                 if (sickleSprite != null) sickleSprite.SetActive(true);
+                break;
+
+            case PlayerToolController.ToolType.FishingRod:
+                if (fishingRodSprite != null)
+                    fishingRodSprite.SetActive(true);
                 break;
         }
     }
@@ -188,7 +201,7 @@ public class PlayerToolAnimation : MonoBehaviour
 
     public void LookAtMouse(Vector3 mouseWorldPos)
     {
-        if (isUsingTool) return;
+        if (isUsingTool || fishingLock) return;
 
         if (hoeTransform != null && hoeSprite != null && hoeSprite.activeSelf)
             RotateToolToMouse(hoeTransform, hoeRenderer, mouseWorldPos);
@@ -204,6 +217,16 @@ public class PlayerToolAnimation : MonoBehaviour
 
         if (sickleTransform != null && sickleSprite != null && sickleSprite.activeSelf)
             RotateToolToMouse(sickleTransform, sickleRenderer, mouseWorldPos);
+        if (fishingRodTransform != null &&
+    fishingRodSprite != null &&
+    fishingRodSprite.activeSelf)
+        {
+            RotateToolToMouse(
+                fishingRodTransform,
+                fishingRodRenderer,
+                mouseWorldPos
+            );
+        }
     }
 
     private void RotateToolToMouse(
@@ -362,7 +385,7 @@ public class PlayerToolAnimation : MonoBehaviour
 
     private void FinishAction()
     {
-        if (playerController != null)
+        if (playerController != null && !fishingLock)
             playerController.canMove = true;
 
         isUsingTool = false;
@@ -508,5 +531,52 @@ public class PlayerToolAnimation : MonoBehaviour
         waterAudioSource.Stop();
         waterAudioSource.loop = false;
         waterAudioSource.clip = null;
+    }
+    public void UseFishingRod(System.Action onComplete)
+    {
+        if (isUsingTool) return;
+
+        StartCoroutine(FishingRodRoutine(onComplete));
+    }
+
+    private IEnumerator FishingRodRoutine(System.Action onComplete)
+    {
+        BeginAction(PlayerActionState.Fishing, "Đang câu cá...");
+
+        float startAngle = currentAngle;
+
+        yield return RotateTool(
+            fishingRodTransform,
+            startAngle,
+            startAngle + 45f,
+            0.15f
+        );
+
+        yield return RotateTool(
+            fishingRodTransform,
+            startAngle + 45f,
+            startAngle - 65f,
+            0.15f
+        );
+
+        yield return new WaitForSeconds(0.15f);
+
+        yield return RotateTool(
+            fishingRodTransform,
+            startAngle - 65f,
+            startAngle,
+            0.18f
+        );
+
+        onComplete?.Invoke();
+
+        FinishAction();
+    }
+    public void SetFishingLock(bool value)
+    {
+        fishingLock = value;
+
+        if (playerController != null)
+            playerController.canMove = !value;
     }
 }
