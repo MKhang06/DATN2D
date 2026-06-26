@@ -9,6 +9,6 @@ public class MoneyUI : MonoBehaviour
     private void Update()
     {
         moneyText.text =
-            "🪙 " + playerStats.Money;
+            " " + playerStats.Money;
     }
 }
