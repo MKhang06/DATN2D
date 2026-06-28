@@ -289,16 +289,16 @@ public class PlayerToolAnimation : MonoBehaviour
     }
 
     public void UseSickle(System.Action onComplete)
-    {
-        if (isUsingTool) return;
+{
+    if (isUsingTool) return;
 
-        StartCoroutine(SimpleToolRoutine(
-            sickleTransform,
-            PlayerActionState.Sickling,
-            "Đang dùng liềm...",
-            onComplete
-        ));
-    }
+    StartCoroutine(SimpleToolRoutine(
+        sickleTransform,
+        PlayerActionState.Sickling,
+        "Đang thu hoạch...",
+        onComplete
+    ));
+}
 
     private IEnumerator HoeRoutine(System.Action onComplete)
     {
