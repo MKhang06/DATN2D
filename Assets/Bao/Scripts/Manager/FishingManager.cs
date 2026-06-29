@@ -40,6 +40,7 @@ public class FishingManager : MonoBehaviour
 
     [Header("Catch Panel")]
     [SerializeField] private FishCatchPanelUI fishCatchPanelUI;
+    [SerializeField] private FishingMiniGameUI miniGameUI;
     [SerializeField] private float minFishKg = 0.5f;
     [SerializeField] private float maxFishKg = 8f;
 
@@ -205,18 +206,24 @@ public class FishingManager : MonoBehaviour
     }
 
     private void CatchFish()
+{
+    if (!isFishing)
+        return;
+
+    fishBiting = false;
+
+    if (biteIconObject != null)
+        biteIconObject.SetActive(false);
+
+    if (miniGameUI != null)
     {
-        if (!isFishing)
-            return;
-
-        fishBiting = false;
-        isFishing = false;
-
-        if (fishingRoutine != null)
-            StopCoroutine(fishingRoutine);
-
-        StartCoroutine(CatchFishRoutine());
+        miniGameUI.StartMiniGame(OnFishingMiniGameFinished);
     }
+    else
+    {
+        CompleteCatchFish();
+    }
+}
 
     private IEnumerator CatchFishRoutine()
     {
@@ -347,4 +354,25 @@ public class FishingManager : MonoBehaviour
         if (toolAnimation != null)
             toolAnimation.SetFishingLock(false);
     }
+    private void OnFishingMiniGameFinished(bool success)
+{
+    if (success)
+    {
+        CompleteCatchFish();
+    }
+    else
+    {
+        FailFishing();
+    }
+}
+
+private void CompleteCatchFish()
+{
+    isFishing = false;
+
+    if (fishingRoutine != null)
+        StopCoroutine(fishingRoutine);
+
+    StartCoroutine(CatchFishRoutine());
+}
 }

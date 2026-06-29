@@ -21,6 +21,7 @@ public class PlayerController : MonoBehaviour
     private Vector2 moveInput;
     private Vector2 lastInput = Vector2.down;
     private bool isRunning;
+    private PlayerInput playerInput;
 
     public Vector2 LastDirection => lastInput;
 
@@ -34,6 +35,7 @@ public class PlayerController : MonoBehaviour
 
         if (playerStats == null)
             playerStats = GetComponent<PlayerStats>();
+        playerInput = GetComponent<PlayerInput>();
     }
 
     private void Update()
@@ -61,6 +63,17 @@ public class PlayerController : MonoBehaviour
 
     public void OnMove(InputValue value)
     {
+        if (!canMove)
+        {
+            moveInput = Vector2.zero;
+
+            if (rb != null)
+                rb.linearVelocity = Vector2.zero;
+
+            UpdateAnimation();
+            return;
+        }
+
         moveInput = value.Get<Vector2>();
 
         if (moveInput.sqrMagnitude > 0.01f)
@@ -105,5 +118,30 @@ public class PlayerController : MonoBehaviour
 
         animator.SetBool("IsWalking", isMoving);
         animator.SetBool("IsRunning", isMoving && isRunning);
+        if (animator == null)
+            animator = GetComponent<Animator>();
+
+        if (animator == null)
+            return;
+    }
+    public void SetMovementLocked(bool locked)
+    {
+        canMove = !locked;
+
+        moveInput = Vector2.zero;
+        isRunning = false;
+
+        if (rb != null)
+            rb.linearVelocity = Vector2.zero;
+
+        if (playerInput != null)
+        {
+            if (locked)
+                playerInput.DeactivateInput();
+            else
+                playerInput.ActivateInput();
+        }
+
+        UpdateAnimation();
     }
 }
