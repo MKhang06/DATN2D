@@ -17,11 +17,12 @@ public class PlayerController : MonoBehaviour
 
     private Rigidbody2D rb;
     private Animator animator;
+    private PlayerInput playerInput;
 
     private Vector2 moveInput;
     private Vector2 lastInput = Vector2.down;
     private bool isRunning;
-    private PlayerInput playerInput;
+    private bool movementLocked;
 
     public Vector2 LastDirection => lastInput;
 
@@ -29,17 +30,24 @@ public class PlayerController : MonoBehaviour
     {
         rb = GetComponent<Rigidbody2D>();
         animator = GetComponent<Animator>();
+        playerInput = GetComponent<PlayerInput>();
 
         rb.gravityScale = 0f;
         rb.freezeRotation = true;
 
         if (playerStats == null)
             playerStats = GetComponent<PlayerStats>();
-        playerInput = GetComponent<PlayerInput>();
     }
 
     private void Update()
     {
+        if (movementLocked)
+        {
+            StopMovement();
+            UpdateAnimation();
+            return;
+        }
+
         bool wantsRun =
             Keyboard.current != null &&
             Keyboard.current.leftShiftKey.isPressed;
@@ -63,13 +71,9 @@ public class PlayerController : MonoBehaviour
 
     public void OnMove(InputValue value)
     {
-        if (!canMove)
+        if (movementLocked || !canMove)
         {
-            moveInput = Vector2.zero;
-
-            if (rb != null)
-                rb.linearVelocity = Vector2.zero;
-
+            StopMovement();
             UpdateAnimation();
             return;
         }
@@ -89,9 +93,9 @@ public class PlayerController : MonoBehaviour
 
     private void FixedUpdate()
     {
-        if (!canMove)
+        if (movementLocked || !canMove)
         {
-            rb.linearVelocity = Vector2.zero;
+            StopMovement();
             return;
         }
 
@@ -104,11 +108,24 @@ public class PlayerController : MonoBehaviour
         rb.linearVelocity = moveInput.normalized * speed;
     }
 
+    private void StopMovement()
+    {
+        moveInput = Vector2.zero;
+        isRunning = false;
+
+        if (rb != null)
+            rb.linearVelocity = Vector2.zero;
+    }
+
     private void UpdateAnimation()
     {
+        if (animator == null)
+            return;
+
         bool isMoving =
             moveInput.sqrMagnitude > 0.01f &&
-            canMove;
+            canMove &&
+            !movementLocked;
 
         animator.SetFloat("InputX", moveInput.x);
         animator.SetFloat("InputY", moveInput.y);
@@ -118,30 +135,37 @@ public class PlayerController : MonoBehaviour
 
         animator.SetBool("IsWalking", isMoving);
         animator.SetBool("IsRunning", isMoving && isRunning);
-        if (animator == null)
-            animator = GetComponent<Animator>();
-
-        if (animator == null)
-            return;
     }
+
     public void SetMovementLocked(bool locked)
+{
+    movementLocked = locked;
+    canMove = !locked;
+
+    moveInput = Vector2.zero;
+    isRunning = false;
+
+    if (rb != null)
     {
-        canMove = !locked;
-
-        moveInput = Vector2.zero;
-        isRunning = false;
-
-        if (rb != null)
-            rb.linearVelocity = Vector2.zero;
-
-        if (playerInput != null)
-        {
-            if (locked)
-                playerInput.DeactivateInput();
-            else
-                playerInput.ActivateInput();
-        }
-
-        UpdateAnimation();
+        rb.linearVelocity = Vector2.zero;
+        rb.angularVelocity = 0f;
+        rb.constraints = RigidbodyConstraints2D.FreezeAll;
     }
+
+    if (playerInput != null)
+    {
+        if (locked)
+            playerInput.enabled = false;   // Tắt hoàn toàn Input
+        else
+            playerInput.enabled = true;
+    }
+
+    if (!locked && rb != null)
+    {
+        rb.constraints =
+            RigidbodyConstraints2D.FreezeRotation;
+    }
+
+    UpdateAnimation();
+}
 }

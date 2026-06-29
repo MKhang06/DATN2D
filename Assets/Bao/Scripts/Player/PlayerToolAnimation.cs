@@ -48,6 +48,7 @@ public class PlayerToolAnimation : MonoBehaviour
     [SerializeField] private GameObject sickleSprite;
     [SerializeField] private Transform sickleTransform;
     [SerializeField] private SpriteRenderer sickleRenderer;
+
     [Header("Fishing Rod")]
     [SerializeField] private GameObject fishingRodSprite;
     [SerializeField] private Transform fishingRodTransform;
@@ -56,8 +57,10 @@ public class PlayerToolAnimation : MonoBehaviour
     [Header("Sound")]
     [SerializeField] private AudioSource hoeAudioSource;
     [SerializeField] private AudioSource waterAudioSource;
+    [SerializeField] private AudioSource sickleAudioSource;
     [SerializeField] private AudioClip hoeSound;
     [SerializeField] private AudioClip waterSound;
+    [SerializeField] private AudioClip sickleSound;
 
     [Header("Camera Shake")]
     [SerializeField] private CameraShake cameraShake;
@@ -98,6 +101,9 @@ public class PlayerToolAnimation : MonoBehaviour
         if (waterAudioSource == null)
             waterAudioSource = GetComponent<AudioSource>();
 
+        if (sickleAudioSource == null)
+            sickleAudioSource = GetComponent<AudioSource>();
+
         HideAllTools();
     }
 
@@ -122,8 +128,7 @@ public class PlayerToolAnimation : MonoBehaviour
         if (axeSprite != null) axeSprite.SetActive(false);
         if (pickaxeSprite != null) pickaxeSprite.SetActive(false);
         if (sickleSprite != null) sickleSprite.SetActive(false);
-        if (fishingRodSprite != null)
-            fishingRodSprite.SetActive(false);
+        if (fishingRodSprite != null) fishingRodSprite.SetActive(false);
     }
 
     public void ShowTool(PlayerToolController.ToolType tool)
@@ -155,8 +160,7 @@ public class PlayerToolAnimation : MonoBehaviour
                 break;
 
             case PlayerToolController.ToolType.FishingRod:
-                if (fishingRodSprite != null)
-                    fishingRodSprite.SetActive(true);
+                if (fishingRodSprite != null) fishingRodSprite.SetActive(true);
                 break;
         }
     }
@@ -217,22 +221,12 @@ public class PlayerToolAnimation : MonoBehaviour
 
         if (sickleTransform != null && sickleSprite != null && sickleSprite.activeSelf)
             RotateToolToMouse(sickleTransform, sickleRenderer, mouseWorldPos);
-        if (fishingRodTransform != null &&
-    fishingRodSprite != null &&
-    fishingRodSprite.activeSelf)
-        {
-            RotateToolToMouse(
-                fishingRodTransform,
-                fishingRodRenderer,
-                mouseWorldPos
-            );
-        }
+
+        if (fishingRodTransform != null && fishingRodSprite != null && fishingRodSprite.activeSelf)
+            RotateToolToMouse(fishingRodTransform, fishingRodRenderer, mouseWorldPos);
     }
 
-    private void RotateToolToMouse(
-        Transform tool,
-        SpriteRenderer renderer,
-        Vector3 mouseWorldPos)
+    private void RotateToolToMouse(Transform tool, SpriteRenderer renderer, Vector3 mouseWorldPos)
     {
         if (tool == null) return;
 
@@ -242,7 +236,6 @@ public class PlayerToolAnimation : MonoBehaviour
             return;
 
         currentAngle = Mathf.Atan2(dir.y, dir.x) * Mathf.Rad2Deg;
-
         tool.rotation = Quaternion.Euler(0f, 0f, currentAngle);
 
         if (renderer != null)
@@ -289,16 +282,48 @@ public class PlayerToolAnimation : MonoBehaviour
     }
 
     public void UseSickle(System.Action onComplete)
-{
-    if (isUsingTool) return;
+    {
+        if (isUsingTool) return;
 
-    StartCoroutine(SimpleToolRoutine(
-        sickleTransform,
-        PlayerActionState.Sickling,
-        "Đang thu hoạch...",
-        onComplete
-    ));
-}
+        StartCoroutine(SickleRoutine(onComplete));
+    }
+
+    private IEnumerator SickleRoutine(System.Action onComplete)
+    {
+        BeginAction(PlayerActionState.Sickling, "Đang thu hoạch...");
+
+        float startAngle = currentAngle;
+
+        PlaySickleSound();
+
+        yield return RotateTool(
+            sickleTransform,
+            startAngle,
+            startAngle + 35f,
+            simpleToolDuration * 0.25f
+        );
+
+        if (cameraShake != null)
+            cameraShake.Shake(hoeShakeDuration, hoeShakeStrength);
+
+        yield return RotateTool(
+            sickleTransform,
+            startAngle + 35f,
+            startAngle - 50f,
+            simpleToolDuration * 0.35f
+        );
+
+        yield return RotateTool(
+            sickleTransform,
+            startAngle - 50f,
+            startAngle,
+            simpleToolDuration * 0.25f
+        );
+
+        onComplete?.Invoke();
+
+        FinishAction();
+    }
 
     private IEnumerator HoeRoutine(System.Action onComplete)
     {
@@ -388,6 +413,9 @@ public class PlayerToolAnimation : MonoBehaviour
         if (playerController != null && !fishingLock)
             playerController.canMove = true;
 
+        if (toolProgressUI != null)
+            toolProgressUI.Hide();
+
         isUsingTool = false;
         currentState = PlayerActionState.Idle;
     }
@@ -436,11 +464,7 @@ public class PlayerToolAnimation : MonoBehaviour
         }
     }
 
-    private IEnumerator RotateTool(
-        Transform tool,
-        float fromAngle,
-        float toAngle,
-        float duration)
+    private IEnumerator RotateTool(Transform tool, float fromAngle, float toAngle, float duration)
     {
         if (tool == null)
             yield break;
@@ -532,6 +556,16 @@ public class PlayerToolAnimation : MonoBehaviour
         waterAudioSource.loop = false;
         waterAudioSource.clip = null;
     }
+
+    private void PlaySickleSound()
+    {
+        if (sickleAudioSource == null || sickleSound == null)
+            return;
+
+        sickleAudioSource.Stop();
+        sickleAudioSource.PlayOneShot(sickleSound);
+    }
+
     public void UseFishingRod(System.Action onComplete)
     {
         if (isUsingTool) return;
@@ -545,33 +579,16 @@ public class PlayerToolAnimation : MonoBehaviour
 
         float startAngle = currentAngle;
 
-        yield return RotateTool(
-            fishingRodTransform,
-            startAngle,
-            startAngle + 45f,
-            0.15f
-        );
-
-        yield return RotateTool(
-            fishingRodTransform,
-            startAngle + 45f,
-            startAngle - 65f,
-            0.15f
-        );
-
+        yield return RotateTool(fishingRodTransform, startAngle, startAngle + 45f, 0.15f);
+        yield return RotateTool(fishingRodTransform, startAngle + 45f, startAngle - 65f, 0.15f);
         yield return new WaitForSeconds(0.15f);
-
-        yield return RotateTool(
-            fishingRodTransform,
-            startAngle - 65f,
-            startAngle,
-            0.18f
-        );
+        yield return RotateTool(fishingRodTransform, startAngle - 65f, startAngle, 0.18f);
 
         onComplete?.Invoke();
 
         FinishAction();
     }
+
     public void SetFishingLock(bool value)
     {
         fishingLock = value;

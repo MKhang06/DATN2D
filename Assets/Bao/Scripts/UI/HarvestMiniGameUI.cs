@@ -3,7 +3,7 @@ using System.Collections.Generic;
 using TMPro;
 using UnityEngine;
 
-public class FishingMiniGameUI : MonoBehaviour
+public class HarvestMiniGameUI : MonoBehaviour
 {
     [System.Serializable]
     public class MiniGameInput
@@ -19,19 +19,19 @@ public class FishingMiniGameUI : MonoBehaviour
     [SerializeField] private TMP_Text resultText;
     [SerializeField] private TMP_Text[] slotTexts;
 
+    [Header("Settings")]
+    [SerializeField] private float timeLimit = 5f;
+    [SerializeField, Range(2, 10)] private int sequenceLength = 4;
+
+    [Header("Inputs")]
+    [SerializeField] private MiniGameInput[] possibleInputs;
+
     [Header("Lock Player")]
     [SerializeField] private PlayerController playerController;
     [SerializeField] private PlayerToolAnimation toolAnimation;
     [SerializeField] private PlayerToolController toolController;
 
-    [Header("Settings")]
-    [SerializeField] private float timeLimit = 6f;
-    [SerializeField, Range(2, 10)] private int sequenceLength = 5;
-
-    [Header("Random Inputs")]
-    [SerializeField] private MiniGameInput[] possibleInputs;
-
-    private readonly List<MiniGameInput> currentSequence = new List<MiniGameInput>();
+    private readonly List<MiniGameInput> sequence = new List<MiniGameInput>();
     private int currentIndex;
     private float timer;
     private bool isPlaying;
@@ -41,7 +41,8 @@ public class FishingMiniGameUI : MonoBehaviour
 
     private void Awake()
     {
-        BuildDefaultInputsIfEmpty();
+        BuildDefaultInputs();
+
         if (root != null)
             root.SetActive(false);
     }
@@ -62,7 +63,7 @@ public class FishingMiniGameUI : MonoBehaviour
             return;
         }
 
-        CheckOnlyPressedKeys();
+        CheckInput();
     }
 
     public void StartMiniGame(Action<bool> callback)
@@ -72,8 +73,6 @@ public class FishingMiniGameUI : MonoBehaviour
         onFinish = callback;
         finished = false;
         isPlaying = true;
-        LockPlayer();
-
         currentIndex = 0;
         timer = timeLimit;
 
@@ -85,12 +84,13 @@ public class FishingMiniGameUI : MonoBehaviour
         if (resultText != null)
             resultText.text = "";
 
+        LockPlayer();
         RefreshUI();
     }
 
     private void GenerateSequence()
     {
-        currentSequence.Clear();
+        sequence.Clear();
 
         int count = Mathf.Clamp(sequenceLength, 2, 10);
 
@@ -100,17 +100,16 @@ public class FishingMiniGameUI : MonoBehaviour
         for (int i = 0; i < count; i++)
         {
             int randomIndex = UnityEngine.Random.Range(0, possibleInputs.Length);
-            currentSequence.Add(possibleInputs[randomIndex]);
+            sequence.Add(possibleInputs[randomIndex]);
         }
     }
 
-    private void CheckOnlyPressedKeys()
+    private void CheckInput()
     {
-        if (currentIndex < 0 || currentIndex >= currentSequence.Count)
+        if (currentIndex < 0 || currentIndex >= sequence.Count)
             return;
 
-        MiniGameInput need = currentSequence[currentIndex];
-
+        MiniGameInput need = sequence[currentIndex];
         bool pressedSomething = false;
 
         foreach (MiniGameInput input in possibleInputs)
@@ -121,37 +120,30 @@ public class FishingMiniGameUI : MonoBehaviour
 
                 if (input.keyCode == need.keyCode)
                 {
-                    CorrectInput();
+                    currentIndex++;
+
+                    if (currentIndex >= sequence.Count)
+                    {
+                        Finish(true);
+                        return;
+                    }
+
+                    RefreshUI();
                     return;
                 }
             }
         }
 
         if (pressedSomething)
-        {
             Finish(false);
-        }
-    }
-
-    private void CorrectInput()
-    {
-        currentIndex++;
-
-        if (currentIndex >= currentSequence.Count)
-        {
-            Finish(true);
-            return;
-        }
-
-        RefreshUI();
     }
 
     private void RefreshUI()
     {
         if (titleText != null)
         {
-            int showIndex = Mathf.Clamp(currentIndex + 1, 1, currentSequence.Count);
-            titleText.text = "CHECKING FISH " + showIndex + "/" + currentSequence.Count;
+            int showIndex = Mathf.Clamp(currentIndex + 1, 1, sequence.Count);
+            titleText.text = "HARVESTING " + showIndex + "/" + sequence.Count;
         }
 
         for (int i = 0; i < slotTexts.Length; i++)
@@ -159,13 +151,13 @@ public class FishingMiniGameUI : MonoBehaviour
             if (slotTexts[i] == null)
                 continue;
 
-            if (i >= currentSequence.Count)
+            if (i >= sequence.Count)
             {
                 slotTexts[i].text = "";
                 continue;
             }
 
-            slotTexts[i].text = currentSequence[i].displayText;
+            slotTexts[i].text = sequence[i].displayText;
 
             if (i < currentIndex)
                 slotTexts[i].color = Color.green;
@@ -185,49 +177,21 @@ public class FishingMiniGameUI : MonoBehaviour
         isPlaying = false;
 
         if (resultText != null)
-            resultText.text = success ? "THÀNH CÔNG!" : "THẤT BẠI!";
+            resultText.text = success ? "THU HOẠCH!" : "THẤT BẠI!";
 
         UnlockPlayer();
+
         onFinish?.Invoke(success);
 
         Invoke(nameof(Hide), 0.4f);
     }
 
-    public void Hide()
+    private void Hide()
     {
-        isPlaying = false;
-        finished = false;
-
         if (root != null)
             root.SetActive(false);
-
-        if (Application.isPlaying)
-            UnlockPlayer();
     }
 
-    private void BuildDefaultInputsIfEmpty()
-    {
-        if (possibleInputs != null && possibleInputs.Length > 0)
-            return;
-
-        possibleInputs = new MiniGameInput[]
-        {
-            new MiniGameInput { displayText = "A", keyCode = KeyCode.A },
-            new MiniGameInput { displayText = "B", keyCode = KeyCode.B },
-            new MiniGameInput { displayText = "C", keyCode = KeyCode.C },
-            new MiniGameInput { displayText = "S", keyCode = KeyCode.S },
-
-            new MiniGameInput { displayText = "1", keyCode = KeyCode.Alpha1 },
-            new MiniGameInput { displayText = "2", keyCode = KeyCode.Alpha2 },
-            new MiniGameInput { displayText = "3", keyCode = KeyCode.Alpha3 },
-            new MiniGameInput { displayText = "4", keyCode = KeyCode.Alpha4 },
-
-            new MiniGameInput { displayText = "↑", keyCode = KeyCode.UpArrow },
-            new MiniGameInput { displayText = "↓", keyCode = KeyCode.DownArrow },
-            new MiniGameInput { displayText = "←", keyCode = KeyCode.LeftArrow },
-            new MiniGameInput { displayText = "→", keyCode = KeyCode.RightArrow },
-        };
-    }
     private void LockPlayer()
 {
     GameLockManager.Instance?.LockPlayer();
@@ -237,4 +201,27 @@ public class FishingMiniGameUI : MonoBehaviour
 {
     GameLockManager.Instance?.UnlockPlayer();
 }
+
+    private void BuildDefaultInputs()
+    {
+        if (possibleInputs != null && possibleInputs.Length > 0)
+            return;
+
+        possibleInputs = new MiniGameInput[]
+        {
+            new MiniGameInput { displayText = "A", keyCode = KeyCode.A },
+            new MiniGameInput { displayText = "S", keyCode = KeyCode.S },
+            new MiniGameInput { displayText = "D", keyCode = KeyCode.D },
+            new MiniGameInput { displayText = "W", keyCode = KeyCode.W },
+
+            new MiniGameInput { displayText = "1", keyCode = KeyCode.Alpha1 },
+            new MiniGameInput { displayText = "2", keyCode = KeyCode.Alpha2 },
+            new MiniGameInput { displayText = "3", keyCode = KeyCode.Alpha3 },
+
+            new MiniGameInput { displayText = "←", keyCode = KeyCode.LeftArrow },
+            new MiniGameInput { displayText = "↑", keyCode = KeyCode.UpArrow },
+            new MiniGameInput { displayText = "↓", keyCode = KeyCode.DownArrow },
+            new MiniGameInput { displayText = "→", keyCode = KeyCode.RightArrow },
+        };
+    }
 }

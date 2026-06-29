@@ -15,6 +15,11 @@ public class CropHarvest : MonoBehaviour
     [SerializeField] private Transform flyTarget;
     [SerializeField] private PlayerToolAnimation toolAnimation;
     [SerializeField] private ToolProgressUI progressUI;
+    [SerializeField] private HarvestMiniGameUI harvestMiniGameUI;
+
+    [Header("Audio")]
+    [SerializeField] private AudioSource leafAudio;
+    [SerializeField] private AudioClip leafRustleSound;
 
     [Header("Settings")]
     [SerializeField] private float harvestTime = 0.8f;
@@ -36,10 +41,7 @@ public class CropHarvest : MonoBehaviour
             progressUI.Hide();
 
         if (cropGrowth == null)
-        {
-            Debug.LogWarning("Thiếu CropGrowth.");
             return;
-        }
 
         if (!cropGrowth.IsReadyToHarvest)
         {
@@ -47,15 +49,35 @@ public class CropHarvest : MonoBehaviour
             return;
         }
 
-        StartCoroutine(HarvestRoutine());
+        isHarvesting = true;
+
+        if (harvestMiniGameUI != null)
+            harvestMiniGameUI.StartMiniGame(OnHarvestMiniGameFinished);
+        else
+            StartCoroutine(HarvestRoutine());
+    }
+
+    private void OnHarvestMiniGameFinished(bool success)
+    {
+        if (success)
+        {
+            StartCoroutine(HarvestRoutine());
+        }
+        else
+        {
+            isHarvesting = false;
+
+            if (progressUI != null)
+                progressUI.Hide();
+
+            Debug.Log("Thu hoạch thất bại!");
+        }
     }
 
     private IEnumerator HarvestRoutine()
     {
-        isHarvesting = true;
-
         if (progressUI != null)
-            progressUI.Show("Đang thu hoạch...");
+            yield return progressUI.PlayProgress("Đang thu hoạch...", harvestTime);
 
         bool sickleFinished = false;
 
@@ -65,32 +87,16 @@ public class CropHarvest : MonoBehaviour
             {
                 sickleFinished = true;
             });
+
+            while (!sickleFinished)
+                yield return null;
         }
-        else
-        {
-            sickleFinished = true;
-        }
-
-        float timer = 0f;
-
-        while (timer < harvestTime)
-        {
-            timer += Time.deltaTime;
-
-            if (progressUI != null)
-                progressUI.SetProgress(1f - timer / harvestTime);
-
-            yield return null;
-        }
-
-        if (progressUI != null)
-            progressUI.Hide();
-
-        while (!sickleFinished)
-            yield return null;
 
         if (leafParticle != null)
             leafParticle.Play();
+
+        if (leafAudio != null && leafRustleSound != null)
+            leafAudio.PlayOneShot(leafRustleSound);
 
         SpawnHarvestEffect();
 
@@ -114,12 +120,10 @@ public class CropHarvest : MonoBehaviour
         );
 
         SpriteRenderer sr = obj.GetComponent<SpriteRenderer>();
-
         if (sr != null)
             sr.sprite = cropIcon;
 
         HarvestFlyEffect effect = obj.GetComponent<HarvestFlyEffect>();
-
         if (effect != null)
         {
             effect.Play(

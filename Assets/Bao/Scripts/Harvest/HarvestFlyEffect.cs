@@ -12,8 +12,10 @@ public class HarvestFlyEffect : MonoBehaviour
     [SerializeField] private float rotateSpeed = 720f;
 
     [Header("Audio")]
-    [SerializeField] private AudioSource harvestAudio;
-    [SerializeField] private AudioClip popSound;
+    [SerializeField] private AudioSource audioSource;
+    [SerializeField] private AudioClip harvestPopSound;
+    [SerializeField] private AudioClip itemFlySound;
+    [SerializeField] private AudioClip inventoryPopSound;
 
     private SpriteRenderer spriteRenderer;
 
@@ -21,37 +23,20 @@ public class HarvestFlyEffect : MonoBehaviour
     {
         spriteRenderer = GetComponent<SpriteRenderer>();
 
-        if (harvestAudio == null)
-            harvestAudio = GetComponent<AudioSource>();
+        if (audioSource == null)
+            audioSource = GetComponent<AudioSource>();
     }
 
-    public void Play(
-        Vector3 startPos,
-        Transform target,
-        string itemName,
-        Sprite itemIcon,
-        int amount)
+    public void Play(Vector3 startPos, Transform target, string itemName, Sprite itemIcon, int amount)
     {
         transform.position = startPos;
         transform.localScale = Vector3.one;
-
-        StartCoroutine(
-            PlayRoutine(
-                target,
-                itemName,
-                itemIcon,
-                amount
-            )
-        );
+        StartCoroutine(PlayRoutine(target, itemName, itemIcon, amount));
     }
 
-    private IEnumerator PlayRoutine(
-        Transform target,
-        string itemName,
-        Sprite itemIcon,
-        int amount)
+    private IEnumerator PlayRoutine(Transform target, string itemName, Sprite itemIcon, int amount)
     {
-        PlayHarvestSound();
+        PlayOneShot(harvestPopSound);
 
         Vector3 start = transform.position;
         Vector3 jumpTarget = start + Vector3.up * jumpHeight;
@@ -63,17 +48,13 @@ public class HarvestFlyEffect : MonoBehaviour
             timer += Time.deltaTime;
             float t = Mathf.Clamp01(timer / jumpTime);
 
-            transform.position =
-                Vector3.Lerp(start, jumpTarget, t);
-
-            transform.Rotate(
-                0f,
-                0f,
-                rotateSpeed * Time.deltaTime
-            );
+            transform.position = Vector3.Lerp(start, jumpTarget, t);
+            transform.Rotate(0f, 0f, rotateSpeed * Time.deltaTime);
 
             yield return null;
         }
+
+        PlayOneShot(itemFlySound);
 
         Vector3 p0 = transform.position;
         Vector3 p2 = target.position + Vector3.up * 0.5f;
@@ -91,56 +72,30 @@ public class HarvestFlyEffect : MonoBehaviour
             Vector3 b = Vector3.Lerp(p1, p2, t);
 
             transform.position = Vector3.Lerp(a, b, t);
-
-            transform.localScale =
-                Vector3.Lerp(originalScale, Vector3.zero, t);
-
-            transform.Rotate(
-                0f,
-                0f,
-                rotateSpeed * Time.deltaTime
-            );
+            transform.localScale = Vector3.Lerp(originalScale, Vector3.zero, t);
+            transform.Rotate(0f, 0f, rotateSpeed * Time.deltaTime);
 
             yield return null;
         }
 
-        if (InventoryManager.Instance != null)
-        {
-            InventoryManager.Instance.AddItem(
-                itemName,
-                itemIcon,
-                amount
-            );
-        }
+        InventoryManager.Instance?.AddItem(itemName, itemIcon, amount);
 
         if (spriteRenderer != null)
             spriteRenderer.enabled = false;
 
-        if (popSound != null)
-            yield return new WaitForSeconds(popSound.length);
+        PlayOneShot(inventoryPopSound);
+
+        float wait = inventoryPopSound != null ? inventoryPopSound.length : 0.15f;
+        yield return new WaitForSeconds(wait);
 
         Destroy(gameObject);
     }
 
-    private void PlayHarvestSound()
+    private void PlayOneShot(AudioClip clip)
     {
-        if (harvestAudio == null)
-        {
-            Debug.LogWarning("Thiếu Harvest AudioSource.");
+        if (audioSource == null || clip == null)
             return;
-        }
 
-        if (popSound == null)
-        {
-            Debug.LogWarning("Thiếu Pop Sound.");
-            return;
-        }
-
-        harvestAudio.Stop();
-        harvestAudio.clip = popSound;
-        harvestAudio.loop = false;
-        harvestAudio.Play();
-
-        Debug.Log("Phát âm thanh thu hoạch ngay từ đầu.");
+        audioSource.PlayOneShot(clip);
     }
 }
