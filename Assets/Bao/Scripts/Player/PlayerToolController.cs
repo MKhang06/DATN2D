@@ -7,7 +7,11 @@ public class PlayerToolController : MonoBehaviour
     {
         None,
         Hoe,
-        WateringCan
+        WateringCan,
+        Axe,
+        Pickaxe,
+        Sickle,
+        FishingRod
     }
 
     [Header("Tool")]
@@ -20,6 +24,7 @@ public class PlayerToolController : MonoBehaviour
     [Header("References")]
     [SerializeField] private PlayerToolAnimation toolAnimation;
     [SerializeField] private PlayerStats playerStats;
+    [SerializeField] private FishingManager fishingManager;
 
     private Camera cam;
 
@@ -32,6 +37,9 @@ public class PlayerToolController : MonoBehaviour
 
         if (playerStats == null)
             playerStats = GetComponent<PlayerStats>();
+
+        if (fishingManager == null)
+            fishingManager = GetComponent<FishingManager>();
     }
 
     private void Update()
@@ -49,52 +57,38 @@ public class PlayerToolController : MonoBehaviour
     private void ChangeTool()
     {
         if (Input.GetKeyDown(KeyCode.Q))
-        {
-            if (currentTool == ToolType.Hoe)
-            {
-                currentTool = ToolType.None;
-
-                if (toolAnimation != null)
-                    toolAnimation.HideHoe();
-
-                if (CursorManager.Instance != null)
-                    CursorManager.Instance.SetDefaultCursor();
-            }
-            else
-            {
-                currentTool = ToolType.Hoe;
-
-                if (toolAnimation != null)
-                    toolAnimation.ShowHoe();
-
-                if (CursorManager.Instance != null)
-                    CursorManager.Instance.SetHoeCursor();
-            }
-        }
+            ToggleTool(ToolType.Hoe);
 
         if (Input.GetKeyDown(KeyCode.E))
+            ToggleTool(ToolType.WateringCan);
+
+        if (Input.GetKeyDown(KeyCode.R))
+            ToggleTool(ToolType.Axe);
+
+        if (Input.GetKeyDown(KeyCode.T))
+            ToggleTool(ToolType.Pickaxe);
+
+        if (Input.GetKeyDown(KeyCode.Y))
+            ToggleTool(ToolType.Sickle);
+
+        if (Input.GetKeyDown(KeyCode.F) || Input.GetKeyDown(KeyCode.U))
+            ToggleTool(ToolType.FishingRod);
+    }
+
+    private void ToggleTool(ToolType tool)
+    {
+        if (toolAnimation == null) return;
+
+        if (currentTool == tool)
         {
-            if (currentTool == ToolType.WateringCan)
-            {
-                currentTool = ToolType.None;
-
-                if (toolAnimation != null)
-                    toolAnimation.HideWateringCan();
-
-                if (CursorManager.Instance != null)
-                    CursorManager.Instance.SetDefaultCursor();
-            }
-            else
-            {
-                currentTool = ToolType.WateringCan;
-
-                if (toolAnimation != null)
-                    toolAnimation.ShowWateringCan();
-
-                if (CursorManager.Instance != null)
-                    CursorManager.Instance.SetWateringCursor();
-            }
+            currentTool = ToolType.None;
+            toolAnimation.HideAllTools();
+            CursorManager.Instance?.SetDefaultCursor();
+            return;
         }
+
+        currentTool = tool;
+        toolAnimation.ShowTool(tool);
     }
 
     private void RotateToolToMouse()
@@ -117,14 +111,33 @@ public class PlayerToolController : MonoBehaviour
     {
         if (currentTool == ToolType.None) return;
 
+        if (EventSystem.current != null &&
+            EventSystem.current.IsPointerOverGameObject())
+            return;
+
+        if (currentTool == ToolType.FishingRod)
+        {
+            if (toolAnimation != null)
+            {
+                toolAnimation.UseFishingRod(() =>
+                {
+                    if (fishingManager != null)
+                        fishingManager.TryStartFishing();
+                });
+            }
+            else
+            {
+                if (fishingManager != null)
+                    fishingManager.TryStartFishing();
+            }
+
+            return;
+        }
+
         if (cam == null)
             cam = Camera.main;
 
         if (cam == null) return;
-
-        if (EventSystem.current != null &&
-            EventSystem.current.IsPointerOverGameObject())
-            return;
 
         Vector2 mouseWorldPos = cam.ScreenToWorldPoint(Input.mousePosition);
 
@@ -137,70 +150,149 @@ public class PlayerToolController : MonoBehaviour
         if (hit == null) return;
 
         FarmTile tile = hit.GetComponent<FarmTile>();
-
         if (tile == null) return;
 
-        if (currentTool == ToolType.Hoe)
-            UseHoe(tile);
-        else if (currentTool == ToolType.WateringCan)
-            UseWateringCan(tile);
+        switch (currentTool)
+        {
+            case ToolType.Hoe:
+                UseHoe(tile);
+                break;
+
+            case ToolType.WateringCan:
+                UseWateringCan(tile);
+                break;
+
+            case ToolType.Axe:
+                UseAxe(tile);
+                break;
+
+            case ToolType.Pickaxe:
+                UsePickaxe(tile);
+                break;
+
+            case ToolType.Sickle:
+                UseSickle(tile);
+                break;
+        }
     }
 
     private void UseHoe(FarmTile tile)
     {
         if (playerStats == null) return;
 
-        if (!playerStats.HasEnergy(15f))
+        float cost = GetEnergyCost(15f);
+
+        if (!playerStats.HasEnergy(cost))
         {
             Debug.Log("Không đủ Energy để cuốc đất!");
             return;
         }
 
-        playerStats.UseEnergy(15f);
+        playerStats.UseEnergy(cost);
         playerStats.AddXP(2);
 
         if (toolAnimation != null)
-        {
-            toolAnimation.UseHoe(() =>
-            {
-                tile.Hoe();
-            });
-        }
+            toolAnimation.UseHoe(() => tile.Hoe());
         else
-        {
             tile.Hoe();
-        }
     }
 
     private void UseWateringCan(FarmTile tile)
     {
         if (playerStats == null) return;
 
-        if (!playerStats.HasEnergy(10f))
+        float cost = GetEnergyCost(10f);
+
+        if (!playerStats.HasEnergy(cost))
         {
             Debug.Log("Không đủ Energy để tưới nước!");
             return;
         }
 
-        playerStats.UseEnergy(10f);
+        playerStats.UseEnergy(cost);
         playerStats.AddXP(1);
 
         if (toolAnimation != null)
-        {
-            toolAnimation.UseWateringCan(() =>
-            {
-                tile.Water();
-            });
-        }
+            toolAnimation.UseWateringCan(() => tile.Water());
         else
-        {
             tile.Water();
+    }
+
+    private void UseAxe(FarmTile tile)
+    {
+        if (playerStats == null) return;
+
+        float cost = GetEnergyCost(20f);
+
+        if (!playerStats.HasEnergy(cost))
+        {
+            Debug.Log("Không đủ Energy để dùng rìu!");
+            return;
         }
+
+        playerStats.UseEnergy(cost);
+        playerStats.AddXP(3);
+
+        if (toolAnimation != null)
+            toolAnimation.UseAxe(() => tile.Axe());
+        else
+            tile.Axe();
+    }
+
+    private void UsePickaxe(FarmTile tile)
+    {
+        if (playerStats == null) return;
+
+        float cost = GetEnergyCost(20f);
+
+        if (!playerStats.HasEnergy(cost))
+        {
+            Debug.Log("Không đủ Energy để dùng cuốc chim!");
+            return;
+        }
+
+        playerStats.UseEnergy(cost);
+        playerStats.AddXP(3);
+
+        if (toolAnimation != null)
+            toolAnimation.UsePickaxe(() => tile.Pickaxe());
+        else
+            tile.Pickaxe();
+    }
+
+    private void UseSickle(FarmTile tile)
+    {
+        if (playerStats == null) return;
+
+        float cost = GetEnergyCost(8f);
+
+        if (!playerStats.HasEnergy(cost))
+        {
+            Debug.Log("Không đủ Energy để dùng liềm!");
+            return;
+        }
+
+        playerStats.UseEnergy(cost);
+        playerStats.AddXP(2);
+
+        if (toolAnimation != null)
+            toolAnimation.UseSickle(() => tile.Sickle());
+        else
+            tile.Sickle();
+    }
+
+    private float GetEnergyCost(float baseCost)
+    {
+        float multiplier = 1f;
+
+        if (CharacterPassiveManager.Instance != null)
+            multiplier = CharacterPassiveManager.Instance.EnergyCostMultiplier;
+
+        return baseCost * multiplier;
     }
 
     private void OnDisable()
     {
-        if (CursorManager.Instance != null)
-            CursorManager.Instance.SetDefaultCursor();
+        CursorManager.Instance?.SetDefaultCursor();
     }
 }

@@ -16,6 +16,6 @@ public class XPUI : MonoBehaviour
             playerStats.RequiredXP;
 
         levelText.text =
-            "⭐ Lv." + playerStats.Level;
+            "Lv." + playerStats.Level;
     }
 }

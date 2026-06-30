@@ -26,7 +26,11 @@ public class FarmTile : MonoBehaviour
     {
         if (currentState != SoilState.Normal) return;
 
-        currentState = SoilState.Hoed;
+        if (WeatherManager.Instance != null && WeatherManager.Instance.IsRaining)
+            currentState = SoilState.Watered;
+        else
+            currentState = SoilState.Hoed;
+
         UpdateTileVisual();
     }
 
@@ -38,7 +42,16 @@ public class FarmTile : MonoBehaviour
         UpdateTileVisual();
     }
 
-    private void UpdateTileVisual()
+    public void WaterByRain()
+    {
+        if (currentState == SoilState.Hoed)
+        {
+            currentState = SoilState.Watered;
+            UpdateTileVisual();
+        }
+    }
+
+    public void UpdateTileVisual()
     {
         if (sr == null) return;
 
@@ -56,5 +69,44 @@ public class FarmTile : MonoBehaviour
                 sr.color = new Color(0.18f, 0.12f, 0.08f);
                 break;
         }
+    }
+
+    public void Axe()
+    {
+        Debug.Log("Chặt cây");
+    }
+
+    public void Pickaxe()
+    {
+        Debug.Log("Đập đá");
+    }
+
+    public void Sickle()
+    {
+        Debug.Log("Cắt cỏ");
+    }
+    [Header("Crop Save")]
+    public bool hasCrop;
+    public int growthStage;
+
+    public FarmTileSaveData GetSaveData()
+    {
+        return new FarmTileSaveData
+        {
+            gridX = gridX,
+            gridY = gridY,
+            state = currentState,
+            hasCrop = hasCrop,
+            growthStage = growthStage
+        };
+    }
+
+    public void LoadSaveData(FarmTileSaveData data)
+    {
+        currentState = data.state;
+        hasCrop = data.hasCrop;
+        growthStage = data.growthStage;
+
+        UpdateTileVisual();
     }
 }
