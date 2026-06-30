@@ -1,7 +1,8 @@
 
+using System.IO.Enumeration;
 using UnityEngine;
 [CreateAssetMenu(fileName = "item", menuName = "inventory/item")]
-public class Item : ScriptableObject
+public class item : ScriptableObject
 {
     public int id;
     public string itemName;
