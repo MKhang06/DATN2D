@@ -89,5 +89,8 @@ TagManager:
   - name: Effects
     uniqueID: 1474857399
     locked: 0
+  - name: house
+    uniqueID: 3473700575
+    locked: 0
   m_RenderingLayers:
   - Default
