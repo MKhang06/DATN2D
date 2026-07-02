@@ -92,5 +92,11 @@ TagManager:
   - name: house
     uniqueID: 3473700575
     locked: 0
+  - name: tree
+    uniqueID: 1026070429
+    locked: 0
+  - name: NPC
+    uniqueID: 3493591955
+    locked: 0
   m_RenderingLayers:
   - Default

@@ -1,11 +1,11 @@
-using UnityEngine;
+// using UnityEngine;
 
-public class ItemPickUp : MonoBehaviour
-{
-    public item item;
-    void PickUp()
-    {
-        //destroy
-        Destroy(this.gameObject);
-    }
-}
+// public class ItemPickUp : MonoBehaviour
+// {
+//     public item item;
+//     void PickUp()
+//     {
+//         //destroy
+//         Destroy(this.gameObject);
+//     }
+// }

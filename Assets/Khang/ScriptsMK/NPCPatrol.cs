@@ -2,92 +2,108 @@ using UnityEngine;
 
 public class NPCPatrol : MonoBehaviour
 {
-    [Header("Cài Đặt Di Chuyển")]
-    public float moveSpeed = 2f;         // Tốc độ đi bộ của NPC
-    public float waitTime = 3f;          // Thời gian đứng chờ tại mỗi điểm (giây)
-
-    [Header("Điểm Mốc Lộ Trình")]
-    public Transform[] waypoints;        // Kéo thả các điểm mốc vào đây
+    [Header("Cấu Hình Lộ Trình")]
+    public Transform[] waypoints;        // Danh sách các điểm mốc cố định NPC sẽ đi qua
+    public float moveSpeed = 2f;         // Tốc độ di chuyển của NPC
+    public float startWaitTime = 1.5f;   // Thời gian NPC đứng nghỉ khi đến mỗi điểm mốc
 
     private int currentWaypointIndex = 0;
+    private float waitTimer;
     private bool isWaiting = false;
-    private float waitTimer = 0f;
-    private Animator animator;
+
+    private Rigidbody2D rb;
+    private Animator anim;
 
     void Start()
     {
-        // Tự động lấy Component Animator trên NPC để xử lý hoạt ảnh sau này
-        animator = GetComponent<Animator>();
+        rb = GetComponent<Rigidbody2D>();
+        anim = GetComponent<Animator>();
         
-        // Nếu có cài đặt điểm mốc, đặt vị trí xuất phát của NPC tại điểm đầu tiên
-        if (waypoints.Length > 0 && waypoints[0] != null)
+        // Đóng băng trục Z và tắt trọng lực để phù hợp game Top-down 2D
+        if (rb != null)
         {
-            transform.position = waypoints[0].position;
+            rb.freezeRotation = true;
+            rb.gravityScale = 0f;
         }
+
+        waitTimer = startWaitTime;
     }
 
     void Update()
     {
-        // Nếu quên chưa kéo điểm mốc vào thì không chạy code dưới để tránh lỗi
         if (waypoints.Length == 0) return;
 
+        // Xử lý logic đếm ngược thời gian chờ tại điểm mốc
         if (isWaiting)
         {
-            // Đếm thời gian đứng chờ
-            waitTimer += Time.deltaTime;
-            if (waitTimer >= waitTime)
+            waitTimer -= Time.deltaTime;
+            if (waitTimer <= 0)
             {
                 isWaiting = false;
-                waitTimer = 0f;
-                
-                // Chuyển sang mục tiêu điểm mốc tiếp theo
+                // Chuyển mục tiêu sang điểm tiếp theo (vòng lặp)
                 currentWaypointIndex = (currentWaypointIndex + 1) % waypoints.Length;
-                
-                SetWalkingAnimation(true); // Bật hoạt ảnh đi bộ khi hết chờ
+                waitTimer = startWaitTime;
             }
+        }
+    }
+
+    void FixedUpdate()
+    {
+        // Nếu không có điểm mốc hoặc NPC đang đứng chờ, bắt NPC dừng lại
+        if (waypoints.Length == 0 || isWaiting)
+        {
+            StopMovement();
+            return;
+        }
+
+        MoveTowardsWaypoint();
+    }
+
+    void MoveTowardsWaypoint()
+    {
+        Vector2 targetPosition = waypoints[currentWaypointIndex].position;
+        Vector2 currentPosition = rb.position;
+
+        // Tính toán hướng di chuyển từ vị trí hiện tại đến điểm mốc
+        Vector2 direction = (targetPosition - currentPosition).normalized;
+        
+        // Tính khoảng cách còn lại tới điểm mốc
+        float distance = Vector2.Distance(currentPosition, targetPosition);
+
+        if (distance > 0.1f)
+        {
+            // Unity 6: Sử dụng linearVelocity thay cho velocity cũ của Rigidbody2D
+            rb.linearVelocity = direction * moveSpeed;
+
+            // Kích hoạt animation chạy
+            if (anim != null) anim.SetBool("isMoving", true);
+
+            // Tự động xoay mặt NPC theo hướng đi Trái/Phải
+            FlipSprite(direction.x);
         }
         else
         {
-            MoveNPC();
+            // Đã chạm đến điểm mốc, dừng lại kích hoạt thời gian chờ
+            isWaiting = true;
         }
     }
 
-    void MoveNPC()
+    void StopMovement()
     {
-        Transform targetTarget = waypoints[currentWaypointIndex];
+        rb.linearVelocity = Vector2.zero;
+        if (anim != null) anim.SetBool("isMoving", false);
+    }
 
-        if (targetTarget == null) return;
-
-        // Di chuyển vị trí NPC hướng dần tới điểm mốc mục tiêu
-        transform.position = Vector3.MoveTowards(transform.position, targetTarget.position, moveSpeed * Time.deltaTime);
-
-        // Tự động xoay mặt (Flip Sprite) theo hướng di chuyển X
-        Vector3 direction = targetTarget.position - transform.position;
-        if (direction.x > 0.01f)
+    void FlipSprite(float horizontalMove)
+    {
+        // Lật scale của trục X để quay đầu nhân vật
+        if (horizontalMove > 0.01f)
         {
-            // Đi sang phải -> quay mặt sang phải (giữ nguyên scale gốc)
             transform.localScale = new Vector3(Mathf.Abs(transform.localScale.x), transform.localScale.y, transform.localScale.z);
         }
-        else if (direction.x < -0.01f)
+        else if (horizontalMove < -0.01f)
         {
-            // Đi sang trái -> lật scale X sang âm để quay mặt sang trái
             transform.localScale = new Vector3(-Mathf.Abs(transform.localScale.x), transform.localScale.y, transform.localScale.z);
-        }
-
-        // Kiểm tra xem NPC đã chạm sát vào điểm mốc chưa
-        if (Vector3.Distance(transform.position, targetTarget.position) < 0.05f)
-        {
-            isWaiting = true;
-            SetWalkingAnimation(false); // Tắt hoạt ảnh đi bộ, chuyển sang đứng yên (Idle)
-        }
-    }
-
-    void SetWalkingAnimation(bool isWalking)
-    {
-        if (animator != null)
-        {
-            // Bạn có thể tạo một biến Bool tên "isMoving" trong Animator của NPC để kích hoạt animation đi bộ
-            animator.SetBool("isMoving", isWalking);
         }
     }
 }
