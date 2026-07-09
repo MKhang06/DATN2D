@@ -4,30 +4,47 @@ using UnityEngine.UI;
 
 public class InventorySlotUI : MonoBehaviour
 {
-    [SerializeField] private Image icon;
+    [Header("UI")]
+    [SerializeField] private Image iconImage;
     [SerializeField] private TMP_Text amountText;
+    [SerializeField] private GameObject selectedFrame;
 
-    public void SetItem(Sprite sprite, int amount)
+    public void SetSlot(
+        InventoryManager.InventorySlot slot,
+        bool selected)
     {
-        if (icon != null)
+        if (slot == null || slot.IsEmpty)
         {
-            icon.enabled = true;
-            icon.sprite = sprite;
+            if (iconImage != null)
+            {
+                iconImage.enabled = false;
+                iconImage.sprite = null;
+            }
+
+            if (amountText != null)
+                amountText.text = "";
+
+            if (selectedFrame != null)
+                selectedFrame.SetActive(selected);
+
+            return;
+        }
+
+        if (iconImage != null)
+        {
+            iconImage.enabled = true;
+            iconImage.sprite = slot.icon;
+            iconImage.preserveAspect = true;
         }
 
         if (amountText != null)
-            amountText.text = amount.ToString();
-    }
-
-    public void Clear()
-    {
-        if (icon != null)
         {
-            icon.enabled = false;
-            icon.sprite = null;
+            amountText.text = slot.amount > 1
+                ? slot.amount.ToString()
+                : "";
         }
 
-        if (amountText != null)
-            amountText.text = "";
+        if (selectedFrame != null)
+            selectedFrame.SetActive(selected);
     }
 }
