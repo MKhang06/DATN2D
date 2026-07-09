@@ -4,12 +4,13 @@ public class GameLockManager : MonoBehaviour
 {
     public static GameLockManager Instance;
 
+    [Header("References")]
     [SerializeField] private PlayerController playerController;
     [SerializeField] private PlayerToolController toolController;
     [SerializeField] private PlayerToolAnimation toolAnimation;
     [SerializeField] private Rigidbody2D playerRb;
 
-    private Vector3 lockedPos;
+    private Vector3 lockedPosition;
     private bool locked;
 
     private void Awake()
@@ -19,10 +20,11 @@ public class GameLockManager : MonoBehaviour
 
     private void LateUpdate()
     {
-        if (!locked) return;
+        if (!locked)
+            return;
 
         if (playerController != null)
-            playerController.transform.position = lockedPos;
+            playerController.transform.position = lockedPosition;
 
         if (playerRb != null)
             playerRb.linearVelocity = Vector2.zero;
@@ -44,15 +46,15 @@ public class GameLockManager : MonoBehaviour
 
         if (playerController != null)
         {
-            lockedPos = playerController.transform.position;
+            lockedPosition = playerController.transform.position;
             playerController.SetMovementLocked(true);
         }
 
-        if (toolAnimation != null)
-            toolAnimation.SetFishingLock(true);
-
         if (toolController != null)
             toolController.enabled = false;
+
+        if (toolAnimation != null)
+            toolAnimation.SetFishingLock(true);
 
         if (playerRb != null)
             playerRb.linearVelocity = Vector2.zero;

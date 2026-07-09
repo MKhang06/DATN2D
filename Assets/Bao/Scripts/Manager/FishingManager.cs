@@ -1,55 +1,81 @@
 using System.Collections;
+using System.Collections.Generic;
 using UnityEngine;
 
 public class FishingManager : MonoBehaviour
 {
+    [System.Serializable]
+    public class FishingLoot
+    {
+        public string itemName;
+        public Sprite icon;
+
+        [Header("Type")]
+        public bool isFish = true;
+
+        [Header("Depth")]
+        public float minDepth = 0f;
+        public float maxDepth = 10f;
+
+        [Header("Chance")]
+        public float weight = 10f;
+
+        [Header("Fish Power")]
+        public float fishPower = 1f;
+
+        [Header("Bait Bonus")]
+        public string preferredBait;
+        public float preferredBaitBonus = 10f;
+    }
+
     [Header("References")]
     [SerializeField] private PlayerStats playerStats;
     [SerializeField] private InventoryManager inventoryManager;
-    [SerializeField] private PlayerController playerController;
-    [SerializeField] private PlayerToolAnimation toolAnimation;
-    [SerializeField] private ToolProgressUI progressUI;
+    [SerializeField] private FishingGearStats gearStats;
+    [SerializeField] private FishingBarMiniGameUI fishingBarUI;
 
     [Header("Fishing Objects")]
     [SerializeField] private GameObject bobberObject;
     [SerializeField] private GameObject biteIconObject;
     [SerializeField] private GameObject splashObject;
 
-    [Header("Fish Data")]
-    [SerializeField] private Sprite[] fishSprites;
-    [SerializeField] private string[] fishNames;
-
-    [Header("Settings")]
+    [Header("Water Check")]
     [SerializeField] private LayerMask waterLayer;
-    [SerializeField] private float fishingEnergyCost = 8f;
-    [SerializeField] private float waitMin = 2f;
-    [SerializeField] private float waitMax = 5f;
-    [SerializeField] private float catchTimeLimit = 2f;
     [SerializeField] private float waterCheckRadius = 0.35f;
 
-    [Header("Audio Source")]
-    [SerializeField] private AudioSource fishingAudio;
+    [Header("Energy")]
+    [SerializeField] private float fishingEnergyCost = 8f;
 
-    [Header("Fishing Audio Clips")]
+    [Header("Wait Time")]
+    [SerializeField] private float waitMin = 2f;
+    [SerializeField] private float waitMax = 5f;
+
+    [Header("Chance")]
+    [SerializeField] private float baseFishChance = 55f;
+    [SerializeField] private float noBaitPenalty = 20f;
+
+    [Header("Loot")]
+    [SerializeField] private FishingLoot[] fishLoots;
+    [SerializeField] private FishingLoot[] junkLoots;
+
+    [Header("Audio")]
+    [SerializeField] private AudioSource fishingAudio;
     [SerializeField] private AudioClip castSound;
     [SerializeField] private AudioClip splashSound;
-    [SerializeField] private AudioClip fishBiteSound;
+    [SerializeField] private AudioClip biteSound;
     [SerializeField] private AudioClip reelSound;
-    [SerializeField] private AudioClip fishCatchSound;
-    [SerializeField] private AudioClip inventoryPopSound;
-
-    [Header("Catch Panel")]
-    [SerializeField] private FishCatchPanelUI fishCatchPanelUI;
-    [SerializeField] private FishingMiniGameUI miniGameUI;
-    [SerializeField] private float minFishKg = 0.5f;
-    [SerializeField] private float maxFishKg = 8f;
+    [SerializeField] private AudioClip catchSound;
+    [SerializeField] private AudioClip lineBreakSound;
+    [SerializeField] private AudioClip junkSound;
 
     private Camera cam;
     private bool isFishing;
-    private bool fishBiting;
-    private Coroutine fishingRoutine;
-    private Coroutine audioRoutine;
+
     private Vector3 fishingPos;
+    private float selectedDepth;
+    private float currentMaxDepth;
+
+    private FishingLoot currentLoot;
 
     private void Awake()
     {
@@ -58,33 +84,13 @@ public class FishingManager : MonoBehaviour
         if (playerStats == null)
             playerStats = GetComponent<PlayerStats>();
 
+        if (gearStats == null)
+            gearStats = GetComponent<FishingGearStats>();
+
         if (inventoryManager == null)
             inventoryManager = InventoryManager.Instance;
 
-        if (playerController == null)
-            playerController = GetComponent<PlayerController>();
-
-        if (toolAnimation == null)
-            toolAnimation = GetComponent<PlayerToolAnimation>();
-
-        if (bobberObject != null)
-            bobberObject.SetActive(false);
-
-        if (biteIconObject != null)
-            biteIconObject.SetActive(false);
-
-        if (splashObject != null)
-            splashObject.SetActive(false);
-        if (progressUI != null)
-        {
-            progressUI.player = transform;
-        }
-    }
-
-    private void Update()
-    {
-        if (fishBiting && Input.GetKeyDown(KeyCode.Space))
-            CatchFish();
+        HideFishingObjects();
     }
 
     public void TryStartFishing()
@@ -94,18 +100,30 @@ public class FishingManager : MonoBehaviour
 
         if (playerStats == null)
         {
-            Debug.LogError("Thiếu PlayerStats.");
+            Debug.LogWarning("Thiếu PlayerStats.");
+            return;
+        }
+
+        if (gearStats == null)
+        {
+            Debug.LogWarning("Thiếu FishingGearStats.");
             return;
         }
 
         if (!playerStats.HasEnergy(fishingEnergyCost))
         {
-            Debug.Log("Không đủ Energy để câu cá!");
+            Debug.Log("Không đủ Energy để câu cá.");
             return;
         }
 
         if (cam == null)
             cam = Camera.main;
+
+        if (cam == null)
+        {
+            Debug.LogWarning("Không tìm thấy Camera Main.");
+            return;
+        }
 
         Vector3 mouseWorldPos = cam.ScreenToWorldPoint(Input.mousePosition);
         mouseWorldPos.z = 0f;
@@ -118,31 +136,46 @@ public class FishingManager : MonoBehaviour
 
         if (hit == null)
         {
-            Debug.Log("Phải quăng ở khu vực có nước!");
+            Debug.Log("Phải quăng cần ở khu vực nước.");
             return;
         }
 
-        playerStats.UseEnergy(fishingEnergyCost);
+        FishingWaterZone zone = hit.GetComponentInParent<FishingWaterZone>();
+
+        float zoneDepth = zone != null
+            ? zone.ZoneMaxDepth
+            : gearStats.MaxDepth;
+
+        currentMaxDepth = Mathf.Min(gearStats.MaxDepth, zoneDepth);
 
         fishingPos = mouseWorldPos;
+        isFishing = true;
 
-        LockPlayerFishing();
+        GameLockManager.Instance?.LockPlayer();
 
-        PlayFishingSound(castSound);
-        if (progressUI != null)
-            progressUI.Show("Đang câu cá...");
+        if (fishingBarUI != null)
+            fishingBarUI.ShowDepthSelect(currentMaxDepth, OnDepthSelected);
+        else
+            OnDepthSelected(currentMaxDepth * 0.5f);
+    }
 
-        fishingRoutine = StartCoroutine(FishingRoutine());
+    private void OnDepthSelected(float depth)
+    {
+        selectedDepth = Mathf.Clamp(depth, 0f, currentMaxDepth);
+
+        playerStats.UseEnergy(fishingEnergyCost);
+
+        StartCoroutine(FishingRoutine());
     }
 
     private IEnumerator FishingRoutine()
     {
-        isFishing = true;
-        fishBiting = false;
+        if (fishingBarUI != null)
+            fishingBarUI.ShowWaitingBite();
 
-        Debug.Log("Quăng cần câu.");
+        Debug.Log("Thả móc ở độ sâu: " + selectedDepth.ToString("0.0") + "m");
 
-        yield return new WaitForSeconds(0.2f);
+        PlaySound(castSound);
 
         if (splashObject != null)
         {
@@ -150,9 +183,9 @@ public class FishingManager : MonoBehaviour
             splashObject.SetActive(true);
         }
 
-        PlayFishingSound(splashSound);
+        PlaySound(splashSound);
 
-        yield return new WaitForSeconds(0.25f);
+        yield return new WaitForSeconds(0.3f);
 
         if (splashObject != null)
             splashObject.SetActive(false);
@@ -163,216 +196,282 @@ public class FishingManager : MonoBehaviour
             bobberObject.SetActive(true);
         }
 
-        float waitTime = Random.Range(waitMin, waitMax);
-
-        float timer = waitTime;
-
-        while (timer > 0f)
-        {
-            timer -= Time.deltaTime;
-
-            if (progressUI != null)
-                progressUI.SetProgress(timer / waitTime);
-
-            yield return null;
-        }
+        yield return new WaitForSeconds(Random.Range(waitMin, waitMax));
 
         if (!isFishing)
             yield break;
 
-        fishBiting = true;
-        if (progressUI != null)
-        {
-            progressUI.Show("Cá cắn! Nhấn SPACE");
-            progressUI.SetProgress(1f);
-        }
+        bool baitUsed = false;
+
+        if (gearStats.HasBait)
+            baitUsed = gearStats.TryConsumeBait();
 
         if (biteIconObject != null)
         {
-            biteIconObject.transform.position =
-                fishingPos + Vector3.up * 1.1f;
-
+            biteIconObject.transform.position = fishingPos + Vector3.up * 1.1f;
             biteIconObject.SetActive(true);
         }
 
-        PlayFishingSound(fishBiteSound);
+        PlaySound(biteSound);
 
-        Debug.Log("Cá cắn câu! Bấm SPACE.");
+        currentLoot = RollLoot(selectedDepth, baitUsed);
 
-        yield return new WaitForSeconds(catchTimeLimit);
+        if (fishingBarUI != null && currentLoot != null)
+        {
+            if (currentLoot.isFish)
+                fishingBarUI.ShowFishBite(currentLoot.icon);
+            else
+                fishingBarUI.ShowJunkBite(currentLoot.icon);
+        }
 
-        if (fishBiting)
-            FailFishing();
-    }
+        yield return new WaitForSeconds(0.4f);
 
-    private void CatchFish()
-{
-    if (!isFishing)
-        return;
-
-    fishBiting = false;
-
-    if (biteIconObject != null)
-        biteIconObject.SetActive(false);
-
-    if (miniGameUI != null)
-    {
-        miniGameUI.StartMiniGame(OnFishingMiniGameFinished);
-    }
-    else
-    {
-        CompleteCatchFish();
-    }
-}
-
-    private IEnumerator CatchFishRoutine()
-    {
         if (biteIconObject != null)
             biteIconObject.SetActive(false);
 
-        PlayFishingSound(reelSound);
-
-        yield return new WaitForSeconds(0.35f);
-
-        if (bobberObject != null)
-            bobberObject.SetActive(false);
-
-        PlayFishingSound(fishCatchSound);
-
-        if (fishSprites == null || fishSprites.Length == 0)
+        if (currentLoot == null)
         {
-            Debug.LogWarning("Chưa gắn Fish Sprites.");
-            UnlockPlayerFishing();
+            FailFishing("Không câu được gì.");
             yield break;
         }
 
-        int index = Random.Range(0, fishSprites.Length);
-
-        string fishName = "Cá";
-
-        if (fishNames != null &&
-            fishNames.Length > index &&
-            !string.IsNullOrEmpty(fishNames[index]))
+        if (!currentLoot.isFish)
         {
-            fishName = fishNames[index];
+            CatchJunk(currentLoot);
+            yield break;
         }
-        if (progressUI != null)
-            progressUI.Hide();
 
-        Sprite fishSprite = fishSprites[index];
-
-        yield return new WaitForSeconds(0.15f);
-
-        float fishKg = Random.Range(minFishKg, maxFishKg);
-
-        if (fishCatchPanelUI != null)
-        {
-            fishCatchPanelUI.ShowFish(fishName, fishSprite, fishKg);
-            PlayFishingSound(inventoryPopSound);
-        }
-        else if (inventoryManager != null)
-        {
-            inventoryManager.AddItem(fishName, fishSprite, 1);
-            PlayFishingSound(inventoryPopSound);
-        }
-        else
-        {
-            Debug.LogWarning("Thiếu InventoryManager, cá chưa vào túi.");
-        }
-        Debug.Log("Bắt được cá: " + fishName);
-
-        UnlockPlayerFishing();
+        StartFishBattle(currentLoot);
     }
 
-    private void FailFishing()
+    private FishingLoot RollLoot(float depth, bool baitUsed)
     {
-        if (!isFishing)
-            return;
+        FishingLoot[] availableFish = GetLootByDepth(fishLoots, depth);
 
-        fishBiting = false;
+        float fishChance = baseFishChance;
+
+        fishChance += gearStats.HookFishChanceBonus;
+
+        if (baitUsed)
+            fishChance += gearStats.BaitFishChanceBonus;
+        else
+            fishChance -= noBaitPenalty;
+
+        if (availableFish.Length <= 0)
+            fishChance = 0f;
+
+        fishChance = Mathf.Clamp(fishChance, 0f, 95f);
+
+        float roll = Random.Range(0f, 100f);
+
+        if (roll <= fishChance)
+            return PickWeightedLoot(availableFish, depth, baitUsed);
+
+        FishingLoot[] availableJunk = GetLootByDepth(junkLoots, depth);
+        return PickWeightedLoot(availableJunk, depth, false);
+    }
+
+    private FishingLoot[] GetLootByDepth(FishingLoot[] list, float depth)
+    {
+        List<FishingLoot> result = new List<FishingLoot>();
+
+        if (list == null)
+            return result.ToArray();
+
+        foreach (FishingLoot loot in list)
+        {
+            if (loot == null)
+                continue;
+
+            if (depth >= loot.minDepth && depth <= loot.maxDepth)
+                result.Add(loot);
+        }
+
+        return result.ToArray();
+    }
+
+    private FishingLoot PickWeightedLoot(
+        FishingLoot[] list,
+        float depth,
+        bool baitUsed)
+    {
+        if (list == null || list.Length == 0)
+            return null;
+
+        float totalWeight = 0f;
+
+        foreach (FishingLoot loot in list)
+        {
+            if (loot == null)
+                continue;
+
+            totalWeight += GetLootWeight(loot, depth, baitUsed);
+        }
+
+        if (totalWeight <= 0f)
+            return list[0];
+
+        float roll = Random.Range(0f, totalWeight);
+        float current = 0f;
+
+        foreach (FishingLoot loot in list)
+        {
+            if (loot == null)
+                continue;
+
+            current += GetLootWeight(loot, depth, baitUsed);
+
+            if (roll <= current)
+                return loot;
+        }
+
+        return list[0];
+    }
+
+    private float GetLootWeight(
+        FishingLoot loot,
+        float depth,
+        bool baitUsed)
+    {
+        float weight = Mathf.Max(0.1f, loot.weight);
+
+        float middleDepth = (loot.minDepth + loot.maxDepth) * 0.5f;
+        float depthDistance = Mathf.Abs(depth - middleDepth);
+
+        weight += Mathf.Max(0f, 5f - depthDistance);
+
+        if (baitUsed &&
+            !string.IsNullOrEmpty(loot.preferredBait) &&
+            gearStats.CurrentBaitName == loot.preferredBait)
+        {
+            weight += loot.preferredBaitBonus;
+        }
+
+        return weight;
+    }
+
+    private void StartFishBattle(FishingLoot fish)
+    {
+        if (fish == null)
+        {
+            CleanupFishing();
+            return;
+        }
+
+        if (fishingBarUI == null)
+        {
+            CompleteCatchFish(fish);
+            return;
+        }
+
+        PlaySound(reelSound);
+
+        fishingBarUI.StartReelGame(
+            fish.fishPower,
+            OnFishBattleFinished
+        );
+    }
+
+    private void OnFishBattleFinished(bool success)
+    {
+        if (success)
+            CompleteCatchFish(currentLoot);
+        else
+            BreakLine();
+    }
+
+    private void CompleteCatchFish(FishingLoot fish)
+    {
+        if (fish == null)
+        {
+            CleanupFishing();
+            return;
+        }
+
+        if (inventoryManager == null)
+            inventoryManager = InventoryManager.Instance;
+
+        inventoryManager?.AddItem(fish.itemName, fish.icon, 1);
+
+        playerStats?.AddXP(5);
+
+        PlaySound(catchSound);
+
+        Debug.Log("Bắt được cá: " + fish.itemName);
+
+        CleanupFishing();
+    }
+
+    private void CatchJunk(FishingLoot junk)
+    {
+        if (junk == null)
+        {
+            CleanupFishing();
+            return;
+        }
+
+        if (inventoryManager == null)
+            inventoryManager = InventoryManager.Instance;
+
+        inventoryManager?.AddItem(junk.itemName, junk.icon, 1);
+
+        playerStats?.AddXP(1);
+
+        PlaySound(junkSound);
+
+        Debug.Log("Câu được vật phẩm lạ: " + junk.itemName);
+
+        CleanupFishing();
+    }
+
+    private void BreakLine()
+    {
+        PlaySound(lineBreakSound);
+
+        Debug.Log("FishPower đầy! Đứt dây câu, mất cá.");
+
+        CleanupFishing();
+    }
+
+    private void FailFishing(string reason)
+    {
+        Debug.Log(reason);
+        CleanupFishing();
+    }
+
+    private void CleanupFishing()
+    {
         isFishing = false;
-        if (progressUI != null)
-            progressUI.Hide();
+        currentLoot = null;
+
+        HideFishingObjects();
+
+        if (fishingBarUI != null)
+            fishingBarUI.Hide();
+
+        GameLockManager.Instance?.UnlockPlayer();
+    }
+
+    private void HideFishingObjects()
+    {
+        if (bobberObject != null)
+            bobberObject.SetActive(false);
 
         if (biteIconObject != null)
             biteIconObject.SetActive(false);
 
-        if (bobberObject != null)
-            bobberObject.SetActive(false);
-
         if (splashObject != null)
             splashObject.SetActive(false);
-
-        Debug.Log("Cá chạy mất!");
-
-        UnlockPlayerFishing();
     }
 
-    private void PlayFishingSound(AudioClip clip)
+    private void PlaySound(AudioClip clip)
     {
         if (fishingAudio == null || clip == null)
             return;
-
-        if (audioRoutine != null)
-            StopCoroutine(audioRoutine);
 
         fishingAudio.Stop();
         fishingAudio.clip = clip;
         fishingAudio.loop = false;
         fishingAudio.Play();
-
-        audioRoutine = StartCoroutine(StopFishingSoundAfterClip(clip.length));
     }
-
-    private IEnumerator StopFishingSoundAfterClip(float delay)
-    {
-        yield return new WaitForSeconds(delay);
-
-        if (fishingAudio != null)
-        {
-            fishingAudio.Stop();
-            fishingAudio.clip = null;
-        }
-
-        audioRoutine = null;
-    }
-
-    private void LockPlayerFishing()
-    {
-        if (playerController != null)
-            playerController.canMove = false;
-
-        if (toolAnimation != null)
-            toolAnimation.SetFishingLock(true);
-    }
-
-    private void UnlockPlayerFishing()
-    {
-        if (playerController != null)
-            playerController.canMove = true;
-
-        if (toolAnimation != null)
-            toolAnimation.SetFishingLock(false);
-    }
-    private void OnFishingMiniGameFinished(bool success)
-{
-    if (success)
-    {
-        CompleteCatchFish();
-    }
-    else
-    {
-        FailFishing();
-    }
-}
-
-private void CompleteCatchFish()
-{
-    isFishing = false;
-
-    if (fishingRoutine != null)
-        StopCoroutine(fishingRoutine);
-
-    StartCoroutine(CatchFishRoutine());
-}
 }

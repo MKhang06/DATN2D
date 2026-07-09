@@ -14,7 +14,7 @@ public class PlayerToolController : MonoBehaviour
         FishingRod
     }
 
-    [Header("Tool")]
+    [Header("Current Tool")]
     public ToolType currentTool = ToolType.None;
 
     [Header("Settings")]
@@ -77,7 +77,8 @@ public class PlayerToolController : MonoBehaviour
 
     private void ToggleTool(ToolType tool)
     {
-        if (toolAnimation == null) return;
+        if (toolAnimation == null)
+            return;
 
         if (currentTool == tool)
         {
@@ -93,13 +94,17 @@ public class PlayerToolController : MonoBehaviour
 
     private void RotateToolToMouse()
     {
-        if (currentTool == ToolType.None) return;
-        if (toolAnimation == null) return;
+        if (currentTool == ToolType.None)
+            return;
+
+        if (toolAnimation == null)
+            return;
 
         if (cam == null)
             cam = Camera.main;
 
-        if (cam == null) return;
+        if (cam == null)
+            return;
 
         Vector3 mousePos = cam.ScreenToWorldPoint(Input.mousePosition);
         mousePos.z = 0f;
@@ -109,7 +114,8 @@ public class PlayerToolController : MonoBehaviour
 
     private void UseToolAtMouse()
     {
-        if (currentTool == ToolType.None) return;
+        if (currentTool == ToolType.None)
+            return;
 
         if (EventSystem.current != null &&
             EventSystem.current.IsPointerOverGameObject())
@@ -117,27 +123,15 @@ public class PlayerToolController : MonoBehaviour
 
         if (currentTool == ToolType.FishingRod)
         {
-            if (toolAnimation != null)
-            {
-                toolAnimation.UseFishingRod(() =>
-                {
-                    if (fishingManager != null)
-                        fishingManager.TryStartFishing();
-                });
-            }
-            else
-            {
-                if (fishingManager != null)
-                    fishingManager.TryStartFishing();
-            }
-
+            UseFishingRod();
             return;
         }
 
         if (cam == null)
             cam = Camera.main;
 
-        if (cam == null) return;
+        if (cam == null)
+            return;
 
         Vector2 mouseWorldPos = cam.ScreenToWorldPoint(Input.mousePosition);
 
@@ -147,10 +141,13 @@ public class PlayerToolController : MonoBehaviour
             farmLayer
         );
 
-        if (hit == null) return;
+        if (hit == null)
+            return;
 
         FarmTile tile = hit.GetComponent<FarmTile>();
-        if (tile == null) return;
+
+        if (tile == null)
+            return;
 
         switch (currentTool)
         {
@@ -176,9 +173,31 @@ public class PlayerToolController : MonoBehaviour
         }
     }
 
+    private void UseFishingRod()
+    {
+        if (fishingManager == null)
+        {
+            Debug.LogWarning("Thiếu FishingManager trên Player.");
+            return;
+        }
+
+        if (toolAnimation != null)
+        {
+            toolAnimation.UseFishingRod(() =>
+            {
+                fishingManager.TryStartFishing();
+            });
+        }
+        else
+        {
+            fishingManager.TryStartFishing();
+        }
+    }
+
     private void UseHoe(FarmTile tile)
     {
-        if (playerStats == null) return;
+        if (playerStats == null)
+            return;
 
         float cost = GetEnergyCost(15f);
 
@@ -199,7 +218,8 @@ public class PlayerToolController : MonoBehaviour
 
     private void UseWateringCan(FarmTile tile)
     {
-        if (playerStats == null) return;
+        if (playerStats == null)
+            return;
 
         float cost = GetEnergyCost(10f);
 
@@ -220,7 +240,8 @@ public class PlayerToolController : MonoBehaviour
 
     private void UseAxe(FarmTile tile)
     {
-        if (playerStats == null) return;
+        if (playerStats == null)
+            return;
 
         float cost = GetEnergyCost(20f);
 
@@ -241,7 +262,8 @@ public class PlayerToolController : MonoBehaviour
 
     private void UsePickaxe(FarmTile tile)
     {
-        if (playerStats == null) return;
+        if (playerStats == null)
+            return;
 
         float cost = GetEnergyCost(20f);
 
@@ -262,7 +284,8 @@ public class PlayerToolController : MonoBehaviour
 
     private void UseSickle(FarmTile tile)
     {
-        if (playerStats == null) return;
+        if (playerStats == null)
+            return;
 
         float cost = GetEnergyCost(8f);
 
