@@ -26,6 +26,11 @@ public class FishingManager : MonoBehaviour
         [Header("Bait Bonus")]
         public string preferredBait;
         public float preferredBaitBonus = 10f;
+        [Header("Result Info")]
+        public float minWeightKg = 1f;
+        public float maxWeightKg = 5f;
+        public float expReward = 0.49f;
+        public int baseSellPrice = 100;
     }
 
     [Header("References")]
@@ -33,6 +38,7 @@ public class FishingManager : MonoBehaviour
     [SerializeField] private InventoryManager inventoryManager;
     [SerializeField] private FishingGearStats gearStats;
     [SerializeField] private FishingBarMiniGameUI fishingBarUI;
+    [SerializeField] private FishingCatchResultUI catchResultUI;
 
     [Header("Fishing Objects")]
     [SerializeField] private GameObject bobberObject;
@@ -388,18 +394,7 @@ public class FishingManager : MonoBehaviour
             return;
         }
 
-        if (inventoryManager == null)
-            inventoryManager = InventoryManager.Instance;
-
-        inventoryManager?.AddItem(fish.itemName, fish.icon, 1);
-
-        playerStats?.AddXP(5);
-
-        PlaySound(catchSound);
-
-        Debug.Log("Bắt được cá: " + fish.itemName);
-
-        CleanupFishing();
+        ShowCatchResult(fish);
     }
 
     private void CatchJunk(FishingLoot junk)
@@ -410,18 +405,7 @@ public class FishingManager : MonoBehaviour
             return;
         }
 
-        if (inventoryManager == null)
-            inventoryManager = InventoryManager.Instance;
-
-        inventoryManager?.AddItem(junk.itemName, junk.icon, 1);
-
-        playerStats?.AddXP(1);
-
-        PlaySound(junkSound);
-
-        Debug.Log("Câu được vật phẩm lạ: " + junk.itemName);
-
-        CleanupFishing();
+        ShowCatchResult(junk);
     }
 
     private void BreakLine()
@@ -473,5 +457,55 @@ public class FishingManager : MonoBehaviour
         fishingAudio.clip = clip;
         fishingAudio.loop = false;
         fishingAudio.Play();
+    }
+    private void ShowCatchResult(FishingLoot loot)
+    {
+        HideFishingObjects();
+
+        if (fishingBarUI != null)
+            fishingBarUI.Hide();
+
+        if (inventoryManager == null)
+            inventoryManager = InventoryManager.Instance;
+
+        float resultWeight = 0f;
+
+        if (loot.isFish)
+        {
+            resultWeight = Random.Range(
+                loot.minWeightKg,
+                loot.maxWeightKg
+            );
+        }
+
+        int sellPrice = Mathf.RoundToInt(loot.baseSellPrice * 0.7f);
+
+        if (catchResultUI != null)
+        {
+            catchResultUI.ShowResult(
+                loot.itemName,
+                loot.icon,
+                loot.isFish,
+                resultWeight,
+                loot.expReward,
+                sellPrice,
+                playerStats,
+                inventoryManager,
+                OnCatchResultClosed
+            );
+        }
+        else
+        {
+            inventoryManager?.AddItem(loot.itemName, loot.icon, 1);
+            CleanupFishing();
+        }
+    }
+
+    private void OnCatchResultClosed()
+    {
+        isFishing = false;
+        currentLoot = null;
+
+        GameLockManager.Instance?.UnlockPlayer();
     }
 }

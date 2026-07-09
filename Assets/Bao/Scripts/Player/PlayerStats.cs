@@ -46,6 +46,11 @@ public class PlayerStats : MonoBehaviour
         currentEnergy = Mathf.Clamp(currentEnergy, 0, maxEnergy);
     }
 
+    public void RestoreEnergy(float amount)
+    {
+        currentEnergy = Mathf.Clamp(currentEnergy + amount, 0, maxEnergy);
+    }
+
     #endregion
 
     #region Stamina
@@ -62,27 +67,28 @@ public class PlayerStats : MonoBehaviour
 
     public void UseStamina(float amount)
     {
-        currentStamina =
-            Mathf.Clamp(currentStamina - amount, 0, maxStamina);
+        currentStamina = Mathf.Clamp(currentStamina - amount, 0, maxStamina);
     }
 
     public void DrainStamina()
     {
-        currentStamina -=
-            staminaDrainPerSecond * Time.deltaTime;
-
-        currentStamina =
-            Mathf.Clamp(currentStamina, 0, maxStamina);
+        currentStamina -= staminaDrainPerSecond * Time.deltaTime;
+        currentStamina = Mathf.Clamp(currentStamina, 0, maxStamina);
     }
 
     public void RegenStamina()
     {
-        currentStamina +=
-            staminaRegenPerSecond * Time.deltaTime;
-
-        currentStamina =
-            Mathf.Clamp(currentStamina, 0, maxStamina);
+        currentStamina += staminaRegenPerSecond * Time.deltaTime;
+        currentStamina = Mathf.Clamp(currentStamina, 0, maxStamina);
     }
+
+    public void AddMaxStamina(float amount)
+    {
+        maxStamina += amount;
+        currentStamina = maxStamina;
+    }
+
+    public float CurrentStamina => currentStamina;
 
     #endregion
 
@@ -90,14 +96,12 @@ public class PlayerStats : MonoBehaviour
 
     public void TakeDamage(float amount)
     {
-        currentHealth =
-            Mathf.Clamp(currentHealth - amount, 0, maxHealth);
+        currentHealth = Mathf.Clamp(currentHealth - amount, 0, maxHealth);
     }
 
     public void Heal(float amount)
     {
-        currentHealth =
-            Mathf.Clamp(currentHealth + amount, 0, maxHealth);
+        currentHealth = Mathf.Clamp(currentHealth + amount, 0, maxHealth);
     }
 
     #endregion
@@ -106,21 +110,42 @@ public class PlayerStats : MonoBehaviour
 
     public void AddMoney(int amount)
     {
+        if (amount <= 0)
+            return;
+
         float multiplier = 1f;
 
         if (CharacterPassiveManager.Instance != null)
             multiplier = CharacterPassiveManager.Instance.MoneyMultiplier;
 
-        Money += Mathf.RoundToInt(amount * multiplier);
+        int finalAmount = Mathf.RoundToInt(amount * multiplier);
+
+        Money += finalAmount;
+
+        Debug.Log("Nhận tiền: $" + finalAmount + " | Tổng tiền: $" + Money);
     }
 
     public bool SpendMoney(int amount)
     {
+        if (amount <= 0)
+            return true;
+
         if (Money < amount)
+        {
+            Debug.Log("Không đủ tiền.");
             return false;
+        }
 
         Money -= amount;
+
+        Debug.Log("Đã tiêu: $" + amount + " | Còn lại: $" + Money);
+
         return true;
+    }
+
+    public void SetMoney(int value)
+    {
+        Money = Mathf.Max(0, value);
     }
 
     #endregion
@@ -129,6 +154,9 @@ public class PlayerStats : MonoBehaviour
 
     public void AddXP(int amount)
     {
+        if (amount <= 0)
+            return;
+
         float multiplier = 1f;
 
         if (CharacterPassiveManager.Instance != null)
@@ -160,37 +188,19 @@ public class PlayerStats : MonoBehaviour
         Debug.Log("Level Up! Level: " + Level);
     }
 
+    public void SetLevel(int value)
+    {
+        Level = Mathf.Max(1, value);
+    }
+
     #endregion
 
     #region Save / Load
 
-    public float CurrentStamina => currentStamina;
-
-    public void SetMoney(int value)
-    {
-        Money = value;
-    }
-
     public void SetStamina(float value)
     {
-        currentStamina =
-            Mathf.Clamp(value, 0, maxStamina);
-    }
-
-    public void SetLevel(int value)
-    {
-        Level = value;
+        currentStamina = Mathf.Clamp(value, 0, maxStamina);
     }
 
     #endregion
-    public void RestoreEnergy(float amount)
-    {
-        currentEnergy = Mathf.Clamp(currentEnergy + amount, 0, maxEnergy);
-    }
-
-    public void AddMaxStamina(float amount)
-    {
-        maxStamina += amount;
-        currentStamina = maxStamina;
-    }
 }
