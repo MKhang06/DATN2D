@@ -104,9 +104,3 @@ InitTestScene*.unity*
 
 # Auto-generated cache in Assets folder
 /[Aa]ssets/[Ss]ceneDependencyCache*
-
-.fake
-Assets/Bao/Scripts/UI/InventoryUI.cs.meta
-Assets/Bao/Scripts/UI/InventoryUI.cs
-Assets/Bao/Scripts/UI/HeldItemUI.cs.meta
-Assets/Bao/Scripts/UI/HeldItemUI.cs
