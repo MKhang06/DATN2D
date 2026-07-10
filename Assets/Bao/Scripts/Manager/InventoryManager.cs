@@ -79,35 +79,35 @@ public class InventoryManager : MonoBehaviour
     }
 
     private void HandleHotbarInput()
+{
+    for (int i = 0; i < hotbarSlots.Length && i < 9; i++)
     {
-        for (int i = 0; i < 9; i++)
-        {
-            KeyCode key = KeyCode.Alpha1 + i;
+        KeyCode key = KeyCode.Alpha1 + i;
 
-            if (Input.GetKeyDown(key))
-            {
-                SelectHotbar(i);
-            }
+        if (Input.GetKeyDown(key))
+        {
+            SelectHotbar(i);
         }
     }
+}
 
     public void SelectHotbar(int index)
-    {
-        if (index < 0 || index >= hotbarSlots.Length)
-            return;
+{
+    if (index < 0 || index >= hotbarSlots.Length)
+        return;
 
-        selectedHotbarIndex = index;
+    selectedHotbarIndex = index;
 
-        OnSelectedHotbarChanged?.Invoke(selectedHotbarIndex);
-        OnInventoryChanged?.Invoke();
+    OnSelectedHotbarChanged?.Invoke(selectedHotbarIndex);
+    OnInventoryChanged?.Invoke();
 
-        InventorySlot slot = hotbarSlots[selectedHotbarIndex];
+    InventorySlot slot = hotbarSlots[selectedHotbarIndex];
 
-        if (!slot.IsEmpty)
-            Debug.Log("Đang cầm: " + slot.itemName);
-        else
-            Debug.Log("Tay trống.");
-    }
+    if (!slot.IsEmpty)
+        Debug.Log("Đang cầm: " + slot.itemName);
+    else
+        Debug.Log("Tay trống.");
+}
 
     public bool AddItem(string itemName, Sprite icon, int amount)
     {
