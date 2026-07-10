@@ -2,6 +2,9 @@ using UnityEngine;
 
 public class InventoryUI : MonoBehaviour
 {
+    [Header("Canvas")]
+    [SerializeField] private Canvas canvas;
+
     [Header("Panels")]
     [SerializeField] private GameObject bagPanel;
 
@@ -15,6 +18,11 @@ public class InventoryUI : MonoBehaviour
 
     private void Start()
     {
+        if (canvas == null)
+            canvas = GetComponentInParent<Canvas>();
+
+        InitSlotUIs();
+
         if (InventoryManager.Instance != null)
         {
             InventoryManager.Instance.OnInventoryChanged += RefreshUI;
@@ -37,8 +45,33 @@ public class InventoryUI : MonoBehaviour
     private void Update()
     {
         if (Input.GetKeyDown(KeyCode.I))
-        {
             ToggleBag();
+    }
+
+    private void InitSlotUIs()
+    {
+        for (int i = 0; i < hotbarUISlots.Length; i++)
+        {
+            if (hotbarUISlots[i] != null)
+            {
+                hotbarUISlots[i].Init(
+                    InventoryManager.SlotArea.Hotbar,
+                    i,
+                    canvas
+                );
+            }
+        }
+
+        for (int i = 0; i < bagUISlots.Length; i++)
+        {
+            if (bagUISlots[i] != null)
+            {
+                bagUISlots[i].Init(
+                    InventoryManager.SlotArea.Bag,
+                    i,
+                    canvas
+                );
+            }
         }
     }
 

@@ -45,6 +45,11 @@ public class InventoryManager : MonoBehaviour
 
     public event Action OnInventoryChanged;
     public event Action<int> OnSelectedHotbarChanged;
+    public enum SlotArea
+{
+    Hotbar,
+    Bag
+}
 
     private void Awake()
     {
@@ -273,4 +278,73 @@ public class InventoryManager : MonoBehaviour
 
         OnInventoryChanged?.Invoke();
     }
+    public InventorySlot GetSlot(SlotArea area, int index)
+{
+    InventorySlot[] slots = area == SlotArea.Hotbar
+        ? hotbarSlots
+        : bagSlots;
+
+    if (index < 0 || index >= slots.Length)
+        return null;
+
+    return slots[index];
+}
+
+public void SwapSlots(
+    SlotArea fromArea,
+    int fromIndex,
+    SlotArea toArea,
+    int toIndex)
+{
+    InventorySlot fromSlot = GetSlot(fromArea, fromIndex);
+    InventorySlot toSlot = GetSlot(toArea, toIndex);
+
+    if (fromSlot == null || toSlot == null)
+        return;
+
+    if (fromSlot.IsEmpty)
+        return;
+
+    // Nếu cùng loại item thì gộp stack
+    if (!toSlot.IsEmpty && toSlot.itemName == fromSlot.itemName)
+    {
+        int canAdd = toSlot.maxStack - toSlot.amount;
+
+        if (canAdd > 0)
+        {
+            int moveAmount = Mathf.Min(canAdd, fromSlot.amount);
+
+            toSlot.amount += moveAmount;
+            fromSlot.amount -= moveAmount;
+
+            if (fromSlot.amount <= 0)
+                fromSlot.Clear();
+
+            OnInventoryChanged?.Invoke();
+            return;
+        }
+    }
+
+    // Nếu khác item thì đổi chỗ
+    string tempName = toSlot.itemName;
+    Sprite tempIcon = toSlot.icon;
+    int tempAmount = toSlot.amount;
+    int tempMaxStack = toSlot.maxStack;
+
+    toSlot.itemName = fromSlot.itemName;
+    toSlot.icon = fromSlot.icon;
+    toSlot.amount = fromSlot.amount;
+    toSlot.maxStack = fromSlot.maxStack;
+
+    fromSlot.itemName = tempName;
+    fromSlot.icon = tempIcon;
+    fromSlot.amount = tempAmount;
+    fromSlot.maxStack = tempMaxStack;
+
+    OnInventoryChanged?.Invoke();
+}
+public void RefreshInventoryUI()
+{
+    OnInventoryChanged?.Invoke();
+}
 }
