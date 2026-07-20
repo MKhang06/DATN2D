@@ -10693,7 +10693,7 @@ MonoBehaviour:
   m_Script: {fileID: 11500000, guid: 4a569b66e7af64f42b37a00808c71d49, type: 3}
   m_Name: 
   m_EditorClassIdentifier: 
-  popupRoot: {fileID: 811396219}
+  popupRoot: {fileID: 1028587850}
   quantityPanel: {fileID: 1378661440}
   quantityItemPreview: {fileID: 613971030}
   quantityItemNameText: {fileID: 0}
@@ -36205,7 +36205,7 @@ MonoBehaviour:
   m_HandleRect: {fileID: 274993933}
   m_Direction: 2
   m_Value: 0
-  m_Size: 1
+  m_Size: 0.27710843
   m_NumberOfSteps: 0
   m_OnValueChanged:
     m_PersistentCalls:
@@ -36401,7 +36401,7 @@ MonoBehaviour:
   m_Name: 
   m_EditorClassIdentifier: 
   m_Material: {fileID: 0}
-  m_Color: {r: 1, g: 1, b: 1, a: 1}
+  m_Color: {r: 0, g: 0, b: 0, a: 1}
   m_RaycastTarget: 1
   m_RaycastPadding: {x: 0, y: 0, z: 0, w: 0}
   m_Maskable: 1
@@ -54212,7 +54212,7 @@ MonoBehaviour:
   m_HandleRect: {fileID: 7575230266069128654}
   m_Direction: 2
   m_Value: 0
-  m_Size: 1
+  m_Size: 0.27710843
   m_NumberOfSteps: 0
   m_OnValueChanged:
     m_PersistentCalls:
