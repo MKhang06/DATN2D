@@ -26,6 +26,7 @@ public class FishingManager : MonoBehaviour
         [Header("Bait Bonus")]
         public string preferredBait;
         public float preferredBaitBonus = 10f;
+
         [Header("Result Info")]
         public float minWeightKg = 1f;
         public float maxWeightKg = 5f;
@@ -39,6 +40,10 @@ public class FishingManager : MonoBehaviour
     [SerializeField] private FishingGearStats gearStats;
     [SerializeField] private FishingBarMiniGameUI fishingBarUI;
     [SerializeField] private FishingCatchResultUI catchResultUI;
+
+    [Header("Notification")]
+    [Tooltip("Có thể để trống, code sẽ tự tìm FishingNotificationUI.")]
+    [SerializeField] private FishingNotificationUI notificationUI;
 
     [Header("Fishing Objects")]
     [SerializeField] private GameObject bobberObject;
@@ -96,6 +101,7 @@ public class FishingManager : MonoBehaviour
         if (inventoryManager == null)
             inventoryManager = InventoryManager.Instance;
 
+        FindNotificationUI();
         HideFishingObjects();
     }
 
@@ -131,7 +137,9 @@ public class FishingManager : MonoBehaviour
             return;
         }
 
-        Vector3 mouseWorldPos = cam.ScreenToWorldPoint(Input.mousePosition);
+        Vector3 mouseWorldPos =
+            cam.ScreenToWorldPoint(Input.mousePosition);
+
         mouseWorldPos.z = 0f;
 
         Collider2D hit = Physics2D.OverlapCircle(
@@ -146,13 +154,17 @@ public class FishingManager : MonoBehaviour
             return;
         }
 
-        FishingWaterZone zone = hit.GetComponentInParent<FishingWaterZone>();
+        FishingWaterZone zone =
+            hit.GetComponentInParent<FishingWaterZone>();
 
         float zoneDepth = zone != null
             ? zone.ZoneMaxDepth
             : gearStats.MaxDepth;
 
-        currentMaxDepth = Mathf.Min(gearStats.MaxDepth, zoneDepth);
+        currentMaxDepth = Mathf.Min(
+            gearStats.MaxDepth,
+            zoneDepth
+        );
 
         fishingPos = mouseWorldPos;
         isFishing = true;
@@ -160,14 +172,25 @@ public class FishingManager : MonoBehaviour
         GameLockManager.Instance?.LockPlayer();
 
         if (fishingBarUI != null)
-            fishingBarUI.ShowDepthSelect(currentMaxDepth, OnDepthSelected);
+        {
+            fishingBarUI.ShowDepthSelect(
+                currentMaxDepth,
+                OnDepthSelected
+            );
+        }
         else
+        {
             OnDepthSelected(currentMaxDepth * 0.5f);
+        }
     }
 
     private void OnDepthSelected(float depth)
     {
-        selectedDepth = Mathf.Clamp(depth, 0f, currentMaxDepth);
+        selectedDepth = Mathf.Clamp(
+            depth,
+            0f,
+            currentMaxDepth
+        );
 
         playerStats.UseEnergy(fishingEnergyCost);
 
@@ -179,7 +202,11 @@ public class FishingManager : MonoBehaviour
         if (fishingBarUI != null)
             fishingBarUI.ShowWaitingBite();
 
-        Debug.Log("Thả móc ở độ sâu: " + selectedDepth.ToString("0.0") + "m");
+        Debug.Log(
+            "Thả móc ở độ sâu: " +
+            selectedDepth.ToString("0.0") +
+            "m"
+        );
 
         PlaySound(castSound);
 
@@ -202,7 +229,9 @@ public class FishingManager : MonoBehaviour
             bobberObject.SetActive(true);
         }
 
-        yield return new WaitForSeconds(Random.Range(waitMin, waitMax));
+        yield return new WaitForSeconds(
+            Random.Range(waitMin, waitMax)
+        );
 
         if (!isFishing)
             yield break;
@@ -214,20 +243,34 @@ public class FishingManager : MonoBehaviour
 
         if (biteIconObject != null)
         {
-            biteIconObject.transform.position = fishingPos + Vector3.up * 1.1f;
+            biteIconObject.transform.position =
+                fishingPos + Vector3.up * 1.1f;
+
             biteIconObject.SetActive(true);
         }
 
         PlaySound(biteSound);
 
-        currentLoot = RollLoot(selectedDepth, baitUsed);
+        currentLoot = RollLoot(
+            selectedDepth,
+            baitUsed
+        );
 
-        if (fishingBarUI != null && currentLoot != null)
+        if (fishingBarUI != null &&
+            currentLoot != null)
         {
             if (currentLoot.isFish)
-                fishingBarUI.ShowFishBite(currentLoot.icon);
+            {
+                fishingBarUI.ShowFishBite(
+                    currentLoot.icon
+                );
+            }
             else
-                fishingBarUI.ShowJunkBite(currentLoot.icon);
+            {
+                fishingBarUI.ShowJunkBite(
+                    currentLoot.icon
+                );
+            }
         }
 
         yield return new WaitForSeconds(0.4f);
@@ -235,51 +278,92 @@ public class FishingManager : MonoBehaviour
         if (biteIconObject != null)
             biteIconObject.SetActive(false);
 
+        /*
+         * Thả dây nhưng không câu được cá
+         * hoặc vật phẩm nào.
+         */
         if (currentLoot == null)
         {
-            FailFishing("Không câu được gì.");
+            FailFishing(
+                "Không câu được cá hoặc vật phẩm nào."
+            );
+
             yield break;
         }
 
+        /*
+         * Câu được vật phẩm rác thì không mở
+         * minigame kéo cá.
+         */
         if (!currentLoot.isFish)
         {
             CatchJunk(currentLoot);
             yield break;
         }
 
+        /*
+         * Câu được cá thì bắt đầu minigame kéo cá.
+         */
         StartFishBattle(currentLoot);
     }
 
-    private FishingLoot RollLoot(float depth, bool baitUsed)
+    private FishingLoot RollLoot(
+        float depth,
+        bool baitUsed)
     {
-        FishingLoot[] availableFish = GetLootByDepth(fishLoots, depth);
+        FishingLoot[] availableFish =
+            GetLootByDepth(fishLoots, depth);
 
         float fishChance = baseFishChance;
 
         fishChance += gearStats.HookFishChanceBonus;
 
         if (baitUsed)
-            fishChance += gearStats.BaitFishChanceBonus;
+        {
+            fishChance +=
+                gearStats.BaitFishChanceBonus;
+        }
         else
+        {
             fishChance -= noBaitPenalty;
+        }
 
         if (availableFish.Length <= 0)
             fishChance = 0f;
 
-        fishChance = Mathf.Clamp(fishChance, 0f, 95f);
+        fishChance = Mathf.Clamp(
+            fishChance,
+            0f,
+            95f
+        );
 
         float roll = Random.Range(0f, 100f);
 
         if (roll <= fishChance)
-            return PickWeightedLoot(availableFish, depth, baitUsed);
+        {
+            return PickWeightedLoot(
+                availableFish,
+                depth,
+                baitUsed
+            );
+        }
 
-        FishingLoot[] availableJunk = GetLootByDepth(junkLoots, depth);
-        return PickWeightedLoot(availableJunk, depth, false);
+        FishingLoot[] availableJunk =
+            GetLootByDepth(junkLoots, depth);
+
+        return PickWeightedLoot(
+            availableJunk,
+            depth,
+            false
+        );
     }
 
-    private FishingLoot[] GetLootByDepth(FishingLoot[] list, float depth)
+    private FishingLoot[] GetLootByDepth(
+        FishingLoot[] list,
+        float depth)
     {
-        List<FishingLoot> result = new List<FishingLoot>();
+        List<FishingLoot> result =
+            new List<FishingLoot>();
 
         if (list == null)
             return result.ToArray();
@@ -289,8 +373,11 @@ public class FishingManager : MonoBehaviour
             if (loot == null)
                 continue;
 
-            if (depth >= loot.minDepth && depth <= loot.maxDepth)
+            if (depth >= loot.minDepth &&
+                depth <= loot.maxDepth)
+            {
                 result.Add(loot);
+            }
         }
 
         return result.ToArray();
@@ -311,13 +398,21 @@ public class FishingManager : MonoBehaviour
             if (loot == null)
                 continue;
 
-            totalWeight += GetLootWeight(loot, depth, baitUsed);
+            totalWeight += GetLootWeight(
+                loot,
+                depth,
+                baitUsed
+            );
         }
 
         if (totalWeight <= 0f)
             return list[0];
 
-        float roll = Random.Range(0f, totalWeight);
+        float roll = Random.Range(
+            0f,
+            totalWeight
+        );
+
         float current = 0f;
 
         foreach (FishingLoot loot in list)
@@ -325,7 +420,11 @@ public class FishingManager : MonoBehaviour
             if (loot == null)
                 continue;
 
-            current += GetLootWeight(loot, depth, baitUsed);
+            current += GetLootWeight(
+                loot,
+                depth,
+                baitUsed
+            );
 
             if (roll <= current)
                 return loot;
@@ -339,16 +438,29 @@ public class FishingManager : MonoBehaviour
         float depth,
         bool baitUsed)
     {
-        float weight = Mathf.Max(0.1f, loot.weight);
+        float weight = Mathf.Max(
+            0.1f,
+            loot.weight
+        );
 
-        float middleDepth = (loot.minDepth + loot.maxDepth) * 0.5f;
-        float depthDistance = Mathf.Abs(depth - middleDepth);
+        float middleDepth =
+            (loot.minDepth + loot.maxDepth) *
+            0.5f;
 
-        weight += Mathf.Max(0f, 5f - depthDistance);
+        float depthDistance =
+            Mathf.Abs(depth - middleDepth);
+
+        weight += Mathf.Max(
+            0f,
+            5f - depthDistance
+        );
 
         if (baitUsed &&
-            !string.IsNullOrEmpty(loot.preferredBait) &&
-            gearStats.CurrentBaitName == loot.preferredBait)
+            !string.IsNullOrEmpty(
+                loot.preferredBait
+            ) &&
+            gearStats.CurrentBaitName ==
+            loot.preferredBait)
         {
             weight += loot.preferredBaitBonus;
         }
@@ -356,11 +468,15 @@ public class FishingManager : MonoBehaviour
         return weight;
     }
 
-    private void StartFishBattle(FishingLoot fish)
+    private void StartFishBattle(
+        FishingLoot fish)
     {
         if (fish == null)
         {
-            CleanupFishing();
+            FailFishing(
+                "Không tìm thấy dữ liệu cá."
+            );
+
             return;
         }
 
@@ -378,48 +494,79 @@ public class FishingManager : MonoBehaviour
         );
     }
 
-    private void OnFishBattleFinished(bool success)
+    private void OnFishBattleFinished(
+        bool success)
     {
         if (success)
+        {
             CompleteCatchFish(currentLoot);
+        }
         else
+        {
+            /*
+             * Người chơi kéo cá thất bại,
+             * thanh FishPower đầy hoặc đứt dây.
+             */
             BreakLine();
+        }
     }
 
-    private void CompleteCatchFish(FishingLoot fish)
+    private void CompleteCatchFish(
+        FishingLoot fish)
     {
         if (fish == null)
         {
-            CleanupFishing();
+            FailFishing(
+                "Không tìm thấy cá sau khi kéo thành công."
+            );
+
             return;
         }
 
+        PlaySound(catchSound);
         ShowCatchResult(fish);
     }
 
-    private void CatchJunk(FishingLoot junk)
+    private void CatchJunk(
+        FishingLoot junk)
     {
         if (junk == null)
         {
-            CleanupFishing();
+            FailFishing(
+                "Không câu được vật phẩm nào."
+            );
+
             return;
         }
 
+        PlaySound(junkSound);
         ShowCatchResult(junk);
     }
 
+    /*
+     * Có cá cắn nhưng người chơi kéo thất bại.
+     */
     private void BreakLine()
     {
         PlaySound(lineBreakSound);
 
-        Debug.Log("FishPower đầy! Đứt dây câu, mất cá.");
+        Debug.Log(
+            "Kéo cá thất bại! Cá đã thoát hoặc dây câu bị đứt."
+        );
 
+        NotifyFishEscaped();
         CleanupFishing();
     }
 
+    /*
+     * Thả dây nhưng không câu được cá
+     * hoặc không câu được vật phẩm nào.
+     */
     private void FailFishing(string reason)
     {
         Debug.Log(reason);
+
+        NotifyNoFish();
         CleanupFishing();
     }
 
@@ -450,15 +597,20 @@ public class FishingManager : MonoBehaviour
 
     private void PlaySound(AudioClip clip)
     {
-        if (fishingAudio == null || clip == null)
+        if (fishingAudio == null ||
+            clip == null)
+        {
             return;
+        }
 
         fishingAudio.Stop();
         fishingAudio.clip = clip;
         fishingAudio.loop = false;
         fishingAudio.Play();
     }
-    private void ShowCatchResult(FishingLoot loot)
+
+    private void ShowCatchResult(
+        FishingLoot loot)
     {
         HideFishingObjects();
 
@@ -466,7 +618,8 @@ public class FishingManager : MonoBehaviour
             fishingBarUI.Hide();
 
         if (inventoryManager == null)
-            inventoryManager = InventoryManager.Instance;
+            inventoryManager =
+                InventoryManager.Instance;
 
         float resultWeight = 0f;
 
@@ -478,7 +631,10 @@ public class FishingManager : MonoBehaviour
             );
         }
 
-        int sellPrice = Mathf.RoundToInt(loot.baseSellPrice * 0.7f);
+        int resultSellPrice =
+            Mathf.RoundToInt(
+                loot.baseSellPrice * 0.7f
+            );
 
         if (catchResultUI != null)
         {
@@ -488,7 +644,7 @@ public class FishingManager : MonoBehaviour
                 loot.isFish,
                 resultWeight,
                 loot.expReward,
-                sellPrice,
+                resultSellPrice,
                 playerStats,
                 inventoryManager,
                 OnCatchResultClosed
@@ -496,7 +652,12 @@ public class FishingManager : MonoBehaviour
         }
         else
         {
-            inventoryManager?.AddItem(loot.itemName, loot.icon, 1);
+            inventoryManager?.AddItem(
+                loot.itemName,
+                loot.icon,
+                1
+            );
+
             CleanupFishing();
         }
     }
@@ -507,5 +668,64 @@ public class FishingManager : MonoBehaviour
         currentLoot = null;
 
         GameLockManager.Instance?.UnlockPlayer();
+    }
+
+    private void FindNotificationUI()
+    {
+        if (notificationUI != null)
+            return;
+
+        if (FishingNotificationUI.Instance != null)
+        {
+            notificationUI =
+                FishingNotificationUI.Instance;
+
+            return;
+        }
+
+        notificationUI =
+            FindFirstObjectByType<
+                FishingNotificationUI
+            >();
+    }
+
+    private void NotifyNoFish()
+    {
+        FindNotificationUI();
+
+        Debug.Log(
+            "Hiển thị thông báo: không câu được gì."
+        );
+
+        if (notificationUI == null)
+        {
+            Debug.LogError(
+                "Không tìm thấy FishingNotificationUI trong Scene."
+            );
+
+            return;
+        }
+
+        notificationUI.ShowNoFish();
+    }
+
+    private void NotifyFishEscaped()
+    {
+        FindNotificationUI();
+
+        Debug.Log(
+            "Hiển thị thông báo: kéo cá thất bại."
+        );
+
+        if (notificationUI == null)
+        {
+            Debug.LogError(
+                "Không tìm thấy FishingNotificationUI trong Scene."
+            );
+
+            return;
+        }
+
+        notificationUI.ShowFishEscaped();
     }
 }
