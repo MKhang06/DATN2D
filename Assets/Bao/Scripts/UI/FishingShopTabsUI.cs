@@ -18,6 +18,7 @@ public class FishingShopTabsUI : MonoBehaviour
     [Header("Script cửa hàng")]
     [SerializeField] private FishingEquipmentShopUI equipmentShopUI;
     [SerializeField] private FishingBaitShopUI baitShopUI;
+    [SerializeField] private FishingPurchasePopupUI purchasePopupUI;
 
     [Header("Button danh mục")]
     [SerializeField] private Button equipmentButton;
@@ -36,7 +37,7 @@ public class FishingShopTabsUI : MonoBehaviour
 
     private void Awake()
     {
-        FindShopScripts();
+        FindReferences();
         SetupButtons();
 
         if (hideOnStart)
@@ -51,13 +52,7 @@ public class FishingShopTabsUI : MonoBehaviour
     private void Start()
     {
         if (!hideOnStart)
-        {
             Open();
-        }
-        else
-        {
-            SetPages(false, false);
-        }
     }
 
     private void Update()
@@ -69,19 +64,27 @@ public class FishingShopTabsUI : MonoBehaviour
         }
 
         if (isOpen &&
-            Input.GetKeyDown(KeyCode.Escape))
+            Input.GetKeyDown(KeyCode.Escape) &&
+            (purchasePopupUI == null ||
+             !purchasePopupUI.IsOpen))
         {
             Close();
         }
     }
 
-    private void FindShopScripts()
+    private void FindReferences()
     {
         if (equipmentShopUI == null)
-            equipmentShopUI = GetComponent<FishingEquipmentShopUI>();
+            equipmentShopUI =
+                GetComponent<FishingEquipmentShopUI>();
 
         if (baitShopUI == null)
-            baitShopUI = GetComponent<FishingBaitShopUI>();
+            baitShopUI =
+                GetComponent<FishingBaitShopUI>();
+
+        if (purchasePopupUI == null)
+            purchasePopupUI =
+                GetComponent<FishingPurchasePopupUI>();
     }
 
     private void SetupButtons()
@@ -89,13 +92,17 @@ public class FishingShopTabsUI : MonoBehaviour
         if (equipmentButton != null)
         {
             equipmentButton.onClick.RemoveAllListeners();
-            equipmentButton.onClick.AddListener(ShowEquipment);
+            equipmentButton.onClick.AddListener(
+                ShowEquipment
+            );
         }
 
         if (baitButton != null)
         {
             baitButton.onClick.RemoveAllListeners();
-            baitButton.onClick.AddListener(ShowBait);
+            baitButton.onClick.AddListener(
+                ShowBait
+            );
         }
 
         if (closeButton != null)
@@ -117,14 +124,12 @@ public class FishingShopTabsUI : MonoBehaviour
     {
         if (root == null)
         {
-            Debug.LogError(
+            Debug.LogWarning(
                 "FishingShopTabsUI chưa gắn Root."
             );
 
             return;
         }
-
-        FindShopScripts();
 
         isOpen = true;
         root.SetActive(true);
@@ -138,7 +143,13 @@ public class FishingShopTabsUI : MonoBehaviour
     {
         isOpen = false;
 
-        SetPages(false, false);
+        purchasePopupUI?.Hide();
+
+        if (equipmentPage != null)
+            equipmentPage.SetActive(false);
+
+        if (baitPage != null)
+            baitPage.SetActive(false);
 
         if (root != null)
             root.SetActive(false);
@@ -148,76 +159,49 @@ public class FishingShopTabsUI : MonoBehaviour
 
     public void ShowEquipment()
     {
-        EnsureShopOpen();
-        FindShopScripts();
+        EnsureOpen();
 
-        SetPages(true, false);
+        purchasePopupUI?.Hide();
+
+        if (baitPage != null)
+            baitPage.SetActive(false);
+
+        if (equipmentPage != null)
+            equipmentPage.SetActive(true);
+
+        equipmentShopUI?.Show();
+
         SetSelectedTab(true);
-
-        if (equipmentShopUI == null)
-        {
-            Debug.LogError(
-                "Không tìm thấy FishingEquipmentShopUI " +
-                "trên object FishingShopUI."
-            );
-
-            return;
-        }
-
-        equipmentShopUI.Show();
-
-        Debug.Log(
-            "Đã chuyển sang tab Trang bị."
-        );
     }
 
     public void ShowBait()
     {
-        EnsureShopOpen();
-        FindShopScripts();
+        EnsureOpen();
 
-        SetPages(false, true);
-        SetSelectedTab(false);
+        purchasePopupUI?.Hide();
 
-        if (baitShopUI == null)
-        {
-            Debug.LogError(
-                "Không tìm thấy FishingBaitShopUI " +
-                "trên object FishingShopUI."
-            );
-
-            return;
-        }
-
-        baitShopUI.Show();
-
-        Debug.Log(
-            "Đã chuyển sang tab Mồi câu."
-        );
-    }
-
-    private void EnsureShopOpen()
-    {
-        if (!isOpen)
-        {
-            isOpen = true;
-
-            if (root != null)
-                root.SetActive(true);
-
-            GameLockManager.Instance?.LockPlayer();
-        }
-    }
-
-    private void SetPages(
-        bool showEquipment,
-        bool showBait)
-    {
         if (equipmentPage != null)
-            equipmentPage.SetActive(showEquipment);
+            equipmentPage.SetActive(false);
 
         if (baitPage != null)
-            baitPage.SetActive(showBait);
+            baitPage.SetActive(true);
+
+        baitShopUI?.Show();
+
+        SetSelectedTab(false);
+    }
+
+    private void EnsureOpen()
+    {
+        if (isOpen)
+            return;
+
+        isOpen = true;
+
+        if (root != null)
+            root.SetActive(true);
+
+        GameLockManager.Instance?.LockPlayer();
     }
 
     private void SetSelectedTab(

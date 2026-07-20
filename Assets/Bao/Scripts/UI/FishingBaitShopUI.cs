@@ -5,10 +5,6 @@ using UnityEngine.UI;
 
 public class FishingBaitShopUI : MonoBehaviour
 {
-    [Header("Bật / tắt giao diện")]
-    [SerializeField] private KeyCode toggleKey = KeyCode.L;
-    [SerializeField] private bool hideOnStart = true;
-
     [Header("Root mồi câu")]
     [SerializeField] private GameObject baitRoot;
 
@@ -21,91 +17,42 @@ public class FishingBaitShopUI : MonoBehaviour
     [SerializeField] private FishingBaitShopItemUI baitCardPrefab;
     [SerializeField] private FishingBaitData[] availableBaits;
 
+    [Header("Xác nhận mua")]
+    [SerializeField]
+    private FishingPurchasePopupUI purchasePopupUI;
+
+    [SerializeField, Min(1)]
+    private int maxPurchaseQuantity = 999;
+
     [Header("Thông tin UI")]
     [SerializeField] private TMP_Text moneyText;
     [SerializeField] private TMP_Text messageText;
-    [SerializeField] private TMP_Text categoryTitleText;
 
-    [Header("Buttons")]
+    [Header("Button tùy chọn")]
     [SerializeField] private Button refreshButton;
-    [SerializeField] private Button closeButton;
 
     [Header("Thông báo")]
     [SerializeField] private float messageDuration = 1.5f;
 
     private Coroutine messageCoroutine;
-    private bool isOpen;
-
-    public bool IsOpen => isOpen;
 
     private void Awake()
     {
-        ValidateRoot();
-
         if (refreshButton != null)
         {
-            refreshButton.onClick.RemoveListener(RefreshBaitList);
-            refreshButton.onClick.AddListener(RefreshBaitList);
-        }
-
-        if (closeButton != null)
-        {
-            closeButton.onClick.RemoveListener(Hide);
-            closeButton.onClick.AddListener(Hide);
+            refreshButton.onClick.RemoveAllListeners();
+            refreshButton.onClick.AddListener(
+                RefreshBaitList
+            );
         }
 
         if (messageText != null)
             messageText.gameObject.SetActive(false);
-
-        if (categoryTitleText != null)
-            categoryTitleText.text = "MỒI CÂU";
-
-        if (hideOnStart)
-        {
-            isOpen = false;
-
-            if (baitRoot != null)
-                baitRoot.SetActive(false);
-        }
     }
 
     private void Start()
     {
         FindReferences();
-
-        if (!hideOnStart)
-            Show();
-    }
-
-    private void Update()
-    {
-        if (Input.GetKeyDown(toggleKey))
-            Toggle();
-
-        if (isOpen && Input.GetKeyDown(KeyCode.Escape))
-            Hide();
-    }
-
-    private void ValidateRoot()
-    {
-        if (baitRoot == null)
-        {
-            Debug.LogWarning(
-                "FishingBaitShopUI chưa được gắn Bait Root."
-            );
-
-            return;
-        }
-
-        if (baitRoot == gameObject)
-        {
-            Debug.LogError(
-                "Không được kéo object đang chứa FishingBaitShopUI " +
-                "vào ô Bait Root. Hãy tạo một object con tên BaitRoot."
-            );
-
-            baitRoot = null;
-        }
     }
 
     private void FindReferences()
@@ -121,37 +68,35 @@ public class FishingBaitShopUI : MonoBehaviour
             inventoryManager =
                 FindFirstObjectByType<InventoryManager>();
         }
-    }
 
-    public void Toggle()
-    {
-        if (isOpen)
-            Hide();
-        else
-            Show();
+        if (purchasePopupUI == null)
+        {
+            purchasePopupUI =
+                GetComponent<FishingPurchasePopupUI>();
+        }
     }
 
     public void Show()
     {
         if (baitRoot == null)
         {
-            Debug.LogWarning("Chưa gắn Bait Root.");
+            Debug.LogWarning(
+                "FishingBaitShopUI chưa gắn Bait Root."
+            );
+
             return;
         }
 
-        isOpen = true;
         baitRoot.SetActive(true);
 
         FindReferences();
         RefreshBaitList();
         RefreshMoney();
-
-        GameLockManager.Instance?.LockPlayer();
     }
 
     public void Hide()
     {
-        isOpen = false;
+        purchasePopupUI?.Hide();
 
         if (baitRoot != null)
             baitRoot.SetActive(false);
@@ -164,13 +109,12 @@ public class FishingBaitShopUI : MonoBehaviour
 
         if (messageText != null)
             messageText.gameObject.SetActive(false);
-
-        GameLockManager.Instance?.UnlockPlayer();
     }
 
     public void RefreshBaitList()
     {
         ClearBaitList();
+        FindReferences();
 
         if (content == null)
         {
@@ -194,7 +138,7 @@ public class FishingBaitShopUI : MonoBehaviour
             availableBaits.Length == 0)
         {
             Debug.LogWarning(
-                "FishingBaitShopUI chưa có mồi trong Available Baits."
+                "Available Baits đang trống."
             );
 
             return;
@@ -213,7 +157,13 @@ public class FishingBaitShopUI : MonoBehaviour
             FishingBaitShopItemUI card =
                 Instantiate(baitCardPrefab, content);
 
-            card.name = "BaitCard_" + bait.baitName;
+            card.gameObject.SetActive(true);
+            card.transform.localScale = Vector3.one;
+            card.transform.localRotation =
+                Quaternion.identity;
+
+            card.name =
+                "BaitCard_" + bait.baitName;
 
             card.Setup(
                 bait,
@@ -223,6 +173,13 @@ public class FishingBaitShopUI : MonoBehaviour
         }
 
         Canvas.ForceUpdateCanvases();
+
+        if (content is RectTransform contentRect)
+        {
+            LayoutRebuilder.ForceRebuildLayoutImmediate(
+                contentRect
+            );
+        }
 
         Debug.Log(
             "Đã tạo " +
@@ -258,6 +215,16 @@ public class FishingBaitShopUI : MonoBehaviour
             return;
         }
 
+        if (purchasePopupUI == null)
+        {
+            ShowMessage(
+                "Chưa gắn FishingPurchasePopupUI.",
+                false
+            );
+
+            return;
+        }
+
         if (playerStats.Level < bait.requiredLevel)
         {
             ShowMessage(
@@ -272,7 +239,19 @@ public class FishingBaitShopUI : MonoBehaviour
             return;
         }
 
-        if (playerStats.Money < bait.price)
+        int maximumByMoney;
+
+        if (bait.price <= 0)
+        {
+            maximumByMoney = maxPurchaseQuantity;
+        }
+        else
+        {
+            maximumByMoney =
+                playerStats.Money / bait.price;
+        }
+
+        if (maximumByMoney < 1)
         {
             ShowMessage(
                 "Bạn không đủ tiền.",
@@ -282,23 +261,110 @@ public class FishingBaitShopUI : MonoBehaviour
             return;
         }
 
+        int maximumQuantity = Mathf.Min(
+            maximumByMoney,
+            maxPurchaseQuantity
+        );
+
+        purchasePopupUI.ShowBaitPurchase(
+            bait.baitName,
+            bait.icon,
+            bait.price,
+            maximumQuantity,
+            quantity =>
+                ConfirmBuyBait(bait, quantity)
+        );
+    }
+
+    private bool ConfirmBuyBait(
+        FishingBaitData bait,
+        int purchaseQuantity)
+    {
+        if (bait == null)
+            return false;
+
+        FindReferences();
+
+        purchaseQuantity = Mathf.Clamp(
+            purchaseQuantity,
+            1,
+            maxPurchaseQuantity
+        );
+
+        int amountPerPurchase =
+            Mathf.Max(1, bait.amountPerPurchase);
+
+        long totalAmountLong =
+            (long)amountPerPurchase *
+            purchaseQuantity;
+
+        long totalPriceLong =
+            (long)Mathf.Max(0, bait.price) *
+            purchaseQuantity;
+
+        if (totalAmountLong > int.MaxValue ||
+            totalPriceLong > int.MaxValue)
+        {
+            ShowMessage(
+                "Số lượng mua quá lớn.",
+                false
+            );
+
+            return false;
+        }
+
+        int totalAmount = (int)totalAmountLong;
+        int totalPrice = (int)totalPriceLong;
+
+        if (playerStats == null ||
+            inventoryManager == null)
+        {
+            ShowMessage(
+                "Không tìm thấy dữ liệu người chơi.",
+                false
+            );
+
+            return false;
+        }
+
+        if (playerStats.Level < bait.requiredLevel)
+        {
+            ShowMessage(
+                "Bạn chưa đủ cấp độ.",
+                false
+            );
+
+            return false;
+        }
+
+        if (playerStats.Money < totalPrice)
+        {
+            ShowMessage(
+                "Bạn không đủ tiền.",
+                false
+            );
+
+            return false;
+        }
+
         bool added = inventoryManager.AddItem(
             bait.baitName,
             bait.icon,
-            bait.amountPerPurchase
+            totalAmount
         );
 
         if (!added)
         {
             ShowMessage(
-                "Túi đồ đã đầy.",
+                "Balo không đủ chỗ.",
                 false
             );
 
-            return;
+            return false;
         }
 
-        bool paid = playerStats.SpendMoney(bait.price);
+        bool paid =
+            playerStats.SpendMoney(totalPrice);
 
         if (!paid)
         {
@@ -307,7 +373,7 @@ public class FishingBaitShopUI : MonoBehaviour
                 false
             );
 
-            return;
+            return false;
         }
 
         RefreshMoney();
@@ -316,17 +382,12 @@ public class FishingBaitShopUI : MonoBehaviour
             "Đã mua " +
             bait.baitName +
             " x" +
-            bait.amountPerPurchase +
+            totalAmount +
             ".",
             true
         );
 
-        Debug.Log(
-            "Đã mua mồi: " +
-            bait.baitName +
-            " | Giá: $" +
-            bait.price
-        );
+        return true;
     }
 
     private void RefreshMoney()
@@ -350,7 +411,9 @@ public class FishingBaitShopUI : MonoBehaviour
         if (content == null)
             return;
 
-        for (int i = content.childCount - 1; i >= 0; i--)
+        for (int i = content.childCount - 1;
+             i >= 0;
+             i--)
         {
             Destroy(content.GetChild(i).gameObject);
         }

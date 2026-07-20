@@ -1,6 +1,7 @@
 using System.Collections;
 using TMPro;
 using UnityEngine;
+using UnityEngine.UI;
 
 public class FishingEquipmentShopUI : MonoBehaviour
 {
@@ -13,17 +14,47 @@ public class FishingEquipmentShopUI : MonoBehaviour
 
     [Header("Danh sách trang bị")]
     [SerializeField] private Transform content;
-    [SerializeField] private FishingEquipmentShopItemUI equipmentCardPrefab;
-    [SerializeField] private FishingEquipmentShopItemData[] availableEquipment;
+
+    [SerializeField]
+    private FishingEquipmentShopItemUI equipmentCardPrefab;
+
+    [SerializeField]
+    private FishingEquipmentShopItemData[] availableEquipment;
+
+    [Header("Xác nhận mua")]
+    [SerializeField]
+    private FishingPurchasePopupUI purchasePopupUI;
 
     [Header("Thông tin UI")]
     [SerializeField] private TMP_Text moneyText;
     [SerializeField] private TMP_Text messageText;
 
+    [Header("Button tùy chọn")]
+    [SerializeField] private Button refreshButton;
+
     [Header("Thông báo")]
     [SerializeField] private float messageDuration = 1.5f;
 
     private Coroutine messageCoroutine;
+
+    private void Awake()
+    {
+        if (refreshButton != null)
+        {
+            refreshButton.onClick.RemoveAllListeners();
+            refreshButton.onClick.AddListener(
+                RefreshEquipmentList
+            );
+        }
+
+        if (messageText != null)
+            messageText.gameObject.SetActive(false);
+    }
+
+    private void Start()
+    {
+        FindReferences();
+    }
 
     private void FindReferences()
     {
@@ -34,13 +65,30 @@ public class FishingEquipmentShopUI : MonoBehaviour
             inventoryManager = InventoryManager.Instance;
 
         if (inventoryManager == null)
-            inventoryManager = FindFirstObjectByType<InventoryManager>();
+        {
+            inventoryManager =
+                FindFirstObjectByType<InventoryManager>();
+        }
+
+        if (purchasePopupUI == null)
+        {
+            purchasePopupUI =
+                GetComponent<FishingPurchasePopupUI>();
+        }
     }
 
     public void Show()
     {
-        if (equipmentRoot != null)
-            equipmentRoot.SetActive(true);
+        if (equipmentRoot == null)
+        {
+            Debug.LogWarning(
+                "FishingEquipmentShopUI chưa gắn Equipment Root."
+            );
+
+            return;
+        }
+
+        equipmentRoot.SetActive(true);
 
         FindReferences();
         RefreshEquipmentList();
@@ -49,8 +97,19 @@ public class FishingEquipmentShopUI : MonoBehaviour
 
     public void Hide()
     {
+        purchasePopupUI?.Hide();
+
         if (equipmentRoot != null)
             equipmentRoot.SetActive(false);
+
+        if (messageCoroutine != null)
+        {
+            StopCoroutine(messageCoroutine);
+            messageCoroutine = null;
+        }
+
+        if (messageText != null)
+            messageText.gameObject.SetActive(false);
     }
 
     public void RefreshEquipmentList()
@@ -60,114 +119,245 @@ public class FishingEquipmentShopUI : MonoBehaviour
 
         if (content == null)
         {
-            Debug.LogWarning("Chưa gắn Content trang bị.");
+            Debug.LogWarning(
+                "FishingEquipmentShopUI chưa gắn Content."
+            );
+
             return;
         }
 
         if (equipmentCardPrefab == null)
         {
-            Debug.LogWarning("Chưa gắn Equipment Card Prefab.");
+            Debug.LogWarning(
+                "Chưa gắn Equipment Card Prefab."
+            );
+
             return;
         }
 
         if (availableEquipment == null ||
             availableEquipment.Length == 0)
         {
-            Debug.LogWarning("Available Equipment đang trống.");
+            Debug.LogWarning(
+                "Available Equipment đang trống."
+            );
+
             return;
         }
 
         int playerLevel =
-            playerStats != null ? playerStats.Level : 0;
+            playerStats != null
+                ? playerStats.Level
+                : 0;
 
-        foreach (FishingEquipmentShopItemData item
-                 in availableEquipment)
+        foreach (
+            FishingEquipmentShopItemData equipment
+            in availableEquipment)
         {
-            if (item == null || item.equipmentData == null)
+            if (equipment == null ||
+                equipment.equipmentData == null)
+            {
                 continue;
+            }
 
             FishingEquipmentShopItemUI card =
-                Instantiate(equipmentCardPrefab, content);
+                Instantiate(
+                    equipmentCardPrefab,
+                    content
+                );
 
-            card.name = "EquipmentCard_" + item.ItemName;
+            card.gameObject.SetActive(true);
+            card.transform.localScale = Vector3.one;
+            card.transform.localRotation =
+                Quaternion.identity;
+
+            card.name =
+                "EquipmentCard_" +
+                equipment.ItemName;
 
             card.Setup(
-                item,
+                equipment,
                 playerLevel,
                 TryBuyEquipment
             );
         }
 
         Canvas.ForceUpdateCanvases();
+
+        if (content is RectTransform contentRect)
+        {
+            LayoutRebuilder.ForceRebuildLayoutImmediate(
+                contentRect
+            );
+        }
+
+        Debug.Log(
+            "Đã tạo " +
+            content.childCount +
+            " card trang bị."
+        );
     }
 
     private void TryBuyEquipment(
-        FishingEquipmentShopItemData item)
+        FishingEquipmentShopItemData equipment)
     {
-        if (item == null || item.equipmentData == null)
+        if (equipment == null ||
+            equipment.equipmentData == null)
+        {
             return;
+        }
 
         FindReferences();
 
         if (playerStats == null)
         {
-            ShowMessage("Không tìm thấy PlayerStats.", false);
-            return;
-        }
-
-        if (inventoryManager == null)
-        {
-            ShowMessage("Không tìm thấy InventoryManager.", false);
-            return;
-        }
-
-        if (playerStats.Level < item.requiredPlayerLevel)
-        {
             ShowMessage(
-                "Cần Level " +
-                item.requiredPlayerLevel +
-                " để mua.",
+                "Không tìm thấy PlayerStats.",
                 false
             );
 
             return;
         }
 
-        if (playerStats.Money < item.price)
+        if (inventoryManager == null)
         {
-            ShowMessage("Không đủ tiền.", false);
+            ShowMessage(
+                "Không tìm thấy InventoryManager.",
+                false
+            );
+
             return;
         }
 
+        if (purchasePopupUI == null)
+        {
+            ShowMessage(
+                "Chưa gắn FishingPurchasePopupUI.",
+                false
+            );
+
+            return;
+        }
+
+        if (playerStats.Level <
+            equipment.requiredPlayerLevel)
+        {
+            ShowMessage(
+                "Bạn cần Level " +
+                equipment.requiredPlayerLevel +
+                " để mua " +
+                equipment.ItemName +
+                ".",
+                false
+            );
+
+            return;
+        }
+
+        if (playerStats.Money < equipment.price)
+        {
+            ShowMessage(
+                "Bạn không đủ tiền.",
+                false
+            );
+
+            return;
+        }
+
+        purchasePopupUI.ShowEquipmentPurchase(
+            equipment.ItemName,
+            equipment.Icon,
+            equipment.price,
+            quantity =>
+                ConfirmBuyEquipment(equipment)
+        );
+    }
+
+    private bool ConfirmBuyEquipment(
+        FishingEquipmentShopItemData equipment)
+    {
+        if (equipment == null ||
+            equipment.equipmentData == null)
+        {
+            return false;
+        }
+
+        FindReferences();
+
+        if (playerStats == null ||
+            inventoryManager == null)
+        {
+            ShowMessage(
+                "Không tìm thấy dữ liệu người chơi.",
+                false
+            );
+
+            return false;
+        }
+
+        if (playerStats.Level <
+            equipment.requiredPlayerLevel)
+        {
+            ShowMessage(
+                "Bạn chưa đủ cấp độ.",
+                false
+            );
+
+            return false;
+        }
+
+        if (playerStats.Money < equipment.price)
+        {
+            ShowMessage(
+                "Bạn không đủ tiền.",
+                false
+            );
+
+            return false;
+        }
+
+        // Trang bị luôn chỉ mua đúng một món.
         bool added = inventoryManager.AddItem(
-            item.ItemName,
-            item.Icon,
-            item.amountPerPurchase
+            equipment.ItemName,
+            equipment.Icon,
+            1
         );
 
         if (!added)
         {
-            ShowMessage("Túi đồ đã đầy.", false);
-            return;
+            ShowMessage(
+                "Balo đã đầy.",
+                false
+            );
+
+            return false;
         }
 
-        bool paid = playerStats.SpendMoney(item.price);
+        bool paid =
+            playerStats.SpendMoney(
+                equipment.price
+            );
 
         if (!paid)
         {
-            ShowMessage("Thanh toán thất bại.", false);
-            return;
+            ShowMessage(
+                "Thanh toán thất bại.",
+                false
+            );
+
+            return false;
         }
 
         RefreshMoney();
 
         ShowMessage(
             "Đã mua " +
-            item.ItemName +
-            " x" +
-            item.amountPerPurchase,
+            equipment.ItemName +
+            " x1.",
             true
         );
+
+        return true;
     }
 
     private void RefreshMoney()
@@ -176,7 +366,9 @@ public class FishingEquipmentShopUI : MonoBehaviour
             return;
 
         int money =
-            playerStats != null ? playerStats.Money : 0;
+            playerStats != null
+                ? playerStats.Money
+                : 0;
 
         moneyText.text =
             "TIỀN MẶT <color=#25F2C4>$" +
@@ -189,7 +381,9 @@ public class FishingEquipmentShopUI : MonoBehaviour
         if (content == null)
             return;
 
-        for (int i = content.childCount - 1; i >= 0; i--)
+        for (int i = content.childCount - 1;
+             i >= 0;
+             i--)
         {
             Destroy(content.GetChild(i).gameObject);
         }
