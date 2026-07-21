@@ -1,0 +1,24 @@
+%YAML 1.1
+%TAG !u! tag:unity3d.com,2011:
+--- !u!114 &11400000
+MonoBehaviour:
+  m_ObjectHideFlags: 0
+  m_CorrespondingSourceObject: {fileID: 0}
+  m_PrefabInstance: {fileID: 0}
+  m_PrefabAsset: {fileID: 0}
+  m_GameObject: {fileID: 0}
+  m_Enabled: 1
+  m_EditorHideFlags: 0
+  m_Script: {fileID: 11500000, guid: 7c4703bcc8a073d498bfd227b41e8cd0, type: 3}
+  m_Name: Item_Equipment_BraidedLineKing
+  m_EditorClassIdentifier: 
+  itemId: equipment_line_braided_king
+  displayName: "D\xE2y D\xF9 Vua"
+  description: 
+  icon: {fileID: 6857695923298094917, guid: 51a936264bf8b5d43a203e249d4a89f9, type: 3}
+  itemType: 3
+  stackMode: 1
+  maxStack: 1
+  uniqueOwnership: 1
+  buyPrice: 2000
+  sellPrice: 1000

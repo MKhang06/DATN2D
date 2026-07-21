@@ -1578,6 +1578,38 @@ CanvasRenderer:
   m_PrefabAsset: {fileID: 0}
   m_GameObject: {fileID: 71521455}
   m_CullTransparentMesh: 1
+--- !u!1 &83922886
+GameObject:
+  m_ObjectHideFlags: 0
+  m_CorrespondingSourceObject: {fileID: 0}
+  m_PrefabInstance: {fileID: 0}
+  m_PrefabAsset: {fileID: 0}
+  serializedVersion: 6
+  m_Component:
+  - component: {fileID: 83922887}
+  m_Layer: 0
+  m_Name: GameSystems
+  m_TagString: Untagged
+  m_Icon: {fileID: 0}
+  m_NavMeshLayer: 0
+  m_StaticEditorFlags: 0
+  m_IsActive: 1
+--- !u!4 &83922887
+Transform:
+  m_ObjectHideFlags: 0
+  m_CorrespondingSourceObject: {fileID: 0}
+  m_PrefabInstance: {fileID: 0}
+  m_PrefabAsset: {fileID: 0}
+  m_GameObject: {fileID: 83922886}
+  serializedVersion: 2
+  m_LocalRotation: {x: 0, y: 0, z: 0, w: 1}
+  m_LocalPosition: {x: 0, y: 0, z: 0}
+  m_LocalScale: {x: 1, y: 1, z: 1}
+  m_ConstrainProportionsScale: 0
+  m_Children:
+  - {fileID: 1110415192}
+  m_Father: {fileID: 0}
+  m_LocalEulerAnglesHint: {x: 0, y: 0, z: 0}
 --- !u!1 &88468937
 GameObject:
   m_ObjectHideFlags: 0
@@ -10724,23 +10756,23 @@ MonoBehaviour:
   content: {fileID: 6915850095636905207}
   baitCardPrefab: {fileID: 8636697742667371625, guid: 6dbc11a51ce78694d8a54425da87f6d1, type: 3}
   availableBaits:
-  - {fileID: 11400000, guid: 45853bcae56e24a49ad867446c2ac83d, type: 2}
-  - {fileID: 11400000, guid: ab45cbf785c683549b2e5f5c033c324e, type: 2}
-  - {fileID: 11400000, guid: f24471e4940e08e498f3b89ee024e593, type: 2}
-  - {fileID: 11400000, guid: feda7f4de746aab49abdb23198090d8b, type: 2}
-  - {fileID: 11400000, guid: 42ce732b9f2e27644b265ed0344af7fe, type: 2}
-  - {fileID: 11400000, guid: a6475a80581e93b469929dbedd2ea4c6, type: 2}
-  - {fileID: 11400000, guid: 3906e7c8b4168ce499f4a9ae77160734, type: 2}
-  - {fileID: 11400000, guid: ec5f5fa4bb6ae754690a9c0338579fb4, type: 2}
-  - {fileID: 11400000, guid: 5d589bf30ebe838459741ea47dfcb1f0, type: 2}
-  - {fileID: 11400000, guid: 6380e183f1f4c494494e623a4314740d, type: 2}
-  - {fileID: 11400000, guid: 244093f4f16c6d44c87c5d32cfda16c9, type: 2}
-  - {fileID: 11400000, guid: 38b5fcfaf434e0b4495295dbdb44c238, type: 2}
-  - {fileID: 11400000, guid: 9a4d1fbd3625d6546addf2d8ef9c87b5, type: 2}
-  - {fileID: 11400000, guid: bf08985aa123c584f86880475c5a336e, type: 2}
-  - {fileID: 11400000, guid: 9baf38ab2fd458a40a4ff5acd092f154, type: 2}
-  - {fileID: 11400000, guid: 9cca17bbdea7da94e9c8ed178acf8aba, type: 2}
-  - {fileID: 11400000, guid: 255b0d7af48c4114d91e3e8a7d2d8719, type: 2}
+  - {fileID: 11400000, guid: 5326c32ffdbabcf4d8f765c9f143f13e, type: 2}
+  - {fileID: 11400000, guid: b5aa8aaa102d9504a846b95714ba805a, type: 2}
+  - {fileID: 11400000, guid: acec6e41cece7f846915038b6ac893f6, type: 2}
+  - {fileID: 11400000, guid: 0d61cc1dafd335a43b3c30d8e4fda57d, type: 2}
+  - {fileID: 11400000, guid: c79783438f902984f91ab8b9e0ad23d4, type: 2}
+  - {fileID: 11400000, guid: 446055ea9f3c74c4b857b756f30f2648, type: 2}
+  - {fileID: 11400000, guid: 035965cc95e5e8541a5855567a0b155d, type: 2}
+  - {fileID: 11400000, guid: 5d5de84cd7e87f54187c03cd64eefe58, type: 2}
+  - {fileID: 11400000, guid: 4fb50fbec394b5e40a7ad467deb35154, type: 2}
+  - {fileID: 11400000, guid: 2cbe5249851c1da4591e3019043d1dc8, type: 2}
+  - {fileID: 11400000, guid: c1ef5943db7c22b43ba233b0891b2b14, type: 2}
+  - {fileID: 11400000, guid: 2f9987e04e5073b40a709429f0b87d87, type: 2}
+  - {fileID: 11400000, guid: fe981742235190045a73f740b153f824, type: 2}
+  - {fileID: 11400000, guid: ea4769b26c7c63042897156c8438da16, type: 2}
+  - {fileID: 11400000, guid: b819e3dfe2b3f3542a16b3739ed4b853, type: 2}
+  - {fileID: 11400000, guid: 294cec87447157641b0ccdd3585a7d89, type: 2}
+  - {fileID: 11400000, guid: b1fdcaa6476557940841178e8fcc47c9, type: 2}
   purchasePopupUI: {fileID: 480529605}
   maxPurchaseQuantity: 999
   moneyText: {fileID: 1897274730}
@@ -10791,17 +10823,17 @@ MonoBehaviour:
   content: {fileID: 1981742139}
   equipmentCardPrefab: {fileID: 1453480443698253077, guid: e4a3059a572527f4aa6a4ded1b81a97d, type: 3}
   availableEquipment:
-  - {fileID: 11400000, guid: 513fff8323be0ba4daedc430dca4c13b, type: 2}
-  - {fileID: 11400000, guid: 14cb686f88c1eef46910ffa27fd816e4, type: 2}
-  - {fileID: 11400000, guid: d484a27c233f5ea429d7568357578f8d, type: 2}
-  - {fileID: 11400000, guid: 2158411f37a83ea4e9668b9c55d35ed5, type: 2}
-  - {fileID: 11400000, guid: bfc068ff75ea685488127dfdf5d94007, type: 2}
-  - {fileID: 11400000, guid: 68bfaf23dc9180b489de71f8186fc9c8, type: 2}
-  - {fileID: 11400000, guid: 62b99e8f3c9e7294b98780f1a477f255, type: 2}
-  - {fileID: 11400000, guid: ed6911f348468044dbf5be95d7804e3c, type: 2}
-  - {fileID: 11400000, guid: 75520fa3e25add64ab6cfe12c1d663a9, type: 2}
-  - {fileID: 11400000, guid: e95eb1dee29669c47b5235d5e7486dd3, type: 2}
-  - {fileID: 11400000, guid: d14cdb4c38835b547b7b023e93aecc1c, type: 2}
+  - {fileID: 11400000, guid: b3370223f21081046bf9fdcc5f7c5656, type: 2}
+  - {fileID: 11400000, guid: 1f211dab29264d645abc26785094461a, type: 2}
+  - {fileID: 11400000, guid: 5d32e6ede68f1e242abb636845b522b0, type: 2}
+  - {fileID: 11400000, guid: 278f24a764c2a8f43a274120c60ee382, type: 2}
+  - {fileID: 11400000, guid: a76b95057e96de54fbf4aeb42974a5c3, type: 2}
+  - {fileID: 11400000, guid: 99bc043cf2203bf4dbf36048ef8e21a8, type: 2}
+  - {fileID: 11400000, guid: 536b017a45455634c93dc2338e254740, type: 2}
+  - {fileID: 11400000, guid: 08464c9aa63f91443b2e72506f041e06, type: 2}
+  - {fileID: 11400000, guid: 54cce3f4a30bddb4980d878bd5e1b003, type: 2}
+  - {fileID: 11400000, guid: 8c71ea1b14c803b409b52b32c5c9ee72, type: 2}
+  - {fileID: 11400000, guid: d2c59ecda12323648b62419971e10621, type: 2}
   purchasePopupUI: {fileID: 480529605}
   moneyText: {fileID: 1897274730}
   messageText: {fileID: 795538245}
@@ -32227,6 +32259,85 @@ RectTransform:
   m_AnchoredPosition: {x: 0, y: 0}
   m_SizeDelta: {x: 0, y: 0}
   m_Pivot: {x: 0.5, y: 0.5}
+--- !u!1 &1110415191
+GameObject:
+  m_ObjectHideFlags: 0
+  m_CorrespondingSourceObject: {fileID: 0}
+  m_PrefabInstance: {fileID: 0}
+  m_PrefabAsset: {fileID: 0}
+  serializedVersion: 6
+  m_Component:
+  - component: {fileID: 1110415192}
+  - component: {fileID: 1110415193}
+  m_Layer: 0
+  m_Name: ItemDatabase
+  m_TagString: Untagged
+  m_Icon: {fileID: 0}
+  m_NavMeshLayer: 0
+  m_StaticEditorFlags: 0
+  m_IsActive: 1
+--- !u!4 &1110415192
+Transform:
+  m_ObjectHideFlags: 0
+  m_CorrespondingSourceObject: {fileID: 0}
+  m_PrefabInstance: {fileID: 0}
+  m_PrefabAsset: {fileID: 0}
+  m_GameObject: {fileID: 1110415191}
+  serializedVersion: 2
+  m_LocalRotation: {x: -0, y: -0, z: -0, w: 1}
+  m_LocalPosition: {x: 0, y: 0, z: 0}
+  m_LocalScale: {x: 1, y: 1, z: 1}
+  m_ConstrainProportionsScale: 0
+  m_Children: []
+  m_Father: {fileID: 83922887}
+  m_LocalEulerAnglesHint: {x: 0, y: 0, z: 0}
+--- !u!114 &1110415193
+MonoBehaviour:
+  m_ObjectHideFlags: 0
+  m_CorrespondingSourceObject: {fileID: 0}
+  m_PrefabInstance: {fileID: 0}
+  m_PrefabAsset: {fileID: 0}
+  m_GameObject: {fileID: 1110415191}
+  m_Enabled: 1
+  m_EditorHideFlags: 0
+  m_Script: {fileID: 11500000, guid: 14111064c38650f479a174900e3c40e1, type: 3}
+  m_Name: 
+  m_EditorClassIdentifier: 
+  items:
+  - {fileID: 11400000, guid: fb9b521b9201bc9488c514d0745c9c1e, type: 2}
+  - {fileID: 11400000, guid: 5345e903aaaf02448931e0f01900ba38, type: 2}
+  - {fileID: 11400000, guid: 76d628ce0a292e042b8e76d3047f603b, type: 2}
+  - {fileID: 11400000, guid: 935921e579f9b454f8de221a01a5c819, type: 2}
+  - {fileID: 11400000, guid: 7138834d2ba9c8a4db566b4cc1bcec33, type: 2}
+  - {fileID: 11400000, guid: 08b3047c359fb334194f51495e9ff2e6, type: 2}
+  - {fileID: 11400000, guid: 43d6ee82ebf8ed849a08607e24271e90, type: 2}
+  - {fileID: 11400000, guid: b46f087e22e6b734ba94c6cd3c039995, type: 2}
+  - {fileID: 11400000, guid: 1ebd5af89c3b55d46aaef856db51ec8b, type: 2}
+  - {fileID: 11400000, guid: 3468be784c8442a45a4952caa85f8364, type: 2}
+  - {fileID: 11400000, guid: d7e4abf799d54e44f90e45834349fbe2, type: 2}
+  - {fileID: 11400000, guid: bfec1a7acc6b53b4781c207723a8303f, type: 2}
+  - {fileID: 11400000, guid: 15b08db33d3fab54485af7ab3bcbdd02, type: 2}
+  - {fileID: 11400000, guid: f3c17c452486b0140960cda402c060b3, type: 2}
+  - {fileID: 11400000, guid: d781efec36cc6dc4c835f2e9fe3f6b63, type: 2}
+  - {fileID: 11400000, guid: 86568898771abaa428e0003de0dd2cfc, type: 2}
+  - {fileID: 11400000, guid: 65db6f0e6bcb4f74d88ede709a95d5cd, type: 2}
+  - {fileID: 11400000, guid: 6c1a1c9ab1380a84e917c5cd45ddbdf6, type: 2}
+  - {fileID: 11400000, guid: 7264ca291e489864b86e9486e78a6cb3, type: 2}
+  - {fileID: 11400000, guid: 0d89643946109a74d89f8f402194ad38, type: 2}
+  - {fileID: 11400000, guid: bee2e849841b206479e145c5514fd03b, type: 2}
+  - {fileID: 11400000, guid: ef1e7deb4bd37614892fd8c57f43eb3a, type: 2}
+  - {fileID: 11400000, guid: 73b75a5d771117e4bab53ccb53337414, type: 2}
+  - {fileID: 11400000, guid: fc9028aa5d4d2cf4a94088a82c1846ff, type: 2}
+  - {fileID: 11400000, guid: d53f344fcb9c69a42a583a43f451a603, type: 2}
+  - {fileID: 11400000, guid: 13517c5f20f088945a7edfd8f89f1f64, type: 2}
+  - {fileID: 11400000, guid: 199cd7866666d8a4384a78f021476583, type: 2}
+  - {fileID: 11400000, guid: 34f432ab88749984a8034b0c833bdaf6, type: 2}
+  - {fileID: 11400000, guid: bff3578c198baec46990cc70c5cf5bb4, type: 2}
+  - {fileID: 11400000, guid: e9166789d8b66644480b5ebd43ea840d, type: 2}
+  - {fileID: 11400000, guid: 8d183c1f6a03d2d41933a8701e9f35d2, type: 2}
+  - {fileID: 11400000, guid: 8835d92b35c65c04f82d034d4a811679, type: 2}
+  keepAcrossScenes: 0
+  logValidationErrors: 1
 --- !u!1 &1111931168
 GameObject:
   m_ObjectHideFlags: 0
@@ -55532,58 +55643,58 @@ MonoBehaviour:
   baseFishChance: 55
   noBaitPenalty: 20
   fishLoots:
-  - itemName: "C\xE1 v\u01B0\u1EE3c nh\u1ECF"
-    icon: {fileID: -7503093049635706396, guid: 912bc0918e49a5147a1d022f6649c04b, type: 3}
+  - itemName: "C\xE1 H\u1ED3i Nh\u1ECF"
+    icon: {fileID: 4864474330649768578, guid: 2bd5fff46156e7944901035971334d6d, type: 3}
     isFish: 1
     minDepth: 0
-    maxDepth: 3
-    weight: 30
-    fishPower: 0.6
+    maxDepth: 4
+    weight: 22
+    fishPower: 0.85
     preferredBait: "Giun \u0110\u1EA5t"
     preferredBaitBonus: 10
-    minWeightKg: 1
-    maxWeightKg: 5
-    expReward: 0.49
-    baseSellPrice: 100
-  - itemName: "C\xE1 h\u1ED3i nh\u1ECF"
+    minWeightKg: 0.3
+    maxWeightKg: 1.2
+    expReward: 3
+    baseSellPrice: 80
+  - itemName: "C\xE1 H\u1ED3ng Nh\u1ECF"
     icon: {fileID: 6124048994273102972, guid: a82812dcc4995e54daece4df8c4fd55b, type: 3}
     isFish: 1
-    minDepth: 1
-    maxDepth: 4
-    weight: 20
-    fishPower: 0.8
-    preferredBait: "Giun \u0110\u1EA5t"
+    minDepth: 0
+    maxDepth: 3.5
+    weight: 26
+    fishPower: 0.75
+    preferredBait: "B\u1ED9t Nh\xE3o"
     preferredBaitBonus: 10
-    minWeightKg: 1
-    maxWeightKg: 5
-    expReward: 0.49
-    baseSellPrice: 100
-  - itemName: "C\xE1 thu nh\u1ECF"
+    minWeightKg: 0.2
+    maxWeightKg: 0.9
+    expReward: 2
+    baseSellPrice: 60
+  - itemName: "C\xE1 Thu Nh\u1ECF"
     icon: {fileID: 6514824173595952584, guid: 1d6da93322adbfa4bbf72ee7729813bb, type: 3}
     isFish: 1
     minDepth: 2
-    maxDepth: 5
-    weight: 18
-    fishPower: 0.9
-    preferredBait: "Giun \u0110\u1EA5t"
+    maxDepth: 7
+    weight: 14
+    fishPower: 1.2
+    preferredBait: "C\xE1 M\u1ED3i Nh\u1ECF"
     preferredBaitBonus: 12
-    minWeightKg: 1
-    maxWeightKg: 5
-    expReward: 0.49
-    baseSellPrice: 100
-  - itemName: "C\xE1 h\u1ED3ng nh\u1ECF"
-    icon: {fileID: 4864474330649768578, guid: 2bd5fff46156e7944901035971334d6d, type: 3}
+    minWeightKg: 0.5
+    maxWeightKg: 2
+    expReward: 5
+    baseSellPrice: 150
+  - itemName: "C\xE1 V\u01B0\u1EE3c"
+    icon: {fileID: -7503093049635706396, guid: 912bc0918e49a5147a1d022f6649c04b, type: 3}
     isFish: 1
-    minDepth: 2
-    maxDepth: 5
-    weight: 15
-    fishPower: 0.9
-    preferredBait: "T\xF4m"
-    preferredBaitBonus: 12
+    minDepth: 3
+    maxDepth: 10
+    weight: 9
+    fishPower: 1.6
+    preferredBait: "M\u1ED3i Gi\u1EA3"
+    preferredBaitBonus: 15
     minWeightKg: 1
     maxWeightKg: 5
-    expReward: 0.49
-    baseSellPrice: 100
+    expReward: 8
+    baseSellPrice: 300
   junkLoots: []
   fishingAudio: {fileID: 1943668924}
   castSound: {fileID: 8300000, guid: c21bfaa62fdc72140a9c8e5ed297067e, type: 3}
@@ -55728,3 +55839,4 @@ SceneRoots:
   - {fileID: 668100645}
   - {fileID: 1710112689}
   - {fileID: 1382985236}
+  - {fileID: 83922887}

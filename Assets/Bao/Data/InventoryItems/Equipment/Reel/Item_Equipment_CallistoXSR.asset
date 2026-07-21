@@ -1,0 +1,24 @@
+%YAML 1.1
+%TAG !u! tag:unity3d.com,2011:
+--- !u!114 &11400000
+MonoBehaviour:
+  m_ObjectHideFlags: 0
+  m_CorrespondingSourceObject: {fileID: 0}
+  m_PrefabInstance: {fileID: 0}
+  m_PrefabAsset: {fileID: 0}
+  m_GameObject: {fileID: 0}
+  m_Enabled: 1
+  m_EditorHideFlags: 0
+  m_Script: {fileID: 11500000, guid: 7c4703bcc8a073d498bfd227b41e8cd0, type: 3}
+  m_Name: Item_Equipment_CallistoXSR
+  m_EditorClassIdentifier: 
+  itemId: equipment_reel_callisto_xsr
+  displayName: Callisto XSR
+  description: 
+  icon: {fileID: 714952081480608755, guid: 6d4a3d4ee48bda84eab1001c942460e6, type: 3}
+  itemType: 3
+  stackMode: 1
+  maxStack: 1
+  uniqueOwnership: 1
+  buyPrice: 2500
+  sellPrice: 1250

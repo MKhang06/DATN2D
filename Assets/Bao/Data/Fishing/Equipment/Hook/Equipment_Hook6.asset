@@ -10,17 +10,17 @@ MonoBehaviour:
   m_Enabled: 1
   m_EditorHideFlags: 0
   m_Script: {fileID: 11500000, guid: 969380abd80da0e48b007a5dce51a59a, type: 3}
-  m_Name: "M\xF3c C\xE2u #6"
+  m_Name: Equipment_Hook6
   m_EditorClassIdentifier: 
   itemName: "M\xF3c C\xE2u #6"
   description: 
-  icon: {fileID: 21300000, guid: 0988c2e391c5fa546b3e74af12cbabf1, type: 3}
-  partType: 2
-  rodPreviewSprite: {fileID: -1224432037895491173, guid: 2d60da62f0d7568418e99654f7d04fa5, type: 3}
-  requiredSkill: 4
+  icon: {fileID: -1224432037895491173, guid: 2d60da62f0d7568418e99654f7d04fa5, type: 3}
+  partType: 0
+  rodPreviewSprite: {fileID: 0}
+  requiredSkill: 0
   power: 0
   speed: 0
   maxDepth: 0
-  fishChanceBonus: 5
+  fishChanceBonus: 0
   baitName: 
   baitChanceBonus: 0

@@ -1,0 +1,26 @@
+%YAML 1.1
+%TAG !u! tag:unity3d.com,2011:
+--- !u!114 &11400000
+MonoBehaviour:
+  m_ObjectHideFlags: 0
+  m_CorrespondingSourceObject: {fileID: 0}
+  m_PrefabInstance: {fileID: 0}
+  m_PrefabAsset: {fileID: 0}
+  m_GameObject: {fileID: 0}
+  m_Enabled: 1
+  m_EditorHideFlags: 0
+  m_Script: {fileID: 11500000, guid: e7bac124b512b4543ab1794d28072d49, type: 3}
+  m_Name: Bait_FishMeat
+  m_EditorClassIdentifier: 
+  baitName: "Th\u1ECBt C\xE1"
+  icon: {fileID: 7358237761833423069, guid: d0a6a4de9a0d34a479e6f6c167d1156f, type: 3}
+  description: 
+  baitType: 0
+  requiredLevel: 6
+  price: 110
+  amountPerPurchase: 1
+  fishChanceBonus: 9
+  rareFishChanceBonus: 3
+  preferredMinDepth: 0
+  preferredMaxDepth: 10
+  consumeOnCast: 1
