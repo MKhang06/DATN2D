@@ -13,12 +13,12 @@ MonoBehaviour:
   m_Name: Item_Equipment_FeatherLight
   m_EditorClassIdentifier: 
   itemId: equipment_rod_feather_light
-  displayName: EQ_FeatherLight
+  displayName: Feather Light
   description: 
   icon: {fileID: 2801815235045398359, guid: aaabfc6efe4cb034a9abd8a44d1304e8, type: 3}
   itemType: 3
   stackMode: 1
   maxStack: 1
   uniqueOwnership: 1
-  buyPrice: 1800
-  sellPrice: 900
+  buyPrice: 0
+  sellPrice: 0

@@ -13,6 +13,6 @@ MonoBehaviour:
   m_Name: ShopItem_CallistoXSR
   m_EditorClassIdentifier: 
   equipmentData: {fileID: 11400000, guid: 0175daaad72b7404dbdcfa4831b071cf, type: 2}
-  price: 2500
+  price: 0
   amountPerPurchase: 1
-  requiredPlayerLevel: 7
+  requiredPlayerLevel: 1

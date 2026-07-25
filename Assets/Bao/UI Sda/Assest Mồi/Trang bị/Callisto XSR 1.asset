@@ -13,6 +13,6 @@ MonoBehaviour:
   m_Name: Callisto XSR 1
   m_EditorClassIdentifier: 
   equipmentData: {fileID: 11400000, guid: f896c88a371c2134c84cbc41e5815960, type: 2}
-  price: 250
+  price: 0
   amountPerPurchase: 1
   requiredPlayerLevel: 1

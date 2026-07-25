@@ -17,7 +17,7 @@ MonoBehaviour:
   icon: {fileID: 714952081480608755, guid: 6d4a3d4ee48bda84eab1001c942460e6, type: 3}
   partType: 0
   rodPreviewSprite: {fileID: 714952081480608755, guid: 6d4a3d4ee48bda84eab1001c942460e6, type: 3}
-  requiredSkill: 1
+  requiredSkill: 0
   power: 2
   speed: 6
   maxDepth: 0

@@ -13,6 +13,6 @@ MonoBehaviour:
   m_Name: ShopItem_CheapMonoLine
   m_EditorClassIdentifier: 
   equipmentData: {fileID: 11400000, guid: 6fdf29a98d4940842954b9ffd09fad83, type: 2}
-  price: 100
+  price: 0
   amountPerPurchase: 1
   requiredPlayerLevel: 1

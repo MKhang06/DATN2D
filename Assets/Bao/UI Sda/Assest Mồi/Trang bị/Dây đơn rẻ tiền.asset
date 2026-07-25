@@ -12,12 +12,12 @@ MonoBehaviour:
   m_Script: {fileID: 11500000, guid: 969380abd80da0e48b007a5dce51a59a, type: 3}
   m_Name: "D\xE2y \u0111\u01A1n r\u1EBB ti\u1EC1n"
   m_EditorClassIdentifier: 
-  itemName: "D\xE2y \u0111\u01A1n r\u1EBB ti\u1EC1n"
+  itemName: "D\xE2y \u0110\u01A1n R\u1EBB Ti\u1EC1n"
   description: 
   icon: {fileID: -2299027691662585556, guid: b95f8b29c22f55446b5f63f04887f01a, type: 3}
   partType: 1
   rodPreviewSprite: {fileID: -2299027691662585556, guid: b95f8b29c22f55446b5f63f04887f01a, type: 3}
-  requiredSkill: 1
+  requiredSkill: 0
   power: 1
   speed: 0
   maxDepth: 0

@@ -13,6 +13,6 @@ MonoBehaviour:
   m_Name: ShopItem_FeatherLight
   m_EditorClassIdentifier: 
   equipmentData: {fileID: 11400000, guid: d98826e2ae0e9ef4b8ebcfd2731c20a0, type: 2}
-  price: 1800
+  price: 0
   amountPerPurchase: 1
-  requiredPlayerLevel: 5
+  requiredPlayerLevel: 1

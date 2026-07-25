@@ -13,6 +13,6 @@ MonoBehaviour:
   m_Name: EQ_FeatherLight 1
   m_EditorClassIdentifier: 
   equipmentData: {fileID: 11400000, guid: 34e436ed5b79bfd46ba1a3f6052d1dac, type: 2}
-  price: 250
+  price: 0
   amountPerPurchase: 1
   requiredPlayerLevel: 1

@@ -14,7 +14,7 @@ MonoBehaviour:
   m_EditorClassIdentifier: 
   inventoryItem: {fileID: 11400000, guid: 6c1a1c9ab1380a84e917c5cd45ddbdf6, type: 2}
   slotType: 2
-  requiredSkill: 3
+  requiredSkill: 0
   strengthBonus: 2
   speedBonus: 0.25
   maxDepthBonus: 0.5
