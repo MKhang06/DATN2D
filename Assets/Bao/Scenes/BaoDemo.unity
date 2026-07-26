@@ -11162,7 +11162,7 @@ Transform:
   serializedVersion: 2
   m_LocalRotation: {x: 0, y: 0, z: 0, w: 1}
   m_LocalPosition: {x: 0.342, y: 0.465, z: 0}
-  m_LocalScale: {x: 0.3, y: 0.3, z: 1}
+  m_LocalScale: {x: 0.65, y: 0.65, z: 1}
   m_ConstrainProportionsScale: 0
   m_Children:
   - {fileID: 658944677}
@@ -21270,7 +21270,7 @@ Transform:
   serializedVersion: 2
   m_LocalRotation: {x: 0, y: 0, z: 0, w: 1}
   m_LocalPosition: {x: 0, y: 0, z: 0}
-  m_LocalScale: {x: 0.15, y: 0.15, z: 1}
+  m_LocalScale: {x: 0.5, y: 0.5, z: 1}
   m_ConstrainProportionsScale: 0
   m_Children: []
   m_Father: {fileID: 422496030}
@@ -21282,7 +21282,7 @@ SpriteRenderer:
   m_PrefabInstance: {fileID: 0}
   m_PrefabAsset: {fileID: 0}
   m_GameObject: {fileID: 658944676}
-  m_Enabled: 1
+  m_Enabled: 0
   m_CastShadows: 0
   m_ReceiveShadows: 0
   m_DynamicOccludee: 1
@@ -23222,6 +23222,37 @@ CanvasRenderer:
   m_PrefabAsset: {fileID: 0}
   m_GameObject: {fileID: 746368659}
   m_CullTransparentMesh: 1
+--- !u!1 &748983726
+GameObject:
+  m_ObjectHideFlags: 0
+  m_CorrespondingSourceObject: {fileID: 0}
+  m_PrefabInstance: {fileID: 0}
+  m_PrefabAsset: {fileID: 0}
+  serializedVersion: 6
+  m_Component:
+  - component: {fileID: 748983727}
+  m_Layer: 0
+  m_Name: RodTipPoint
+  m_TagString: Untagged
+  m_Icon: {fileID: 0}
+  m_NavMeshLayer: 0
+  m_StaticEditorFlags: 0
+  m_IsActive: 1
+--- !u!4 &748983727
+Transform:
+  m_ObjectHideFlags: 0
+  m_CorrespondingSourceObject: {fileID: 0}
+  m_PrefabInstance: {fileID: 0}
+  m_PrefabAsset: {fileID: 0}
+  m_GameObject: {fileID: 748983726}
+  serializedVersion: 2
+  m_LocalRotation: {x: 0, y: 0, z: 0, w: 1}
+  m_LocalPosition: {x: -1.4872, y: 1.8567998, z: 0}
+  m_LocalScale: {x: 1, y: 1, z: 1}
+  m_ConstrainProportionsScale: 0
+  m_Children: []
+  m_Father: {fileID: 1050016782}
+  m_LocalEulerAnglesHint: {x: 0, y: 0, z: 0}
 --- !u!1 &749547872
 GameObject:
   m_ObjectHideFlags: 0
@@ -34786,6 +34817,8 @@ GameObject:
   m_Component:
   - component: {fileID: 1050016782}
   - component: {fileID: 1050016783}
+  - component: {fileID: 1050016784}
+  - component: {fileID: 1050016785}
   m_Layer: 0
   m_Name: Fishing Rod
   m_TagString: Untagged
@@ -34802,10 +34835,12 @@ Transform:
   m_GameObject: {fileID: 1050016781}
   serializedVersion: 2
   m_LocalRotation: {x: -0, y: -0, z: -0, w: 1}
-  m_LocalPosition: {x: 0.457, y: 1.059, z: 0}
+  m_LocalPosition: {x: 0.45700014, y: 1.059, z: 0}
   m_LocalScale: {x: 0.2622464, y: 0.2622464, z: 0.2622464}
   m_ConstrainProportionsScale: 0
-  m_Children: []
+  m_Children:
+  - {fileID: 1747672702}
+  - {fileID: 748983727}
   m_Father: {fileID: 6210251248469213982}
   m_LocalEulerAnglesHint: {x: 0, y: 0, z: 0}
 --- !u!212 &1050016783
@@ -34863,6 +34898,54 @@ SpriteRenderer:
   m_WasSpriteAssigned: 1
   m_MaskInteraction: 0
   m_SpriteSortPoint: 0
+--- !u!114 &1050016784
+MonoBehaviour:
+  m_ObjectHideFlags: 0
+  m_CorrespondingSourceObject: {fileID: 0}
+  m_PrefabInstance: {fileID: 0}
+  m_PrefabAsset: {fileID: 0}
+  m_GameObject: {fileID: 1050016781}
+  m_Enabled: 0
+  m_EditorHideFlags: 0
+  m_Script: {fileID: 11500000, guid: 3bc655ba9b175764fa4fd596be19a150, type: 3}
+  m_Name: 
+  m_EditorClassIdentifier: 
+  rodPivot: {fileID: 1050016782}
+  rodVisual: {fileID: 1050016782}
+  rodRenderer: {fileID: 1050016783}
+  worldCamera: {fileID: 519420031}
+  spriteForwardLocal: {x: -1, y: 1}
+  reverseForward: 0
+  maximumDegreesPerSecond: 2160
+  minimumAimDistance: 0.12
+  angleDeadZone: 0.08
+  extraAngleOffset: 0
+  disableKnownOldAimScripts: 1
+  forceDisableSpriteFlip: 1
+  drawDebugLines: 0
+  showSetupWarnings: 1
+--- !u!114 &1050016785
+MonoBehaviour:
+  m_ObjectHideFlags: 0
+  m_CorrespondingSourceObject: {fileID: 0}
+  m_PrefabInstance: {fileID: 0}
+  m_PrefabAsset: {fileID: 0}
+  m_GameObject: {fileID: 1050016781}
+  m_Enabled: 0
+  m_EditorHideFlags: 0
+  m_Script: {fileID: 11500000, guid: 5840c59cf77fb9644bde9731a1ca053b, type: 3}
+  m_Name: 
+  m_EditorClassIdentifier: 
+  rodRoot: {fileID: 1050016782}
+  handlePoint: {fileID: 1747672702}
+  tipPoint: {fileID: 748983727}
+  worldCamera: {fileID: 519420031}
+  maximumDegreesPerSecond: 2880
+  minimumMouseDistance: 0.12
+  angleDeadZone: 0.05
+  forceDisableSpriteFlip: 1
+  rodRenderer: {fileID: 1050016783}
+  drawDebugLines: 0
 --- !u!1 &1051379295
 GameObject:
   m_ObjectHideFlags: 0
@@ -40994,7 +41077,7 @@ MonoBehaviour:
   m_HandleRect: {fileID: 274993933}
   m_Direction: 2
   m_Value: 0
-  m_Size: 0.27710843
+  m_Size: 1
   m_NumberOfSteps: 0
   m_OnValueChanged:
     m_PersistentCalls:
@@ -50964,6 +51047,37 @@ CanvasRenderer:
   m_PrefabAsset: {fileID: 0}
   m_GameObject: {fileID: 1740344567}
   m_CullTransparentMesh: 1
+--- !u!1 &1747672701
+GameObject:
+  m_ObjectHideFlags: 0
+  m_CorrespondingSourceObject: {fileID: 0}
+  m_PrefabInstance: {fileID: 0}
+  m_PrefabAsset: {fileID: 0}
+  serializedVersion: 6
+  m_Component:
+  - component: {fileID: 1747672702}
+  m_Layer: 0
+  m_Name: RodHandlePoint
+  m_TagString: Untagged
+  m_Icon: {fileID: 0}
+  m_NavMeshLayer: 0
+  m_StaticEditorFlags: 0
+  m_IsActive: 1
+--- !u!4 &1747672702
+Transform:
+  m_ObjectHideFlags: 0
+  m_CorrespondingSourceObject: {fileID: 0}
+  m_PrefabInstance: {fileID: 0}
+  m_PrefabAsset: {fileID: 0}
+  m_GameObject: {fileID: 1747672701}
+  serializedVersion: 2
+  m_LocalRotation: {x: 0, y: 0, z: 0, w: 1}
+  m_LocalPosition: {x: 1.2168001, y: -1.5192, z: 0}
+  m_LocalScale: {x: 1, y: 1, z: 1}
+  m_ConstrainProportionsScale: 0
+  m_Children: []
+  m_Father: {fileID: 1050016782}
+  m_LocalEulerAnglesHint: {x: 0, y: 0, z: 0}
 --- !u!1 &1748285733
 GameObject:
   m_ObjectHideFlags: 0
@@ -53418,6 +53532,62 @@ CanvasRenderer:
   m_PrefabAsset: {fileID: 0}
   m_GameObject: {fileID: 1864545215}
   m_CullTransparentMesh: 1
+--- !u!1 &1865310729
+GameObject:
+  m_ObjectHideFlags: 0
+  m_CorrespondingSourceObject: {fileID: 0}
+  m_PrefabInstance: {fileID: 0}
+  m_PrefabAsset: {fileID: 0}
+  serializedVersion: 6
+  m_Component:
+  - component: {fileID: 1865310730}
+  - component: {fileID: 1865310731}
+  m_Layer: 0
+  m_Name: FishingRodAimPivot
+  m_TagString: Untagged
+  m_Icon: {fileID: 0}
+  m_NavMeshLayer: 0
+  m_StaticEditorFlags: 0
+  m_IsActive: 1
+--- !u!4 &1865310730
+Transform:
+  m_ObjectHideFlags: 0
+  m_CorrespondingSourceObject: {fileID: 0}
+  m_PrefabInstance: {fileID: 0}
+  m_PrefabAsset: {fileID: 0}
+  m_GameObject: {fileID: 1865310729}
+  serializedVersion: 2
+  m_LocalRotation: {x: -0, y: -0, z: -0, w: 1}
+  m_LocalPosition: {x: 0.77610147, y: 0.6605953, z: 0}
+  m_LocalScale: {x: 1, y: 1, z: 1}
+  m_ConstrainProportionsScale: 0
+  m_Children: []
+  m_Father: {fileID: 6210251248469213982}
+  m_LocalEulerAnglesHint: {x: 0, y: 0, z: 0}
+--- !u!114 &1865310731
+MonoBehaviour:
+  m_ObjectHideFlags: 0
+  m_CorrespondingSourceObject: {fileID: 0}
+  m_PrefabInstance: {fileID: 0}
+  m_PrefabAsset: {fileID: 0}
+  m_GameObject: {fileID: 1865310729}
+  m_Enabled: 0
+  m_EditorHideFlags: 0
+  m_Script: {fileID: 11500000, guid: 59508a61f727c3348989a5d536a6fb4b, type: 3}
+  m_Name: 
+  m_EditorClassIdentifier: 
+  rodPivot: {fileID: 1865310730}
+  rodVisual: {fileID: 1050016782}
+  handlePoint: {fileID: 1747672702}
+  tipPoint: {fileID: 748983727}
+  worldCamera: {fileID: 519420031}
+  degreesPerSecond: 2160
+  minimumMouseDistance: 0.08
+  angleDeadZone: 0.05
+  clearSpriteFlip: 1
+  rodRenderer: {fileID: 1050016783}
+  compensateNegativeParentScale: 1
+  drawDebugLines: 0
 --- !u!1 &1876693588
 GameObject:
   m_ObjectHideFlags: 0
@@ -62547,7 +62717,7 @@ MonoBehaviour:
   m_HandleRect: {fileID: 7575230266069128654}
   m_Direction: 2
   m_Value: 0
-  m_Size: 0.27710843
+  m_Size: 1
   m_NumberOfSteps: 0
   m_OnValueChanged:
     m_PersistentCalls:
@@ -62947,6 +63117,9 @@ PrefabInstance:
       addedObject: {fileID: 1545556968}
     - targetCorrespondingSourceObject: {fileID: 6770209043894755006, guid: 0b13ecfbe49197747ade198e011f0b5e, type: 3}
       insertIndex: -1
+      addedObject: {fileID: 1865310730}
+    - targetCorrespondingSourceObject: {fileID: 6770209043894755006, guid: 0b13ecfbe49197747ade198e011f0b5e, type: 3}
+      insertIndex: -1
       addedObject: {fileID: 1050016782}
     - targetCorrespondingSourceObject: {fileID: 754109313421579143, guid: 0b13ecfbe49197747ade198e011f0b5e, type: 3}
       insertIndex: 1
@@ -62979,6 +63152,30 @@ PrefabInstance:
     - targetCorrespondingSourceObject: {fileID: 8951891740236506941, guid: 0b13ecfbe49197747ade198e011f0b5e, type: 3}
       insertIndex: -1
       addedObject: {fileID: 9113155354489064567}
+    - targetCorrespondingSourceObject: {fileID: 8951891740236506941, guid: 0b13ecfbe49197747ade198e011f0b5e, type: 3}
+      insertIndex: -1
+      addedObject: {fileID: 9113155354489064568}
+    - targetCorrespondingSourceObject: {fileID: 8951891740236506941, guid: 0b13ecfbe49197747ade198e011f0b5e, type: 3}
+      insertIndex: -1
+      addedObject: {fileID: 9113155354489064572}
+    - targetCorrespondingSourceObject: {fileID: 8951891740236506941, guid: 0b13ecfbe49197747ade198e011f0b5e, type: 3}
+      insertIndex: -1
+      addedObject: {fileID: 9113155354489064577}
+    - targetCorrespondingSourceObject: {fileID: 8951891740236506941, guid: 0b13ecfbe49197747ade198e011f0b5e, type: 3}
+      insertIndex: -1
+      addedObject: {fileID: 9113155354489064581}
+    - targetCorrespondingSourceObject: {fileID: 8951891740236506941, guid: 0b13ecfbe49197747ade198e011f0b5e, type: 3}
+      insertIndex: -1
+      addedObject: {fileID: 9113155354489064582}
+    - targetCorrespondingSourceObject: {fileID: 8951891740236506941, guid: 0b13ecfbe49197747ade198e011f0b5e, type: 3}
+      insertIndex: -1
+      addedObject: {fileID: 9113155354489064583}
+    - targetCorrespondingSourceObject: {fileID: 8951891740236506941, guid: 0b13ecfbe49197747ade198e011f0b5e, type: 3}
+      insertIndex: -1
+      addedObject: {fileID: 9113155354489064584}
+    - targetCorrespondingSourceObject: {fileID: 8951891740236506941, guid: 0b13ecfbe49197747ade198e011f0b5e, type: 3}
+      insertIndex: -1
+      addedObject: {fileID: 9113155354489064585}
   m_SourcePrefab: {fileID: 100100000, guid: 0b13ecfbe49197747ade198e011f0b5e, type: 3}
 --- !u!4 &6210251248469213982 stripped
 Transform:
@@ -63696,6 +63893,229 @@ MonoBehaviour:
   forceSameInventoryManager: 1
   refreshCustomizationUIOnInventoryChange: 1
   showDebugLogs: 1
+--- !u!114 &9113155354489064568
+MonoBehaviour:
+  m_ObjectHideFlags: 0
+  m_CorrespondingSourceObject: {fileID: 0}
+  m_PrefabInstance: {fileID: 0}
+  m_PrefabAsset: {fileID: 0}
+  m_GameObject: {fileID: 1195798365}
+  m_Enabled: 1
+  m_EditorHideFlags: 0
+  m_Script: {fileID: 11500000, guid: abec43637b92e594eb03bef55d603ca3, type: 3}
+  m_Name: 
+  m_EditorClassIdentifier: 
+  inventoryManager: {fileID: 1154832215}
+  customizationUI: {fileID: 1900130975}
+  requiredRodItem: {fileID: 11400000, guid: 34f432ab88749984a8034b0c833bdaf6, type: 2}
+  hierarchyRodVisual: {fileID: 1050016781}
+  requireSelectedRod: 1
+  closeCustomizationWhenRodPutAway: 1
+  forceCloseWhileNotHoldingRod: 1
+  acceptedRodNames:
+  - Feather Light
+  - EQ_FeatherLight
+  - equipment_rod_feather_light
+  - Fishing Rod
+  - "C\u1EA7n C\xE2u"
+  onCustomizationDenied:
+    m_PersistentCalls:
+      m_Calls: []
+  onRodHeld:
+    m_PersistentCalls:
+      m_Calls: []
+  onRodPutAway:
+    m_PersistentCalls:
+      m_Calls: []
+  showDebugLogs: 1
+--- !u!114 &9113155354489064572
+MonoBehaviour:
+  m_ObjectHideFlags: 0
+  m_CorrespondingSourceObject: {fileID: 0}
+  m_PrefabInstance: {fileID: 0}
+  m_PrefabAsset: {fileID: 0}
+  m_GameObject: {fileID: 1195798365}
+  m_Enabled: 0
+  m_EditorHideFlags: 0
+  m_Script: {fileID: 11500000, guid: 5d4c4d8a5b0925445be9d235d526f772, type: 3}
+  m_Name: 
+  m_EditorClassIdentifier: 
+  inventoryManager: {fileID: 1154832215}
+  equipmentShopUI: {fileID: 480529604}
+  hierarchyRodObject: {fileID: 1050016781}
+  rodSpriteRenderer: {fileID: 1050016783}
+  onlyShowWhenSelected: 1
+  hideWhenNoRodSelected: 1
+  overrideLocalScale: 1
+  heldLocalScale: {x: 0.15, y: 0.15, z: 1}
+  rodKeywords:
+  - Feather Light
+  - FeatherLight
+  - Fishing Rod
+  - "C\u1EA7n C\xE2u"
+  - equipment_rod
+  showDebugLogs: 1
+--- !u!114 &9113155354489064577
+MonoBehaviour:
+  m_ObjectHideFlags: 0
+  m_CorrespondingSourceObject: {fileID: 0}
+  m_PrefabInstance: {fileID: 0}
+  m_PrefabAsset: {fileID: 0}
+  m_GameObject: {fileID: 1195798365}
+  m_Enabled: 0
+  m_EditorHideFlags: 0
+  m_Script: {fileID: 11500000, guid: a8e0058c8d6f5ad44ab7a7a8a6c9c640, type: 3}
+  m_Name: 
+  m_EditorClassIdentifier: 
+  inventoryManager: {fileID: 1154832215}
+  heldItemObject: {fileID: 658944676}
+  heldItemRenderer: {fileID: 658944678}
+  rodKeywords:
+  - Feather Light
+  - FeatherLight
+  - Fishing Rod
+  - "C\u1EA7n C\xE2u"
+  - equipment_rod
+--- !u!114 &9113155354489064581
+MonoBehaviour:
+  m_ObjectHideFlags: 0
+  m_CorrespondingSourceObject: {fileID: 0}
+  m_PrefabInstance: {fileID: 0}
+  m_PrefabAsset: {fileID: 0}
+  m_GameObject: {fileID: 1195798365}
+  m_Enabled: 0
+  m_EditorHideFlags: 0
+  m_Script: {fileID: 11500000, guid: 162aca85d93728148849438cb222a6bc, type: 3}
+  m_Name: 
+  m_EditorClassIdentifier: 
+  inventoryManager: {fileID: 1154832215}
+  oldRodObject: {fileID: 1050016781}
+  oldRodRenderer: {fileID: 1050016783}
+  oldRodSprite: {fileID: 4407887877861769381, guid: d17dcb2a1017b594bb34ffc16f8a95ec, type: 3}
+  heldItemRenderer: {fileID: 658944678}
+  restoreOldTransform: 1
+  oldLocalPosition: {x: -0.31910133, y: 0.39840472, z: 0}
+  oldLocalEulerAngles: {x: 0, y: 0, z: 0}
+  oldLocalScale: {x: 0.2622464, y: 0.2622464, z: 0.2622464}
+  rodKeywords:
+  - Feather Light
+  - FeatherLight
+  - Fishing Rod
+  - "C\u1EA7n C\xE2u"
+  - equipment_rod
+  showDebugLogs: 0
+--- !u!114 &9113155354489064582
+MonoBehaviour:
+  m_ObjectHideFlags: 0
+  m_CorrespondingSourceObject: {fileID: 0}
+  m_PrefabInstance: {fileID: 0}
+  m_PrefabAsset: {fileID: 0}
+  m_GameObject: {fileID: 1195798365}
+  m_Enabled: 0
+  m_EditorHideFlags: 0
+  m_Script: {fileID: 11500000, guid: 0296ee7582129b24b979fad5f018c1c7, type: 3}
+  m_Name: 
+  m_EditorClassIdentifier: 
+  inventoryManager: {fileID: 1154832215}
+  oldRodObject: {fileID: 1050016781}
+  oldRodRenderer: {fileID: 1050016783}
+  oldRodSprite: {fileID: 4407887877861769381, guid: d17dcb2a1017b594bb34ffc16f8a95ec, type: 3}
+  heldItemRoot: {fileID: 658944677}
+  toolHolder: {fileID: 6210251248469213982}
+  forceOldTransform: 1
+  oldLocalPosition: {x: 0.45700014, y: 1.059, z: 0}
+  oldLocalEulerAngles: {x: 0, y: 0, z: 0}
+  oldLocalScale: {x: 0.2622464, y: 0.2622464, z: 0.2622464}
+  rodKeywords:
+  - Feather Light
+  - FeatherLight
+  - Fishing Rod
+  - "C\u1EA7n C\xE2u"
+  - equipment_rod
+  hideMatchingRodSprites: 1
+  hideNamedRodRenderers: 1
+  showDebugLogs: 0
+--- !u!114 &9113155354489064583
+MonoBehaviour:
+  m_ObjectHideFlags: 0
+  m_CorrespondingSourceObject: {fileID: 0}
+  m_PrefabInstance: {fileID: 0}
+  m_PrefabAsset: {fileID: 0}
+  m_GameObject: {fileID: 1195798365}
+  m_Enabled: 0
+  m_EditorHideFlags: 0
+  m_Script: {fileID: 11500000, guid: b021be754a524714baa386b37cd004ef, type: 3}
+  m_Name: 
+  m_EditorClassIdentifier: 
+  inventoryManager: {fileID: 1154832215}
+  oldFishingRod: {fileID: 1050016781}
+  heldItemRoot: {fileID: 658944677}
+  preserveOldRodExactly: 1
+  hideHeldItemRenderers: 1
+  rodKeywords:
+  - Feather Light
+  - FeatherLight
+  - Fishing Rod
+  - "C\u1EA7n C\xE2u"
+  - equipment_rod
+  showDebugLogs: 0
+--- !u!114 &9113155354489064584
+MonoBehaviour:
+  m_ObjectHideFlags: 0
+  m_CorrespondingSourceObject: {fileID: 0}
+  m_PrefabInstance: {fileID: 0}
+  m_PrefabAsset: {fileID: 0}
+  m_GameObject: {fileID: 1195798365}
+  m_Enabled: 0
+  m_EditorHideFlags: 0
+  m_Script: {fileID: 11500000, guid: 5e51f0facffd80843a4a11c1ad205794, type: 3}
+  m_Name: 
+  m_EditorClassIdentifier: 
+  inventoryManager: {fileID: 1154832215}
+  exactOldRodObject: {fileID: 1050016781}
+  originalParent: {fileID: 6210251248469213982}
+  heldItemRoot: {fileID: 658944677}
+  restoreOriginalPositionAndScale: 1
+  originalLocalPosition: {x: 0.45700014, y: 1.059, z: 0}
+  originalLocalScale: {x: 0.2622464, y: 0.2622464, z: 0.2622464}
+  rodKeywords:
+  - Feather Light
+  - FeatherLight
+  - Fishing Rod
+  - "C\u1EA7n C\xE2u"
+  - equipment_rod
+  showDebugLogs: 0
+--- !u!114 &9113155354489064585
+MonoBehaviour:
+  m_ObjectHideFlags: 0
+  m_CorrespondingSourceObject: {fileID: 0}
+  m_PrefabInstance: {fileID: 0}
+  m_PrefabAsset: {fileID: 0}
+  m_GameObject: {fileID: 1195798365}
+  m_Enabled: 1
+  m_EditorHideFlags: 0
+  m_Script: {fileID: 11500000, guid: 53dd7cb4a43dc1a4190a4cbcc441e893, type: 3}
+  m_Name: 
+  m_EditorClassIdentifier: 
+  inventoryManager: {fileID: 1154832215}
+  ownershipGate: {fileID: 9113155354489064568}
+  playerToolAnimation: {fileID: 9113155354489064547}
+  oldFishingRod: {fileID: 1050016781}
+  heldItemRoot: {fileID: 658944677}
+  forceOldRodPositionAndScale: 1
+  oldRodLocalPosition: {x: 0.4570001, y: 1.059, z: 0}
+  oldRodLocalScale: {x: 0.2622464, y: 0.2622464, z: 0.2622464}
+  autoEquipFromHotbar: 1
+  blockLegacyFWithoutPurchasedRod: 1
+  forceEnableMouseRotation: 1
+  rodKeywords:
+  - Feather Light
+  - FeatherLight
+  - EQ_FeatherLight
+  - Fishing Rod
+  - "C\u1EA7n C\xE2u"
+  - equipment_rod
+  showDebugLogs: 0
 --- !u!1 &9201609976061828842
 GameObject:
   m_ObjectHideFlags: 0
