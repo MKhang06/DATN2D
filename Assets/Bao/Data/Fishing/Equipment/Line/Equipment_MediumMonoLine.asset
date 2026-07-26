@@ -15,7 +15,7 @@ MonoBehaviour:
   itemName: "D\xE2y \u0110\u01A1n C\u1EE1 V\u1EEBa"
   description: 
   icon: {fileID: 8321706048909718519, guid: 852201a8e20ab4647a8b56b4210ada9a, type: 3}
-  partType: 0
+  partType: 1
   rodPreviewSprite: {fileID: 0}
   requiredSkill: 0
   power: 0

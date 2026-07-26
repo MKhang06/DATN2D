@@ -15,7 +15,7 @@ MonoBehaviour:
   itemName: "D\xE2y D\xF9 Tia Ch\u1EDBp"
   description: 
   icon: {fileID: 7833852217944610713, guid: 51a936264bf8b5d43a203e249d4a89f9, type: 3}
-  partType: 0
+  partType: 1
   rodPreviewSprite: {fileID: 0}
   requiredSkill: 0
   power: 0

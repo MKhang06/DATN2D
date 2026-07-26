@@ -15,7 +15,7 @@ MonoBehaviour:
   itemName: "M\xF3c C\xE2u #6"
   description: 
   icon: {fileID: -1224432037895491173, guid: 2d60da62f0d7568418e99654f7d04fa5, type: 3}
-  partType: 0
+  partType: 2
   rodPreviewSprite: {fileID: 0}
   requiredSkill: 0
   power: 0

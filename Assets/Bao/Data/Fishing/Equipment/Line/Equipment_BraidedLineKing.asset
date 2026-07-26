@@ -15,7 +15,7 @@ MonoBehaviour:
   itemName: "D\xE2y D\xF9 Vua"
   description: 
   icon: {fileID: 6857695923298094917, guid: 51a936264bf8b5d43a203e249d4a89f9, type: 3}
-  partType: 0
+  partType: 1
   rodPreviewSprite: {fileID: 0}
   requiredSkill: 0
   power: 0

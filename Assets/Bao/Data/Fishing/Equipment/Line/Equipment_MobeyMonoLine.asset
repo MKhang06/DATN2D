@@ -15,7 +15,7 @@ MonoBehaviour:
   itemName: "D\xE2y Mobey \u0110\u01A1n"
   description: 
   icon: {fileID: 5834596863387846907, guid: 24731b0725076f549b660e80d694832f, type: 3}
-  partType: 0
+  partType: 1
   rodPreviewSprite: {fileID: 0}
   requiredSkill: 0
   power: 0

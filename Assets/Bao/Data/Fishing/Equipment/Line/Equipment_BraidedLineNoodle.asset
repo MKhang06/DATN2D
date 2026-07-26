@@ -15,7 +15,7 @@ MonoBehaviour:
   itemName: "D\xE2y D\xF9 Noodle"
   description: 
   icon: {fileID: 4745453858183910115, guid: 8e58dc4384c63994882e4fbdc24fb8cf, type: 3}
-  partType: 0
+  partType: 1
   rodPreviewSprite: {fileID: 0}
   requiredSkill: 0
   power: 0
