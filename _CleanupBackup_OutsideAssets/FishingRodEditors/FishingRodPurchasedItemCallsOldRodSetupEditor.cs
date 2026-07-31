@@ -211,7 +211,7 @@ public static class FishingRodPurchasedItemCallsOldRodSetupEditor
 
     private static int DisableDisplayControllers(
         Transform root,
-        FishingRodPurchasedItemCallsOldRod keep,
+        ishingRodPurchasedItemCallsOldRod keep,
         Transform oldRod)
     {
         int count = 0;

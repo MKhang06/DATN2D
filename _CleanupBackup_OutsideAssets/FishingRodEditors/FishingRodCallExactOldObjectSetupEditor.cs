@@ -183,7 +183,7 @@ public static class FishingRodCallExactOldObjectSetupEditor
     private static int
         DisableConflictingDisplayControllers(
             Transform root,
-            FishingRodCallExactOldObject keep,
+            ishingRodCallExactOldObject keep,
             Transform selectedRod)
     {
         int count = 0;

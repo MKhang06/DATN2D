@@ -346,7 +346,7 @@ public static class FishingRodMouseAimPivotSetupEditor
     private static int
         DisableAllOtherRodAimScripts(
             Transform root,
-            FishingRodMouseAimPivot keep)
+            ishingRodMouseAimPivot keep)
     {
         int count = 0;
 

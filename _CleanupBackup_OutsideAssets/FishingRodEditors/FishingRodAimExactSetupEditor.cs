@@ -271,7 +271,7 @@ public static class FishingRodAimExactSetupEditor
     private static int
         DisableOldRotationScripts(
             Transform root,
-            FishingRodAimExact keep)
+            ishingRodAimExact keep)
     {
         int count = 0;
 
