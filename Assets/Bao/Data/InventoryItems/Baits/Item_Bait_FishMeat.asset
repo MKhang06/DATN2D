@@ -1,0 +1,24 @@
+%YAML 1.1
+%TAG !u! tag:unity3d.com,2011:
+--- !u!114 &11400000
+MonoBehaviour:
+  m_ObjectHideFlags: 0
+  m_CorrespondingSourceObject: {fileID: 0}
+  m_PrefabInstance: {fileID: 0}
+  m_PrefabAsset: {fileID: 0}
+  m_GameObject: {fileID: 0}
+  m_Enabled: 1
+  m_EditorHideFlags: 0
+  m_Script: {fileID: 11500000, guid: 7c4703bcc8a073d498bfd227b41e8cd0, type: 3}
+  m_Name: Item_Bait_FishMeat
+  m_EditorClassIdentifier: 
+  itemId: bait_fish_meat
+  displayName: "Th\u1ECBt C\xE1"
+  description: 
+  icon: {fileID: 7358237761833423069, guid: d0a6a4de9a0d34a479e6f6c167d1156f, type: 3}
+  itemType: 0
+  stackMode: 0
+  maxStack: 999
+  uniqueOwnership: 0
+  buyPrice: 110
+  sellPrice: 55

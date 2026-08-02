@@ -1,0 +1,26 @@
+%YAML 1.1
+%TAG !u! tag:unity3d.com,2011:
+--- !u!114 &11400000
+MonoBehaviour:
+  m_ObjectHideFlags: 0
+  m_CorrespondingSourceObject: {fileID: 0}
+  m_PrefabInstance: {fileID: 0}
+  m_PrefabAsset: {fileID: 0}
+  m_GameObject: {fileID: 0}
+  m_Enabled: 1
+  m_EditorHideFlags: 0
+  m_Script: {fileID: 11500000, guid: 969380abd80da0e48b007a5dce51a59a, type: 3}
+  m_Name: Equipment_BraidedLineLightning
+  m_EditorClassIdentifier: 
+  itemName: "D\xE2y D\xF9 Tia Ch\u1EDBp"
+  description: 
+  icon: {fileID: 7833852217944610713, guid: 51a936264bf8b5d43a203e249d4a89f9, type: 3}
+  partType: 1
+  rodPreviewSprite: {fileID: 0}
+  requiredSkill: 0
+  power: 0
+  speed: 0
+  maxDepth: 0
+  fishChanceBonus: 0
+  baitName: 
+  baitChanceBonus: 0

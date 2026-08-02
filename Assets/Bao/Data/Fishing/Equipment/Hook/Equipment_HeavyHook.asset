@@ -1,0 +1,26 @@
+%YAML 1.1
+%TAG !u! tag:unity3d.com,2011:
+--- !u!114 &11400000
+MonoBehaviour:
+  m_ObjectHideFlags: 0
+  m_CorrespondingSourceObject: {fileID: 0}
+  m_PrefabInstance: {fileID: 0}
+  m_PrefabAsset: {fileID: 0}
+  m_GameObject: {fileID: 0}
+  m_Enabled: 1
+  m_EditorHideFlags: 0
+  m_Script: {fileID: 11500000, guid: 969380abd80da0e48b007a5dce51a59a, type: 3}
+  m_Name: Equipment_HeavyHook
+  m_EditorClassIdentifier: 
+  itemName: "M\xF3c C\xE2u H\u1EA1ng N\u1EB7ng"
+  description: 
+  icon: {fileID: 8209022219562622298, guid: 7f9c5d11be68bbb4a8f2c72061b1984b, type: 3}
+  partType: 2
+  rodPreviewSprite: {fileID: 0}
+  requiredSkill: 0
+  power: 0
+  speed: 0
+  maxDepth: 0
+  fishChanceBonus: 0
+  baitName: 
+  baitChanceBonus: 0
