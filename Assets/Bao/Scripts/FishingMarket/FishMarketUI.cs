@@ -12,7 +12,7 @@ public class FishMarketUI : MonoBehaviour
     [Serializable]
     private sealed class FishPriceOverride
     {
-        public InventoryItemData fishItem;
+        public InventoryItemData fishItem = null;
 
         [Min(0.01f)]
         public float minimumMultiplier =

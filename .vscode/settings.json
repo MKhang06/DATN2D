@@ -67,5 +67,17 @@
         "*.sln": "*.csproj",
         "*.slnx": "*.csproj"
     },
-    "dotnet.defaultSolution": "DATN2D.slnx"
+    "dotnet.defaultSolution": "DATN2D.slnx",
+    "cSpell.language": "en,vi",
+    "cSpell.words": [
+        "Behaviour",
+        "Behaviours",
+        "interactable",
+        "Mathf",
+        "MonoBehaviour",
+        "Raycaster",
+        "Raycasters",
+        "Rebuilder",
+        "Rigidbody"
+    ]
 }

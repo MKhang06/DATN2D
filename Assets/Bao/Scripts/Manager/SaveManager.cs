@@ -124,7 +124,9 @@ public class SaveManager : MonoBehaviour
 
     private void SaveFarmTiles(SaveData data)
     {
-        FarmTile[] tiles = FindObjectsOfType<FarmTile>();
+        FarmTile[] tiles = FindObjectsByType<FarmTile>(
+            FindObjectsSortMode.None
+        );
 
         foreach (FarmTile tile in tiles)
         {
@@ -134,7 +136,9 @@ public class SaveManager : MonoBehaviour
 
     private void LoadFarmTiles(SaveData data)
     {
-        FarmTile[] tiles = FindObjectsOfType<FarmTile>();
+        FarmTile[] tiles = FindObjectsByType<FarmTile>(
+            FindObjectsSortMode.None
+        );
 
         foreach (FarmTile tile in tiles)
         {
@@ -152,7 +156,9 @@ public class SaveManager : MonoBehaviour
 
     private void SaveAnimals(SaveData data)
     {
-        SaveableAnimal[] animals = FindObjectsOfType<SaveableAnimal>();
+        SaveableAnimal[] animals = FindObjectsByType<SaveableAnimal>(
+            FindObjectsSortMode.None
+        );
 
         foreach (SaveableAnimal animal in animals)
             data.animals.Add(animal.GetSaveData());
@@ -160,7 +166,9 @@ public class SaveManager : MonoBehaviour
 
     private void LoadAnimals(SaveData data)
     {
-        SaveableAnimal[] animals = FindObjectsOfType<SaveableAnimal>();
+        SaveableAnimal[] animals = FindObjectsByType<SaveableAnimal>(
+            FindObjectsSortMode.None
+        );
 
         foreach (SaveableAnimal animal in animals)
         {
@@ -177,7 +185,9 @@ public class SaveManager : MonoBehaviour
 
     private void SaveBuildings(SaveData data)
     {
-        SaveableBuilding[] buildings = FindObjectsOfType<SaveableBuilding>();
+        SaveableBuilding[] buildings = FindObjectsByType<SaveableBuilding>(
+            FindObjectsSortMode.None
+        );
 
         foreach (SaveableBuilding building in buildings)
             data.buildings.Add(building.GetSaveData());
@@ -185,7 +195,9 @@ public class SaveManager : MonoBehaviour
 
     private void LoadBuildings(SaveData data)
     {
-        SaveableBuilding[] buildings = FindObjectsOfType<SaveableBuilding>();
+        SaveableBuilding[] buildings = FindObjectsByType<SaveableBuilding>(
+            FindObjectsSortMode.None
+        );
 
         foreach (SaveableBuilding building in buildings)
         {

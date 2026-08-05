@@ -259,17 +259,19 @@ public class WeatherManager : MonoBehaviour
     lightningLight.pointLightInnerRadius =
         Random.Range(10f, 15f);
 
-    yield return new WaitForSeconds(0.08f);
+    float safeFlashDuration = Mathf.Max(0.01f, flashDuration);
+
+    yield return new WaitForSeconds(safeFlashDuration * (2f / 3f));
 
     lightningLight.intensity = 0;
 
-    yield return new WaitForSeconds(0.04f);
+    yield return new WaitForSeconds(safeFlashDuration / 3f);
 
     lightningLight.intensity =
         Random.Range(minFlashIntensity * 0.6f,
                      maxFlashIntensity * 0.8f);
 
-    yield return new WaitForSeconds(0.05f);
+    yield return new WaitForSeconds(safeFlashDuration * (5f / 12f));
 
     lightningLight.intensity = 0;
     lightningLight.enabled = false;

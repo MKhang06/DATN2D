@@ -25,17 +25,19 @@ namespace GreenField.UI
 
         public void OpenSettings()
         {
-            Debug.Log("[Green Field] Chưa tạo panel Cài đặt.");
+            Debug.Log("[Green Field] Chưa tạo panel Cài đặt.", this);
         }
 
         public void ReloadCurrentScene()
         {
-            Scene currentScene = SceneManager.GetActiveScene();
+            Scene currentScene = gameObject.scene;
             SceneManager.LoadScene(currentScene.name, LoadSceneMode.Single);
         }
 
         public void ExitGame()
         {
+            Debug.Log("[Green Field] Thoát game.", this);
+
 #if UNITY_EDITOR
             UnityEditor.EditorApplication.isPlaying = false;
 #else

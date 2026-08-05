@@ -1,6 +1,8 @@
 using UnityEngine;
 using UnityEngine.UI;
 
+#pragma warning disable S3903 // Giữ namespace hiện tại để không làm mất liên kết MonoBehaviour đã serialize trong scene/prefab.
+
 public class FishingShopTabsUI : MonoBehaviour
 {
     [Header("Mở / đóng cửa hàng")]
@@ -222,3 +224,5 @@ public class FishingShopTabsUI : MonoBehaviour
         }
     }
 }
+
+#pragma warning restore S3903
