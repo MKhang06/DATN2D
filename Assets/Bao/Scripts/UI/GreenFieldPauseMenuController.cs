@@ -35,8 +35,6 @@ namespace GreenField.UI
 
         private float previousTimeScale = 1f;
         private bool previousAudioPause;
-        private bool previousCursorVisible;
-        private CursorLockMode previousCursorLockMode;
         private bool isPaused;
         private bool lockedPlayerWithPause;
 
@@ -116,15 +114,12 @@ namespace GreenField.UI
 
             previousTimeScale = Time.timeScale;
             previousAudioPause = AudioListener.pause;
-            previousCursorVisible = Cursor.visible;
-            previousCursorLockMode = Cursor.lockState;
 
             isPaused = true;
             IsGamePaused = true;
             Time.timeScale = 0f;
             AudioListener.pause = true;
-            Cursor.lockState = CursorLockMode.None;
-            Cursor.visible = true;
+            CursorManager.EnsureCursorAvailable();
 
             if (GameLockManager.Instance != null)
             {
@@ -195,8 +190,7 @@ namespace GreenField.UI
             IsGamePaused = false;
             Time.timeScale = previousTimeScale;
             AudioListener.pause = previousAudioPause;
-            Cursor.lockState = previousCursorLockMode;
-            Cursor.visible = previousCursorVisible;
+            CursorManager.EnsureCursorAvailable();
 
             if (lockedPlayerWithPause && GameLockManager.Instance != null)
             {

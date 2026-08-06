@@ -88,8 +88,7 @@ public class ToolSupplyShopStandalone : MonoBehaviour
         disabledRaycasters =
             new List<GraphicRaycaster>();
 
-    private bool previousCursorVisible;
-    private CursorLockMode previousCursorLock;
+    private bool cursorStateCaptured;
 
     private GameObject interactingPlayer;
     private bool playerLockedByShop;
@@ -197,15 +196,8 @@ public class ToolSupplyShopStandalone : MonoBehaviour
         if (ownRaycaster != null)
             ownRaycaster.enabled = true;
 
-        previousCursorVisible =
-            Cursor.visible;
-
-        previousCursorLock =
-            Cursor.lockState;
-
-        Cursor.visible = true;
-        Cursor.lockState =
-            CursorLockMode.None;
+        cursorStateCaptured = true;
+        CursorManager.EnsureCursorAvailable();
 
         DisableCompetingRaycasters();
         LockPlayerForShop();
@@ -228,11 +220,10 @@ public class ToolSupplyShopStandalone : MonoBehaviour
         RestoreCompetingRaycasters();
         UnlockPlayerForShop();
 
-        Cursor.visible =
-            previousCursorVisible;
+        if (cursorStateCaptured)
+            cursorStateCaptured = false;
 
-        Cursor.lockState =
-            previousCursorLock;
+        CursorManager.EnsureCursorAvailable();
     }
 
     public void RefreshProducts()

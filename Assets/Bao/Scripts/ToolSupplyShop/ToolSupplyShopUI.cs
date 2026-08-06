@@ -91,6 +91,7 @@ public class ToolSupplyShopUI : MonoBehaviour
     {
         ResolveReferences();
         EnsureEventSystem();
+        CursorManager.EnsureCursorAvailable();
 
         if (shopRoot == null)
         {
@@ -119,6 +120,7 @@ public class ToolSupplyShopUI : MonoBehaviour
             shopRoot.SetActive(false);
 
         HideMessage();
+        CursorManager.EnsureCursorAvailable();
     }
 
     public void RefreshShop()
@@ -549,9 +551,7 @@ public class ToolSupplyShopUI : MonoBehaviour
             group.blocksRaycasts = true;
         }
 
-        Cursor.visible = true;
-        Cursor.lockState =
-            CursorLockMode.None;
+        CursorManager.EnsureCursorAvailable();
     }
 
     private static void EnsureEventSystem()

@@ -147,8 +147,6 @@ public class FishMarketUI : MonoBehaviour
     private long lastCountdownSeconds = long.MinValue;
     private int lastDisplayedMoney = int.MinValue;
     private bool cursorStateCaptured;
-    private bool previousCursorVisible;
-    private CursorLockMode previousCursorLockMode;
 
     private const float MaintenanceInterval = 0.5f;
 
@@ -1386,12 +1384,8 @@ public class FishMarketUI : MonoBehaviour
         if (cursorStateCaptured)
             return;
 
-        previousCursorVisible = Cursor.visible;
-        previousCursorLockMode = Cursor.lockState;
         cursorStateCaptured = true;
-
-        Cursor.visible = true;
-        Cursor.lockState = CursorLockMode.None;
+        CursorManager.EnsureCursorAvailable();
     }
 
     private void RestoreCursorState()
@@ -1399,9 +1393,8 @@ public class FishMarketUI : MonoBehaviour
         if (!cursorStateCaptured)
             return;
 
-        Cursor.visible = previousCursorVisible;
-        Cursor.lockState = previousCursorLockMode;
         cursorStateCaptured = false;
+        CursorManager.EnsureCursorAvailable();
     }
 
     private void RebuildContentLayout()
