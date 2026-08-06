@@ -426,6 +426,79 @@ public class FishingRodLoadout : MonoBehaviour
         OnLoadoutChanged?.Invoke();
     }
 
+    public void WriteSaveData(SaveData data)
+    {
+        if (data == null)
+            return;
+
+        data.equippedReelId = GetPartId(equippedReel);
+        data.equippedLineId = GetPartId(equippedLine);
+        data.equippedHookId = GetPartId(equippedHook);
+        data.equippedBaitId = GetPartId(equippedBait);
+    }
+
+    public void LoadSaveData(SaveData data)
+    {
+        if (data == null || data.saveVersion < 2)
+            return;
+
+        equippedReel = FindPartById(
+            FishingRodPartSlotType.Reel,
+            data.equippedReelId
+        );
+        equippedLine = FindPartById(
+            FishingRodPartSlotType.Line,
+            data.equippedLineId
+        );
+        equippedHook = FindPartById(
+            FishingRodPartSlotType.Hook,
+            data.equippedHookId
+        );
+        equippedBait = FindPartById(
+            FishingRodPartSlotType.Bait,
+            data.equippedBaitId
+        );
+
+        ValidateEquippedParts();
+        SaveEquippedParts();
+        OnLoadoutChanged?.Invoke();
+    }
+
+    private static string GetPartId(
+        FishingRodPartDefinition definition)
+    {
+        return definition != null
+            ? definition.ItemId
+            : string.Empty;
+    }
+
+    private FishingRodPartDefinition FindPartById(
+        FishingRodPartSlotType slotType,
+        string itemId)
+    {
+        if (partDefinitions == null ||
+            string.IsNullOrWhiteSpace(itemId))
+        {
+            return null;
+        }
+
+        foreach (FishingRodPartDefinition definition in partDefinitions)
+        {
+            if (definition != null &&
+                definition.SlotType == slotType &&
+                string.Equals(
+                    definition.ItemId,
+                    itemId,
+                    StringComparison.OrdinalIgnoreCase
+                ))
+            {
+                return definition;
+            }
+        }
+
+        return null;
+    }
+
     private void SaveEquippedParts()
     {
         if (!saveWithPlayerPrefs)

@@ -341,6 +341,17 @@ public class WeatherManager : MonoBehaviour
         }
     }
 
+    public void SetWeather(
+        WeatherType weather,
+        bool waterFarmTiles = false)
+    {
+        currentWeather = weather;
+        ApplyWeatherEffect();
+
+        if (waterFarmTiles && IsRaining)
+            WaterAllFarmTiles();
+    }
+
     [ContextMenu("TEST/Set Sunny")]
     public void TestSetSunny()
     {

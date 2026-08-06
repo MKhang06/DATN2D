@@ -13,6 +13,8 @@ public class GameLockManager : MonoBehaviour
     private Vector3 lockedPosition;
     private bool locked;
 
+    public bool IsLocked => locked;
+
     private void Awake()
     {
         Instance = this;
@@ -77,5 +79,11 @@ public class GameLockManager : MonoBehaviour
 
         if (toolController != null)
             toolController.enabled = true;
+    }
+
+    public void RefreshLockedPosition()
+    {
+        if (locked && playerController != null)
+            lockedPosition = playerController.transform.position;
     }
 }

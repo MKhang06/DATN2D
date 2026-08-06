@@ -116,11 +116,28 @@ namespace GreenField.UI
             {
                 settingsPanel.SetActive(false);
             }
+
+            RefreshSaveButtons();
         }
 
-        public void StartNewGame() => LoadBaoDemo();
-        public void ContinueGame() => LoadBaoDemo();
-        public void LoadGame() => LoadBaoDemo();
+        public void StartNewGame()
+        {
+            if (!CanLoadBaoDemo())
+                return;
+
+            SaveManager.BeginNewGame();
+            SceneManager.LoadScene(farmSceneName, LoadSceneMode.Single);
+        }
+
+        public void ContinueGame()
+        {
+            LoadSavedGame();
+        }
+
+        public void LoadGame()
+        {
+            LoadSavedGame();
+        }
 
         public void OpenSettings()
         {
@@ -501,12 +518,44 @@ namespace GreenField.UI
             PlayerPrefs.Save();
         }
 
-        private void LoadBaoDemo()
+        private void LoadSavedGame()
+        {
+            if (!SaveManager.HasSaveGame)
+            {
+                Debug.LogWarning("[Green Field] Chưa có dữ liệu lưu.", this);
+                RefreshSaveButtons();
+                return;
+            }
+
+            if (!CanLoadBaoDemo())
+                return;
+
+            SaveManager.RequestLoadOnNextGameplayScene();
+            SceneManager.LoadScene(farmSceneName, LoadSceneMode.Single);
+        }
+
+        private void RefreshSaveButtons()
+        {
+            bool hasSave = SaveManager.HasSaveGame;
+            Button[] buttons = GetComponentsInChildren<Button>(true);
+
+            foreach (Button button in buttons)
+            {
+                if (button != null &&
+                    (button.name == "Button_Continue" ||
+                     button.name == "Button_Load"))
+                {
+                    button.interactable = hasSave;
+                }
+            }
+        }
+
+        private bool CanLoadBaoDemo()
         {
             if (string.IsNullOrWhiteSpace(farmSceneName))
             {
                 Debug.LogError("[Green Field] Farm Scene Name đang để trống.");
-                return;
+                return false;
             }
 
             if (!Application.CanStreamedLevelBeLoaded(farmSceneName))
@@ -515,10 +564,10 @@ namespace GreenField.UI
                     "[Green Field] Không thể load scene '" + farmSceneName + "'. " +
                     "Hãy chạy Tools > Green Field > Build Main Menu để thêm BaoDemo vào Build Settings."
                 );
-                return;
+                return false;
             }
 
-            SceneManager.LoadScene(farmSceneName, LoadSceneMode.Single);
+            return true;
         }
     }
 }
