@@ -41770,7 +41770,7 @@ MonoBehaviour:
   m_EditorClassIdentifier: 
   root: {fileID: 1314514197}
   playerPullFill: {fileID: 676206264}
-  waterMaskRect: {fileID: 393248737}
+  waterMaskRect: {fileID: 674094298}
   greenZoneRect: {fileID: 2013621174}
   fishIconRect: {fileID: 2074172789}
   fishIconImage: {fileID: 2074172790}
@@ -41779,7 +41779,7 @@ MonoBehaviour:
   statusText: {fileID: 1368169625}
   hintText: {fileID: 879043018}
   depthMoveSpeed: 3
-  fishIconOffsetX: 25
+  fishIconOffsetX: 74
   playerPullGainSpeed: 0.35
   playerPullLoseSpeed: 0.04
   fishForceGainSpeed: 0.25

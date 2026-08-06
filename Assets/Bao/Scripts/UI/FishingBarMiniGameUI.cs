@@ -53,7 +53,7 @@ public class FishingBarMiniGameUI : MonoBehaviour
 
     [Header("Presentation")]
     [SerializeField] private bool applyPolishedLayout = true;
-    [SerializeField] private Vector2 panelSize = new Vector2(720f, 590f);
+    [SerializeField] private Vector2 panelSize = new Vector2(560f, 460f);
     [SerializeField, Range(1f, 20f)] private float transitionSpeed = 9f;
     [SerializeField] private Color playerPullColor = new Color(0.25f, 0.95f, 0.55f, 1f);
     [SerializeField] private Color fishSafeColor = new Color(1f, 0.72f, 0.18f, 1f);
@@ -87,11 +87,18 @@ public class FishingBarMiniGameUI : MonoBehaviour
     private bool showingResult;
     private bool resultWasSuccess;
     private bool presentationReady;
+    private bool battleMeterStateInitialized;
+    private bool battleMetersVisible;
 
     private void Awake()
     {
         PreparePresentation();
         Hide();
+    }
+
+    private void OnEnable()
+    {
+        PreparePresentation();
     }
 
     private void Update()
@@ -458,7 +465,7 @@ public class FishingBarMiniGameUI : MonoBehaviour
             ConfigureRect(
                 backgroundImage.rectTransform,
                 Vector2.zero,
-                new Vector2(panelSize.x, panelSize.y - 30f)
+                new Vector2(panelSize.x, panelSize.y - 20f)
             );
             backgroundImage.color = new Color(0.72f, 0.9f, 0.92f, 0.98f);
             backgroundImage.raycastTarget = false;
@@ -468,21 +475,51 @@ public class FishingBarMiniGameUI : MonoBehaviour
         depthGroupRect = FindRect("DepthBar");
         RectTransform frameRect = FindRect("Frame");
 
+        /*
+         * Scene cũ gán nhầm WaterBar vào field waterMaskRect, làm cả cụm
+         * nước bị giữ ở tọa độ âm và văng sang mép trái màn hình.
+         */
+        RectTransform actualWaterMask = FindRect("WaterMask");
+        if (actualWaterMask != null)
+            waterMaskRect = actualWaterMask;
+
         if (depthGroupRect != null)
-            ConfigureRect(depthGroupRect, new Vector2(0f, -4f), new Vector2(400f, 390f));
+            ConfigureRect(depthGroupRect, new Vector2(0f, -12f), new Vector2(320f, 286f));
 
         if (frameRect != null)
-            ConfigureRect(frameRect, Vector2.zero, new Vector2(100f, 390f));
+        {
+            ConfigureRect(frameRect, Vector2.zero, new Vector2(82f, 286f));
+            Image frameImage = frameRect.GetComponent<Image>();
+            if (frameImage != null)
+                frameImage.raycastTarget = false;
+        }
 
         if (waterMaskRect != null)
-            ConfigureRect(waterMaskRect, Vector2.zero, new Vector2(76f, 354f));
+        {
+            ConfigureRect(waterMaskRect, Vector2.zero, new Vector2(60f, 258f));
+
+            Image maskGraphic = waterMaskRect.GetComponent<Image>();
+            if (maskGraphic != null)
+            {
+                maskGraphic.raycastTarget = false;
+                maskGraphic.enabled = false;
+            }
+        }
 
         RectTransform waterBarRect = FindRect("WaterBar");
         if (waterBarRect != null)
-            ConfigureRect(waterBarRect, Vector2.zero, new Vector2(76f, 354f));
+        {
+            ConfigureRect(waterBarRect, Vector2.zero, new Vector2(60f, 258f));
+            Image waterImage = waterBarRect.GetComponent<Image>();
+            if (waterImage != null)
+            {
+                waterImage.preserveAspect = false;
+                waterImage.raycastTarget = false;
+            }
+        }
 
         if (greenZoneRect != null)
-            ConfigureRect(greenZoneRect, Vector2.zero, new Vector2(72f, 82f));
+            ConfigureRect(greenZoneRect, Vector2.zero, new Vector2(56f, 62f));
 
         greenZoneImage =
             greenZoneRect != null
@@ -492,21 +529,21 @@ public class FishingBarMiniGameUI : MonoBehaviour
         if (fishIconRect != null && depthGroupRect != null)
         {
             fishIconRect.SetParent(depthGroupRect, false);
-            ConfigureRect(fishIconRect, new Vector2(92f, 0f), new Vector2(76f, 76f));
-            fishIconOffsetX = 92f;
+            ConfigureRect(fishIconRect, new Vector2(74f, 0f), new Vector2(62f, 62f));
+            fishIconOffsetX = 74f;
         }
 
         ConfigurePowerMeter(
             playerPullFill,
             "Player Meter Track",
-            new Vector2(-132f, 0f),
+            new Vector2(-108f, 0f),
             playerPullColor,
             out playerMeterTrack
         );
         ConfigurePowerMeter(
             fishForceFill,
             "Fish Meter Track",
-            new Vector2(132f, 0f),
+            new Vector2(108f, 0f),
             fishSafeColor,
             out fishMeterTrack
         );
@@ -517,50 +554,51 @@ public class FishingBarMiniGameUI : MonoBehaviour
                 depthGroupRect,
                 "Player Meter Label",
                 "LỰC KÉO",
-                new Vector2(-132f, 204f),
-                new Vector2(130f, 28f),
+                new Vector2(-108f, 153f),
+                new Vector2(108f, 24f),
                 playerPullColor
             );
             fishMeterLabel = CreateLabel(
                 depthGroupRect,
                 "Fish Meter Label",
                 "SỨC CÁ",
-                new Vector2(132f, 204f),
-                new Vector2(130f, 28f),
+                new Vector2(108f, 153f),
+                new Vector2(108f, 24f),
                 fishSafeColor
             );
             dangerMarker = CreateImage(
                 depthGroupRect,
                 "Danger Marker",
-                new Vector2(132f, 88f),
-                new Vector2(52f, 3f),
+                new Vector2(108f, 64f),
+                new Vector2(46f, 3f),
                 new Color(1f, 0.84f, 0.32f, 0.95f)
             );
         }
 
         ConfigureText(
             statusText,
-            new Vector2(0f, 247f),
-            new Vector2(620f, 54f),
-            32f,
+            new Vector2(0f, 190f),
+            new Vector2(500f, 44f),
+            28f,
             new Color(1f, 0.84f, 0.34f, 1f)
         );
         ConfigureText(
             depthText,
-            new Vector2(0f, 190f),
-            new Vector2(300f, 40f),
-            24f,
+            new Vector2(0f, 148f),
+            new Vector2(230f, 32f),
+            20f,
             Color.white
         );
         ConfigureText(
             hintText,
-            new Vector2(0f, -247f),
-            new Vector2(640f, 72f),
-            19f,
+            new Vector2(0f, -192f),
+            new Vector2(510f, 54f),
+            16f,
             new Color(0.84f, 0.94f, 0.96f, 1f)
         );
 
         presentationReady = true;
+        RefreshBattleMeterVisibility(true);
         UpdateGreenZonePosition();
         UpdateFishIconPosition(false);
     }
@@ -597,7 +635,7 @@ public class FishingBarMiniGameUI : MonoBehaviour
             return;
 
         fill.rectTransform.SetParent(depthGroupRect, false);
-        ConfigureRect(fill.rectTransform, position, new Vector2(34f, 350f));
+        ConfigureRect(fill.rectTransform, position, new Vector2(28f, 255f));
         fill.type = Image.Type.Filled;
         fill.fillMethod = Image.FillMethod.Vertical;
         fill.fillOrigin = 0;
@@ -609,7 +647,7 @@ public class FishingBarMiniGameUI : MonoBehaviour
             depthGroupRect,
             trackName,
             position,
-            new Vector2(48f, 364f),
+            new Vector2(42f, 267f),
             new Color(0.025f, 0.07f, 0.085f, 0.94f)
         );
 
@@ -630,6 +668,8 @@ public class FishingBarMiniGameUI : MonoBehaviour
     {
         if (!presentationReady)
             return;
+
+        RefreshBattleMeterVisibility(false);
 
         if (rootCanvasGroup != null)
         {
@@ -692,6 +732,38 @@ public class FishingBarMiniGameUI : MonoBehaviour
         }
     }
 
+    private void RefreshBattleMeterVisibility(bool force)
+    {
+        bool shouldShow = state == State.Reeling || showingResult;
+
+        if (!force &&
+            battleMeterStateInitialized &&
+            battleMetersVisible == shouldShow)
+        {
+            return;
+        }
+
+        battleMeterStateInitialized = true;
+        battleMetersVisible = shouldShow;
+
+        SetActive(playerPullFill, shouldShow);
+        SetActive(fishForceFill, shouldShow);
+        SetActive(playerMeterTrack, shouldShow);
+        SetActive(fishMeterTrack, shouldShow);
+        SetActive(playerMeterLabel, shouldShow);
+        SetActive(fishMeterLabel, shouldShow);
+        SetActive(dangerMarker, shouldShow);
+
+        if (depthText != null)
+            depthText.gameObject.SetActive(!shouldShow);
+    }
+
+    private static void SetActive(Component component, bool active)
+    {
+        if (component != null && component.gameObject.activeSelf != active)
+            component.gameObject.SetActive(active);
+    }
+
     private TMP_Text CreateLabel(
         RectTransform parent,
         string objectName,
@@ -711,7 +783,7 @@ public class FishingBarMiniGameUI : MonoBehaviour
         TMP_Text label = labelObject.GetComponent<TMP_Text>();
         label.text = value;
         label.font = statusText != null ? statusText.font : null;
-        label.fontSize = 16f;
+        label.fontSize = 14f;
         label.fontStyle = FontStyles.Bold;
         label.alignment = TextAlignmentOptions.Center;
         label.color = color;
