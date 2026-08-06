@@ -1,3 +1,4 @@
+using System.Collections.Generic;
 using TMPro;
 using UnityEngine;
 
@@ -34,10 +35,19 @@ public class FishBuyerNPCInteraction :
     private bool closeWhenPlayerLeaves =
         true;
 
-    private bool playerInside;
+    private readonly HashSet<Collider2D>
+        playerColliders =
+            new HashSet<Collider2D>();
+
+    private float nextMarketResolveTime;
+
+    private bool playerInside =>
+        playerColliders.Count > 0;
 
     private void Awake()
     {
+        ResolveMarketUI();
+
         Collider2D trigger =
             GetComponent<Collider2D>();
 
@@ -48,15 +58,28 @@ public class FishBuyerNPCInteraction :
 
     private void Update()
     {
+        if (marketUI == null &&
+            Time.unscaledTime >= nextMarketResolveTime)
+        {
+            ResolveMarketUI();
+            nextMarketResolveTime = Time.unscaledTime + 1f;
+        }
+
         if (!playerInside ||
             marketUI == null)
         {
             return;
         }
 
-        if (!Input.GetKeyDown(
-                interactionKey))
+        if (!Input.GetKeyDown(interactionKey))
         {
+            if (!marketUI.IsOpen &&
+                promptRoot != null &&
+                !promptRoot.activeSelf)
+            {
+                SetPromptVisible(true);
+            }
+
             return;
         }
 
@@ -78,7 +101,7 @@ public class FishBuyerNPCInteraction :
         if (!other.CompareTag(playerTag))
             return;
 
-        playerInside = true;
+        playerColliders.Add(other);
 
         if (marketUI == null ||
             !marketUI.IsOpen)
@@ -93,7 +116,11 @@ public class FishBuyerNPCInteraction :
         if (!other.CompareTag(playerTag))
             return;
 
-        playerInside = false;
+        playerColliders.Remove(other);
+
+        if (playerInside)
+            return;
+
         SetPromptVisible(false);
 
         if (closeWhenPlayerLeaves)
@@ -110,5 +137,20 @@ public class FishBuyerNPCInteraction :
 
         if (promptRoot != null)
             promptRoot.SetActive(visible);
+    }
+
+    private void ResolveMarketUI()
+    {
+        if (marketUI == null)
+            marketUI = FindFirstObjectByType<FishMarketUI>();
+    }
+
+    private void OnDisable()
+    {
+        playerColliders.Clear();
+        SetPromptVisible(false);
+
+        if (closeWhenPlayerLeaves)
+            marketUI?.CloseShop();
     }
 }

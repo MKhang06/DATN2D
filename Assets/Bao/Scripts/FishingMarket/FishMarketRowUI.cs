@@ -56,6 +56,8 @@ public class FishMarketRowUI : MonoBehaviour
 
     private InventoryItemData boundItem;
     private Action<InventoryItemData> onSell;
+    private bool canSell;
+    private bool invokingSell;
 
     private void Awake()
     {
@@ -162,11 +164,11 @@ public class FishMarketRowUI : MonoBehaviour
 
         if (sellButtonText != null)
         {
-            sellButtonText.text =
-                "BÁN " +
-                view.OwnedAmount
-                    .ToString("N0") +
-                " CON";
+            sellButtonText.text = view.CanSell
+                ? "BÁN " +
+                  view.OwnedAmount.ToString("N0") +
+                  " CON"
+                : "HẾT CÁ";
         }
 
         if (payoutText != null)
@@ -177,11 +179,12 @@ public class FishMarketRowUI : MonoBehaviour
                     .ToString("N0");
         }
 
-        bool canSell =
-            view.CanSell;
+        canSell = view.CanSell;
 
         if (sellButton != null)
-            sellButton.interactable = canSell;
+            sellButton.interactable =
+                canSell &&
+                !invokingSell;
 
         if (canvasGroup != null)
         {
@@ -190,7 +193,7 @@ public class FishMarketRowUI : MonoBehaviour
                     ? availableColor.a
                     : unavailableColor.a;
 
-            canvasGroup.interactable = true;
+            canvasGroup.interactable = canSell;
             canvasGroup.blocksRaycasts = true;
         }
     }
@@ -229,10 +232,30 @@ public class FishMarketRowUI : MonoBehaviour
 
     private void HandleSellClicked()
     {
-        if (boundItem == null)
+        if (boundItem == null ||
+            onSell == null ||
+            !canSell ||
+            invokingSell)
+        {
             return;
+        }
 
-        onSell?.Invoke(boundItem);
+        invokingSell = true;
+
+        if (sellButton != null)
+            sellButton.interactable = false;
+
+        try
+        {
+            onSell.Invoke(boundItem);
+        }
+        finally
+        {
+            invokingSell = false;
+
+            if (sellButton != null)
+                sellButton.interactable = canSell;
+        }
     }
 
     private void OnDestroy()
