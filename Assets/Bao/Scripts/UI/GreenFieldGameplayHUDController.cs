@@ -12,6 +12,7 @@ namespace GreenField.UI
         private const string GameplaySceneName = "BaoDemo";
         private const string PanelTexturePath = "GreenFieldHUD/hud_panel_frame_v2";
         private const string IconTexturePath = "GreenFieldHUD/hud_icons_v2";
+        private const float HudPanelScale = 0.88f;
 
         private static readonly Color HealthColor = new Color(0.93f, 0.20f, 0.16f, 1f);
         private static readonly Color EnergyColor = new Color(1f, 0.70f, 0.12f, 1f);
@@ -260,6 +261,7 @@ namespace GreenField.UI
             GameObject panel = CreatePanel(safeAreaRect, "Status Panel", new Vector2(600f, 350f));
             statsPanelRect = panel.GetComponent<RectTransform>();
             AnchorTopLeft(statsPanelRect, new Vector2(22f, -22f));
+            statsPanelRect.localScale = Vector3.one * HudPanelScale;
 
             CreateStatRow(panel.transform, "Health", 0, "M\u00C1U", 54f, HealthColor,
                 out healthFill, out healthValueText);
@@ -330,6 +332,7 @@ namespace GreenField.UI
             );
             timePanelRect = panel.GetComponent<RectTransform>();
             AnchorTopRight(timePanelRect, new Vector2(-22f, -22f));
+            timePanelRect.localScale = Vector3.one * HudPanelScale;
 
             CreateIcon(panel.transform, "Time Icon", 5, new Vector2(88f, -119f), 108f);
             timeText = CreateText(
