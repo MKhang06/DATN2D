@@ -335,7 +335,7 @@ MonoBehaviour:
     m_MipBias: 0
     m_VarianceClampScale: 0.9
     m_ContrastAdaptiveSharpening: 0
---- !u!1001 &8629515632115318209
+--- !u!1001 &3911862143937480028
 PrefabInstance:
   m_ObjectHideFlags: 0
   serializedVersion: 2
@@ -423,10 +423,6 @@ PrefabInstance:
       propertyPath: m_LocalEulerAnglesHint.z
       value: 0
       objectReference: {fileID: 0}
-    - target: {fileID: 1617571212719348372, guid: 273b5f02d36b3744997185bcfd6831cd, type: 3}
-      propertyPath: farmSceneName
-      value: BaoDemo
-      objectReference: {fileID: 0}
     - target: {fileID: 7910423355258264979, guid: 273b5f02d36b3744997185bcfd6831cd, type: 3}
       propertyPath: m_Name
       value: GreenField_MainMenu
@@ -441,5 +437,5 @@ SceneRoots:
   m_ObjectHideFlags: 0
   m_Roots:
   - {fileID: 2042317973}
-  - {fileID: 8629515632115318209}
   - {fileID: 1707931721}
+  - {fileID: 3911862143937480028}
