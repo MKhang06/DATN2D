@@ -75,8 +75,11 @@ public class CursorManager : MonoBehaviour
 
     public static void EnsureCursorAvailable()
     {
-        Cursor.lockState = CursorLockMode.None;
-        Cursor.visible = true;
+        if (Cursor.lockState != CursorLockMode.None)
+            Cursor.lockState = CursorLockMode.None;
+
+        if (!Cursor.visible)
+            Cursor.visible = true;
     }
 
     public void SetDefaultCursor()

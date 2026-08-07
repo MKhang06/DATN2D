@@ -436,19 +436,38 @@ public class PlayerToolController : MonoBehaviour
                 farmLayer
             );
 
-        if (hit == null)
-        {
-            return;
-        }
-
         FarmTile tile =
-            hit.GetComponent<FarmTile>();
+            hit != null
+                ? hit.GetComponent<FarmTile>()
+                : null;
 
-        if (tile == null)
+        if (tile != null)
+        {
+            UseToolOnFarmTile(tile);
+            return;
+        }
+
+        FarmPlotTilemap plots = FarmPlotTilemap.Instance;
+        if (plots == null ||
+            !plots.TryGetCell(mouseWorldPos, out Vector3Int cell))
         {
             return;
         }
 
+        switch (currentTool)
+        {
+            case ToolType.Hoe:
+                UseHoe(plots, cell);
+                break;
+
+            case ToolType.WateringCan:
+                UseWateringCan(plots, cell);
+                break;
+        }
+    }
+
+    private void UseToolOnFarmTile(FarmTile tile)
+    {
         switch (currentTool)
         {
             case ToolType.Hoe:
@@ -512,6 +531,27 @@ public class PlayerToolController : MonoBehaviour
     private void UseHoe(
         FarmTile tile)
     {
+        if (tile == null ||
+            tile.currentState != FarmTile.SoilState.Normal)
+        {
+            return;
+        }
+
+        UseHoeAction(tile.Hoe);
+    }
+
+    private void UseHoe(
+        FarmPlotTilemap plots,
+        Vector3Int cell)
+    {
+        if (plots == null || !plots.CanHoe(cell))
+            return;
+
+        UseHoeAction(() => plots.Hoe(cell));
+    }
+
+    private void UseHoeAction(Action applyHoe)
+    {
         if (playerStats == null)
             return;
 
@@ -533,17 +573,38 @@ public class PlayerToolController : MonoBehaviour
         if (toolAnimation != null)
         {
             toolAnimation.UseHoe(
-                () => tile.Hoe()
+                applyHoe
             );
         }
         else
         {
-            tile.Hoe();
+            applyHoe?.Invoke();
         }
     }
 
     private void UseWateringCan(
         FarmTile tile)
+    {
+        if (tile == null ||
+            tile.currentState != FarmTile.SoilState.Hoed)
+        {
+            return;
+        }
+
+        UseWateringAction(tile.Water);
+    }
+
+    private void UseWateringCan(
+        FarmPlotTilemap plots,
+        Vector3Int cell)
+    {
+        if (plots == null || !plots.CanWater(cell))
+            return;
+
+        UseWateringAction(() => plots.Water(cell));
+    }
+
+    private void UseWateringAction(Action applyWater)
     {
         if (playerStats == null)
             return;
@@ -566,12 +627,12 @@ public class PlayerToolController : MonoBehaviour
         if (toolAnimation != null)
         {
             toolAnimation.UseWateringCan(
-                () => tile.Water()
+                applyWater
             );
         }
         else
         {
-            tile.Water();
+            applyWater?.Invoke();
         }
     }
 

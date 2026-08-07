@@ -139,5 +139,7 @@ public class GameTimeManager : MonoBehaviour
         currentHour = hour;
         currentMinute = minute;
         currentSeason = season;
+
+        OnMinuteChanged?.Invoke();
     }
 }

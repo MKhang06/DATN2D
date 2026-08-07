@@ -13,7 +13,7 @@ namespace GreenField.UI
     [DefaultExecutionOrder(-10000)]
     public sealed class GreenFieldPauseMenuController : MonoBehaviour
     {
-        private const string GameplaySceneName = "BaoDemo";
+        private const string GameplaySceneName = "MAPMAIN";
         private const string MainMenuSceneName = "MenuGame";
         private const string MasterVolumeKey = "GreenField.Audio.MasterVolume";
         private const string MutedKey = "GreenField.Audio.Muted";

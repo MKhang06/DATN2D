@@ -6,14 +6,14 @@ EditorBuildSettings:
   serializedVersion: 2
   m_Scenes:
   - enabled: 1
-    path: Assets/Bao/Scenes/MenuGame.unity
+    path: Assets/Khang/SceneMK/MenuGame.unity
     guid: 821555a4072ab4d40be8366f0f2e35d4
   - enabled: 1
     path: Assets/Scenes/Maps Demo.unity
     guid: 8c9cfa26abfee488c85f1582747f6a02
   - enabled: 1
-    path: Assets/Bao/Scenes/BaoDemo.unity
-    guid: 6e8b8bc7e0cc0b548be7344e880f74b2
+    path: Assets/Khang/SceneMK/MAPMAIN.unity
+    guid: f283e73aa5874aa43848d97df59da16a
   m_configObjects:
     com.unity.input.settings.actions: {fileID: -944628639613478452, guid: 2bcd2660ca9b64942af0de543d8d7100, type: 3}
   m_UseUCBPForAssetBundles: 0

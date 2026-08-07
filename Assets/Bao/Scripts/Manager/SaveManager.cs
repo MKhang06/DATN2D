@@ -7,7 +7,7 @@ using UnityEngine.SceneManagement;
 
 public class SaveManager : MonoBehaviour
 {
-    private const int CurrentSaveVersion = 2;
+    private const int CurrentSaveVersion = 3;
     private const string SaveFileName = "save.json";
     private const string BackupFileName = "save.backup.json";
     private const string TemporaryFileName = "save.tmp.json";
@@ -143,6 +143,7 @@ public class SaveManager : MonoBehaviour
             SaveInventory(data);
             SaveFishingLoadout(data);
             SaveFarmTiles(data);
+            SaveFarmPlotTiles(data);
             SaveAnimals(data);
             SaveBuildings(data);
 
@@ -176,6 +177,7 @@ public class SaveManager : MonoBehaviour
             LoadWeather(data);
             LoadInventory(data);
             LoadFarmTiles(data);
+            LoadFarmPlotTiles(data);
             LoadAnimals(data);
             LoadBuildings(data);
             LoadFishingLoadout(data);
@@ -388,6 +390,24 @@ public class SaveManager : MonoBehaviour
         }
     }
 
+    private static void SaveFarmPlotTiles(SaveData data)
+    {
+        FarmPlotTilemap plots = FarmPlotTilemap.Instance != null
+            ? FarmPlotTilemap.Instance
+            : FindFirstObjectByType<FarmPlotTilemap>();
+
+        plots?.WriteSaveData(data.farmPlotTiles);
+    }
+
+    private static void LoadFarmPlotTiles(SaveData data)
+    {
+        FarmPlotTilemap plots = FarmPlotTilemap.Instance != null
+            ? FarmPlotTilemap.Instance
+            : FindFirstObjectByType<FarmPlotTilemap>();
+
+        plots?.LoadSaveData(data.farmPlotTiles);
+    }
+
     private static void SaveAnimals(SaveData data)
     {
         SaveableAnimal[] animals = FindObjectsByType<SaveableAnimal>(
@@ -534,6 +554,7 @@ public class SaveManager : MonoBehaviour
         data.hotbarSlots ??= new List<InventorySlotSaveData>();
         data.bagSlots ??= new List<InventorySlotSaveData>();
         data.farmTiles ??= new List<FarmTileSaveData>();
+        data.farmPlotTiles ??= new List<FarmPlotTileSaveData>();
         data.animals ??= new List<AnimalSaveData>();
         data.buildings ??= new List<BuildingSaveData>();
     }

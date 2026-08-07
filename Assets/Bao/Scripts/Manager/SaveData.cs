@@ -39,6 +39,7 @@ public class SaveData
     public string equippedBaitId;
 
     public List<FarmTileSaveData> farmTiles = new();
+    public List<FarmPlotTileSaveData> farmPlotTiles = new();
     public List<AnimalSaveData> animals = new();
     public List<BuildingSaveData> buildings = new();
 }
@@ -51,6 +52,15 @@ public class FarmTileSaveData
     public FarmTile.SoilState state;
     public int growthStage;
     public bool hasCrop;
+}
+
+[Serializable]
+public class FarmPlotTileSaveData
+{
+    public int x;
+    public int y;
+    public int z;
+    public FarmTile.SoilState state;
 }
 
 [Serializable]

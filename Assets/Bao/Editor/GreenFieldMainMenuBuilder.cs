@@ -80,8 +80,8 @@ namespace GreenField.UI.Editor
         }
 
         private const string RootName = "GreenField_MainMenu";
-        private const string TargetSceneName = "BaoDemo";
-        private const string TargetScenePath = "Assets/Bao/Scenes/BaoDemo.unity";
+        private const string TargetSceneName = "MAPMAIN";
+        private const string TargetScenePath = "Assets/Khang/SceneMK/MAPMAIN.unity";
 
         private const string BackgroundPath =
             "Assets/Bao/Art/Backgrounds/main_menu_background.png";
@@ -108,7 +108,7 @@ namespace GreenField.UI.Editor
             {
                 AssetDatabase.Refresh(ImportAssetOptions.ForceSynchronousImport);
                 ValidateAndConfigureAssets();
-                EnsureBaoDemoInBuildSettings();
+                EnsureGameplaySceneInBuildSettings();
 
                 GameObject existing = GameObject.Find(RootName);
                 if (existing != null)
@@ -314,13 +314,13 @@ namespace GreenField.UI.Editor
             importer.SaveAndReimport();
         }
 
-        private static void EnsureBaoDemoInBuildSettings()
+        private static void EnsureGameplaySceneInBuildSettings()
         {
             SceneAsset scene = AssetDatabase.LoadAssetAtPath<SceneAsset>(TargetScenePath);
             if (scene == null)
             {
                 throw new FileNotFoundException(
-                    "Không tìm thấy scene BaoDemo tại: " + TargetScenePath
+                    "Không tìm thấy scene MAPMAIN tại: " + TargetScenePath
                 );
             }
 
@@ -350,7 +350,7 @@ namespace GreenField.UI.Editor
             }
 
             EditorBuildSettings.scenes = scenes.ToArray();
-            Debug.Log("[Green Field] BaoDemo đã sẵn sàng trong Build Settings.");
+            Debug.Log("[Green Field] MAPMAIN đã sẵn sàng trong Build Settings.");
         }
 
         private static void SetControllerScene(
@@ -811,7 +811,7 @@ namespace GreenField.UI.Editor
                 page,
                 "AudioInfo",
                 "Âm lượng được lưu tự động và áp dụng cho toàn bộ game, " +
-                "kể cả khi mở trực tiếp scene BaoDemo.",
+                "kể cả khi mở trực tiếp scene MAPMAIN.",
                 new Vector2(0f, -105f),
                 new Vector2(660f, 115f)
             );

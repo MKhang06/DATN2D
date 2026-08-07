@@ -20,7 +20,7 @@ namespace GreenField.UI
         private const int VietnameseLanguage = 0;
 
         [Header("Scene sẽ được mở từ menu")]
-        [SerializeField] private string farmSceneName = "BaoDemo";
+        [SerializeField] private string farmSceneName = "MAPMAIN";
 
         [Header("Cửa sổ cài đặt")]
         [SerializeField] private GameObject settingsPanel;
@@ -122,7 +122,7 @@ namespace GreenField.UI
 
         public void StartNewGame()
         {
-            if (!CanLoadBaoDemo())
+            if (!CanLoadGameplayScene())
                 return;
 
             SaveManager.BeginNewGame();
@@ -527,7 +527,7 @@ namespace GreenField.UI
                 return;
             }
 
-            if (!CanLoadBaoDemo())
+            if (!CanLoadGameplayScene())
                 return;
 
             SaveManager.RequestLoadOnNextGameplayScene();
@@ -550,7 +550,7 @@ namespace GreenField.UI
             }
         }
 
-        private bool CanLoadBaoDemo()
+        private bool CanLoadGameplayScene()
         {
             if (string.IsNullOrWhiteSpace(farmSceneName))
             {
@@ -562,7 +562,7 @@ namespace GreenField.UI
             {
                 Debug.LogError(
                     "[Green Field] Không thể load scene '" + farmSceneName + "'. " +
-                    "Hãy chạy Tools > Green Field > Build Main Menu để thêm BaoDemo vào Build Settings."
+                    "Hãy chạy Tools > Green Field > Build Main Menu để thêm MAPMAIN vào Build Settings."
                 );
                 return false;
             }

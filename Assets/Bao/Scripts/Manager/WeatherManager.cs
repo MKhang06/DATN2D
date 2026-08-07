@@ -315,6 +315,8 @@ public class WeatherManager : MonoBehaviour
 
     foreach (FarmTile tile in tiles)
         tile.WaterByRain();
+
+    FarmPlotTilemap.Instance?.WaterHoedTiles();
 }
 
     public string GetWeatherText()

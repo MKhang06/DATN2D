@@ -9,7 +9,7 @@ namespace GreenField.UI
     [DefaultExecutionOrder(-9000)]
     public sealed class GreenFieldGameplayHUDController : MonoBehaviour
     {
-        private const string GameplaySceneName = "BaoDemo";
+        private const string GameplaySceneName = "MAPMAIN";
         private const string PanelTexturePath = "GreenFieldHUD/hud_panel_frame_v2";
         private const string IconTexturePath = "GreenFieldHUD/hud_icons_v2";
         private const float HudPanelScale = 0.88f;
