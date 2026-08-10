@@ -2,88 +2,84 @@ using System.Collections;
 using UnityEngine;
 using UnityEngine.EventSystems;
 
-public class Crop : MonoBehaviour
+namespace Khang
 {
-    [Header("Cấu Hình Phát Triển")]
-    [SerializeField] private Sprite[] growthStages;     // Dải ảnh các giai đoạn phát triển
-    [SerializeField] private float timePerStage = 5f;   // Thời gian lớn lên mỗi giai đoạn (giây)
-    [SerializeField] private GameObject harvestDrop;    // Asset củ/quả/Prefab rơi ra khi thu hoạch
-
-    private int currentStage = 0;
-    private bool isFullyGrown = false;
-    private SpriteRenderer spriteRenderer;
-    private Coroutine growthCoroutine;
-
-    private void Awake()
+    public class Crop : MonoBehaviour
     {
-        spriteRenderer = GetComponent<SpriteRenderer>();
-    }
+        [Header("Cấu Hình Phát Triển")]
+        [SerializeField] private Sprite[] growthStages;     // Dải ảnh giai đoạn phát triển
+        [SerializeField] private float timePerStage = 5f;   // Thời gian lớn lên mỗi giai đoạn (giây)
+        [SerializeField] private ItemData cropItemData;     // File ItemData vật phẩm thu hoạch
 
-    private void Start()
-    {
-        UpdateSprite();
+        private int currentStage = 0;
+        private bool isFullyGrown = false;
+        private SpriteRenderer spriteRenderer;
+        private Coroutine growthCoroutine;
 
-        // TỐI ƯU: Sử dụng Coroutine đếm giờ thay vì Update() đếm mỗi frame
-        if (growthStages != null && growthStages.Length > 1)
+        private void Awake()
         {
-            growthCoroutine = StartCoroutine(GrowthRoutine());
+            spriteRenderer = GetComponent<SpriteRenderer>();
         }
-    }
 
-    // Coroutine đếm thời gian: Tiết kiệm tài nguyên CPU tuyệt đối
-    private IEnumerator GrowthRoutine()
-    {
-        while (currentStage < growthStages.Length - 1)
+        private void Start()
         {
-            yield return new WaitForSeconds(timePerStage);
+            // Tự động xếp lớp theo trục Y (Cây ở dưới đè cây ở trên)
+            if (spriteRenderer != null)
+            {
+                spriteRenderer.sortingOrder = Mathf.RoundToInt(-transform.position.y * 100);
+            }
 
-            currentStage++;
             UpdateSprite();
 
-            if (currentStage == growthStages.Length - 1)
+            if (growthStages != null && growthStages.Length > 1)
             {
-                isFullyGrown = true;
-                break;
+                growthCoroutine = StartCoroutine(GrowthRoutine());
             }
         }
-    }
 
-    private void UpdateSprite()
-    {
-        if (growthStages != null && currentStage < growthStages.Length && spriteRenderer != null)
+        private IEnumerator GrowthRoutine()
         {
-            spriteRenderer.sprite = growthStages[currentStage];
-        }
-    }
+            while (currentStage < growthStages.Length - 1)
+            {
+                yield return new WaitForSeconds(timePerStage);
+                currentStage++;
+                UpdateSprite();
 
-    // Thu hoạch nông sản
-    public void Harvest()
-    {
-        if (!isFullyGrown) return;
-
-        if (growthCoroutine != null)
-        {
-            StopCoroutine(growthCoroutine);
+                if (currentStage == growthStages.Length - 1)
+                {
+                    isFullyGrown = true;
+                    break;
+                }
+            }
         }
 
-        // Rơi củ/quả ra đất
-        if (harvestDrop != null)
+        private void UpdateSprite()
         {
-            Instantiate(harvestDrop, transform.position, Quaternion.identity);
+            if (growthStages != null && currentStage < growthStages.Length && spriteRenderer != null)
+            {
+                spriteRenderer.sprite = growthStages[currentStage];
+            }
         }
 
-        // Xóa cây khỏi ô ruộng
-        Destroy(gameObject);
-    }
-
-    private void OnMouseDown()
-    {
-        // Nếu click trúng giao diện UI (Túi đồ, Menu) thì không thu hoạch
-        if (EventSystem.current != null && EventSystem.current.IsPointerOverGameObject())
+        public void Harvest()
         {
-            return;
+            if (!isFullyGrown) return;
+
+            // Thêm nông sản trực tiếp vào Túi Đồ
+            if (cropItemData != null && InventoryManager.Instance != null)
+            {
+                InventoryManager.Instance.AddItem(cropItemData, 1);
+            }
+
+            Destroy(gameObject);
         }
 
-        Harvest();
+        private void OnMouseDown()
+        {
+            // Bỏ qua nếu click trên UI
+            if (EventSystem.current != null && EventSystem.current.IsPointerOverGameObject()) return;
+
+            Harvest();
+        }
     }
 }
