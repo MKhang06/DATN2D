@@ -837,8 +837,8 @@ public static class FishingCustomizationUIRebuildEditor
         text.color =
             color;
 
-        text.enableWordWrapping =
-            false;
+        text.textWrappingMode =
+            TextWrappingModes.NoWrap;
 
         text.overflowMode =
             TextOverflowModes.Ellipsis;

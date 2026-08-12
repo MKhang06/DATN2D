@@ -541,8 +541,8 @@ public static class FishingRodPartOptionPrefabFixEditor
 
         text.text = defaultText;
         text.alignment = alignment;
-        text.enableWordWrapping =
-            false;
+        text.textWrappingMode =
+            TextWrappingModes.NoWrap;
 
         text.overflowMode =
             TextOverflowModes

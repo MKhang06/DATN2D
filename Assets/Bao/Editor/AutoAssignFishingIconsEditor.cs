@@ -939,9 +939,12 @@ public static class AutoAssignFishingIconsEditor
     {
         FishingManager[] managers =
             UnityEngine.Object
-                .FindObjectsOfType<
+                .FindObjectsByType<
                     FishingManager
-                >(true);
+                >(
+                    FindObjectsInactive.Include,
+                    FindObjectsSortMode.None
+                );
 
         int updated = 0;
 

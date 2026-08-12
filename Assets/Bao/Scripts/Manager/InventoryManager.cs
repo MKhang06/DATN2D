@@ -1,4 +1,5 @@
 using System;
+using System.Collections.Generic;
 using UnityEngine;
 
 public class InventoryManager : MonoBehaviour
@@ -1241,5 +1242,129 @@ public class InventoryManager : MonoBehaviour
     public void RefreshInventoryUI()
     {
         OnInventoryChanged?.Invoke();
+    }
+
+    public void WriteSaveData(SaveData data)
+    {
+        if (data == null)
+            return;
+
+        data.selectedHotbarIndex = selectedHotbarIndex;
+        data.hotbarSlots = CreateSlotSaveList(hotbarSlots);
+        data.bagSlots = CreateSlotSaveList(bagSlots);
+    }
+
+    public void LoadSaveData(SaveData data)
+    {
+        if (data == null)
+            return;
+
+        RestoreSlots(hotbarSlots, data.hotbarSlots);
+        RestoreSlots(bagSlots, data.bagSlots);
+
+        selectedHotbarIndex = hotbarSlots != null &&
+                              hotbarSlots.Length > 0
+            ? Mathf.Clamp(
+                data.selectedHotbarIndex,
+                0,
+                hotbarSlots.Length - 1
+            )
+            : 0;
+
+        OnSelectedHotbarChanged?.Invoke(selectedHotbarIndex);
+        OnInventoryChanged?.Invoke();
+    }
+
+    private static List<InventorySlotSaveData> CreateSlotSaveList(
+        InventorySlot[] slots)
+    {
+        List<InventorySlotSaveData> result =
+            new List<InventorySlotSaveData>();
+
+        if (slots == null)
+            return result;
+
+        foreach (InventorySlot slot in slots)
+        {
+            if (slot == null || slot.IsEmpty)
+            {
+                result.Add(new InventorySlotSaveData());
+                continue;
+            }
+
+            result.Add(
+                new InventorySlotSaveData
+                {
+                    itemId = slot.itemData != null
+                        ? slot.itemData.ItemId
+                        : string.Empty,
+                    itemName = slot.itemName,
+                    amount = Mathf.Max(0, slot.amount),
+                    maxStack = Mathf.Max(1, slot.maxStack)
+                }
+            );
+        }
+
+        return result;
+    }
+
+    private static void RestoreSlots(
+        InventorySlot[] targetSlots,
+        List<InventorySlotSaveData> savedSlots)
+    {
+        if (targetSlots == null)
+            return;
+
+        InitSlots(targetSlots);
+
+        for (int index = 0; index < targetSlots.Length; index++)
+        {
+            InventorySlot target = targetSlots[index];
+            InventorySlotSaveData saved =
+                savedSlots != null && index < savedSlots.Count
+                    ? savedSlots[index]
+                    : null;
+
+            if (saved == null ||
+                saved.amount <= 0 ||
+                (string.IsNullOrWhiteSpace(saved.itemId) &&
+                 string.IsNullOrWhiteSpace(saved.itemName)))
+            {
+                target.Clear();
+                continue;
+            }
+
+            InventoryItemData item = null;
+            if (ItemDatabase.Instance != null)
+            {
+                item = ItemDatabase.Instance.Get(saved.itemId);
+
+                if (item == null)
+                    item = ItemDatabase.Instance.Get(saved.itemName);
+            }
+
+            if (item != null)
+            {
+                target.SetItem(
+                    item,
+                    Mathf.Clamp(
+                        saved.amount,
+                        1,
+                        Mathf.Max(1, item.MaxStack)
+                    )
+                );
+            }
+            else
+            {
+                int maxStack = Mathf.Max(1, saved.maxStack);
+                target.SetItem(
+                    null,
+                    saved.itemName,
+                    null,
+                    Mathf.Clamp(saved.amount, 1, maxStack),
+                    maxStack
+                );
+            }
+        }
     }
 }

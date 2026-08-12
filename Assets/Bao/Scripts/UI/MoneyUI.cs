@@ -1,3 +1,4 @@
+using System.Globalization;
 using TMPro;
 using UnityEngine;
 
@@ -17,6 +18,7 @@ public class MoneyUI : MonoBehaviour
         if (moneyText == null || playerStats == null)
             return;
 
-        moneyText.text = " " + playerStats.Money;
+        moneyText.text = Mathf.Max(0, playerStats.Money)
+            .ToString("N0", CultureInfo.InvariantCulture);
     }
 }

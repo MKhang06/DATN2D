@@ -52,13 +52,23 @@ public readonly struct FishMarketRowView
         OwnedAmount =
             Mathf.Max(0, ownedAmount);
 
-        TotalPayout =
-            Mathf.Max(
-                0,
-                Mathf.RoundToInt(
-                    CurrentPrice *
-                    OwnedAmount
-                )
+        double rawPayout =
+            CurrentPrice *
+            (double)OwnedAmount;
+
+        if (double.IsNaN(rawPayout) ||
+            double.IsInfinity(rawPayout) ||
+            rawPayout <= 0d ||
+            rawPayout > int.MaxValue)
+        {
+            TotalPayout = 0;
+        }
+        else
+        {
+            TotalPayout = (int)System.Math.Round(
+                rawPayout,
+                System.MidpointRounding.AwayFromZero
             );
+        }
     }
 }

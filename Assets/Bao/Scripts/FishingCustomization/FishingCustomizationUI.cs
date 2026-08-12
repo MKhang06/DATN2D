@@ -134,6 +134,8 @@ public class FishingCustomizationUI : MonoBehaviour
     private bool inventorySubscribed;
     private FishingPartType selectedPartType;
 
+    public bool IsOpen => isOpen;
+
     private const BindingFlags MemberFlags =
         BindingFlags.Instance |
         BindingFlags.Public |

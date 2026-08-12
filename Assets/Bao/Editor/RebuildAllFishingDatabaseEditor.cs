@@ -1492,9 +1492,12 @@ public static class RebuildAllFishingDatabaseEditor
     {
         FishingManager[] managers =
             UnityEngine.Object
-                .FindObjectsOfType<
+                .FindObjectsByType<
                     FishingManager
-                >(true);
+                >(
+                    FindObjectsInactive.Include,
+                    FindObjectsSortMode.None
+                );
 
         int updated = 0;
 
@@ -2036,9 +2039,12 @@ public static class RebuildAllFishingDatabaseEditor
     {
         FishingManager[] managers =
             UnityEngine.Object
-                .FindObjectsOfType<
+                .FindObjectsByType<
                     FishingManager
-                >(true);
+                >(
+                    FindObjectsInactive.Include,
+                    FindObjectsSortMode.None
+                );
 
         int errors = 0;
 

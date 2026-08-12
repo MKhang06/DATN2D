@@ -11,6 +11,12 @@ public class PlayerStatsUI : MonoBehaviour
     [SerializeField] private Image energyFill;
     [SerializeField] private Image staminaFill;
 
+    private void Awake()
+    {
+        if (playerStats == null)
+            playerStats = FindFirstObjectByType<PlayerStats>();
+    }
+
     private void Update()
     {
         if (playerStats == null)
@@ -18,23 +24,31 @@ public class PlayerStatsUI : MonoBehaviour
 
         if (healthFill != null)
         {
-            healthFill.fillAmount =
-                playerStats.currentHealth /
-                playerStats.maxHealth;
+            healthFill.fillAmount = SafeRatio(
+                playerStats.currentHealth,
+                playerStats.maxHealth
+            );
         }
 
         if (energyFill != null)
         {
-            energyFill.fillAmount =
-                playerStats.currentEnergy /
-                playerStats.maxEnergy;
+            energyFill.fillAmount = SafeRatio(
+                playerStats.currentEnergy,
+                playerStats.maxEnergy
+            );
         }
 
         if (staminaFill != null)
         {
-            staminaFill.fillAmount =
-                playerStats.currentStamina /
-                playerStats.maxStamina;
+            staminaFill.fillAmount = SafeRatio(
+                playerStats.currentStamina,
+                playerStats.maxStamina
+            );
         }
+    }
+
+    private static float SafeRatio(float current, float maximum)
+    {
+        return maximum <= 0f ? 0f : Mathf.Clamp01(current / maximum);
     }
 }

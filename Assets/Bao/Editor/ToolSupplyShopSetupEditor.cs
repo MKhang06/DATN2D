@@ -1744,7 +1744,7 @@ public static class ToolSupplyShopSetupEditor
         text.alignment = alignment;
         text.color = color;
         text.raycastTarget = false;
-        text.enableWordWrapping = true;
+        text.textWrappingMode = TextWrappingModes.Normal;
 
         return text;
     }

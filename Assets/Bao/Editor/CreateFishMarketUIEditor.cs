@@ -1208,7 +1208,7 @@ public static class RebuildFishMarketUIFixEditor
         text.fontStyle = fontStyle;
         text.alignment = alignment;
         text.color = color;
-        text.enableWordWrapping = false;
+        text.textWrappingMode = TextWrappingModes.NoWrap;
         text.raycastTarget = false;
         text.richText = true;
 
@@ -1337,7 +1337,7 @@ public static class RebuildFishMarketUIFixEditor
     private static void EnsureEventSystem()
     {
         EventSystem eventSystem =
-            Object.FindObjectOfType<
+            Object.FindFirstObjectByType<
                 EventSystem
             >();
 

@@ -302,9 +302,12 @@ public static class CreateFishingRodPartDefinitionsEditor
         List<FishingRodPartDefinition> definitions)
     {
         FishingRodLoadout[] loadouts =
-            UnityEngine.Object.FindObjectsOfType<
+            UnityEngine.Object.FindObjectsByType<
                 FishingRodLoadout
-            >(true);
+            >(
+                FindObjectsInactive.Include,
+                FindObjectsSortMode.None
+            );
 
         int changedCount = 0;
 

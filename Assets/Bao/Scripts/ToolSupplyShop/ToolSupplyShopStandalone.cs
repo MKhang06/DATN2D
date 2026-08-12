@@ -11,6 +11,8 @@ using UnityEngine.UI;
 using UnityEngine.InputSystem;
 #endif
 
+#pragma warning disable S3903 // Giữ namespace hiện tại để không làm mất liên kết MonoBehaviour đã serialize trong scene/prefab.
+
 [DisallowMultipleComponent]
 [DefaultExecutionOrder(32000)]
 public class ToolSupplyShopStandalone : MonoBehaviour
@@ -86,8 +88,7 @@ public class ToolSupplyShopStandalone : MonoBehaviour
         disabledRaycasters =
             new List<GraphicRaycaster>();
 
-    private bool previousCursorVisible;
-    private CursorLockMode previousCursorLock;
+    private bool cursorStateCaptured;
 
     private GameObject interactingPlayer;
     private bool playerLockedByShop;
@@ -195,15 +196,8 @@ public class ToolSupplyShopStandalone : MonoBehaviour
         if (ownRaycaster != null)
             ownRaycaster.enabled = true;
 
-        previousCursorVisible =
-            Cursor.visible;
-
-        previousCursorLock =
-            Cursor.lockState;
-
-        Cursor.visible = true;
-        Cursor.lockState =
-            CursorLockMode.None;
+        cursorStateCaptured = true;
+        CursorManager.EnsureCursorAvailable();
 
         DisableCompetingRaycasters();
         LockPlayerForShop();
@@ -226,11 +220,10 @@ public class ToolSupplyShopStandalone : MonoBehaviour
         RestoreCompetingRaycasters();
         UnlockPlayerForShop();
 
-        Cursor.visible =
-            previousCursorVisible;
+        if (cursorStateCaptured)
+            cursorStateCaptured = false;
 
-        Cursor.lockState =
-            previousCursorLock;
+        CursorManager.EnsureCursorAvailable();
     }
 
     public void RefreshProducts()
@@ -470,45 +463,7 @@ public class ToolSupplyShopStandalone : MonoBehaviour
                     .ToLowerInvariant()
                 : string.Empty;
 
-        int count = 0;
-
-        if (products != null)
-        {
-            foreach (ToolShopItemData item
-                     in products)
-            {
-                if (item == null ||
-                    item.inventoryItem == null)
-                {
-                    continue;
-                }
-
-                string searchable =
-                    (
-                        item.DisplayName +
-                        " " +
-                        item.Description +
-                        " " +
-                        item.category +
-                        " " +
-                        item.ItemId
-                    ).ToLowerInvariant();
-
-                if (!string.IsNullOrWhiteSpace(
-                        keyword) &&
-                    !searchable.Contains(keyword))
-                {
-                    continue;
-                }
-
-                CreateProductCard(
-                    content,
-                    item
-                );
-
-                count++;
-            }
-        }
+        int count = CreateMatchingProductCards(keyword);
 
         /*
          * Bảo đảm toàn bộ Graphic của card không bị alpha/culling
@@ -545,6 +500,50 @@ public class ToolSupplyShopStandalone : MonoBehaviour
             " sản phẩm.",
             this
         );
+    }
+
+    private int CreateMatchingProductCards(
+        string keyword)
+    {
+        if (products == null)
+            return 0;
+
+        int count = 0;
+
+        foreach (ToolShopItemData item in products)
+        {
+            if (!MatchesProductSearch(item, keyword))
+                continue;
+
+            CreateProductCard(content, item);
+            count++;
+        }
+
+        return count;
+    }
+
+    private static bool MatchesProductSearch(
+        ToolShopItemData item,
+        string keyword)
+    {
+        if (item == null || item.inventoryItem == null)
+            return false;
+
+        if (string.IsNullOrWhiteSpace(keyword))
+            return true;
+
+        string searchable =
+            (
+                item.DisplayName +
+                " " +
+                item.Description +
+                " " +
+                item.category +
+                " " +
+                item.ItemId
+            ).ToLowerInvariant();
+
+        return searchable.Contains(keyword);
     }
 
     private void CreateProductCard(
@@ -1841,6 +1840,7 @@ public class ToolSupplyShopStandalone : MonoBehaviour
         }
         catch (UnityException)
         {
+            // Nếu tag Player chưa tồn tại, tiếp tục nhận diện bằng component ở bên dưới.
         }
 
         MonoBehaviour[] behaviours =
@@ -1956,58 +1956,79 @@ public class ToolSupplyShopStandalone : MonoBehaviour
         foreach (string memberName
                  in names)
         {
-            object collection =
-                GetMemberValue(
-                    inventoryManager,
+            if (CollectionContainsItem(
                     type,
-                    memberName
-                );
+                    memberName,
+                    targetId,
+                    targetName))
+                return true;
+        }
 
-            if (!(collection is
-                    System.Collections
-                        .IEnumerable
-                    enumerable))
+        return false;
+    }
+
+    private bool CollectionContainsItem(
+        Type inventoryType,
+        string memberName,
+        string targetId,
+        string targetName)
+    {
+        object collection =
+            GetMemberValue(
+                inventoryManager,
+                inventoryType,
+                memberName
+            );
+
+        if (!(collection is
+                System.Collections.IEnumerable enumerable))
+        {
+            return false;
+        }
+
+        foreach (object slot in enumerable)
+        {
+            if (slot != null &&
+                SlotMatchesItem(slot, targetId, targetName))
             {
-                continue;
-            }
-
-            foreach (object slot
-                     in enumerable)
-            {
-                if (slot == null)
-                    continue;
-
-                string slotName =
-                    ReadStringMember(
-                        slot,
-                        "itemName",
-                        "displayName",
-                        "ItemName"
-                    );
-
-                string slotId =
-                    ReadStringMember(
-                        slot,
-                        "itemId",
-                        "ItemId",
-                        "id"
-                    );
-
-                if ((!string.IsNullOrWhiteSpace(
-                        targetId) &&
-                     Normalize(slotId) ==
-                        targetId) ||
-                    (!string.IsNullOrWhiteSpace(
-                        targetName) &&
-                     Normalize(slotName) ==
-                        targetName))
-                {
-                    return true;
-                }
+                return true;
             }
         }
 
         return false;
+    }
+
+    private static bool SlotMatchesItem(
+        object slot,
+        string targetId,
+        string targetName)
+    {
+        string slotName =
+            ReadStringMember(
+                slot,
+                "itemName",
+                "displayName",
+                "ItemName"
+            );
+
+        string slotId =
+            ReadStringMember(
+                slot,
+                "itemId",
+                "ItemId",
+                "id"
+            );
+
+        return MatchesNormalizedValue(targetId, slotId) ||
+               MatchesNormalizedValue(targetName, slotName);
+    }
+
+    private static bool MatchesNormalizedValue(
+        string expected,
+        string actual)
+    {
+        return !string.IsNullOrWhiteSpace(expected) &&
+               Normalize(actual) == expected;
     }
 
     private bool TrySpendMoney(
@@ -2205,6 +2226,7 @@ public class ToolSupplyShopStandalone : MonoBehaviour
             }
             catch
             {
+                // Bỏ qua member không thể chuyển sang số và thử tên member tiếp theo.
             }
         }
 
@@ -2802,7 +2824,7 @@ public class ToolSupplyShopStandalone : MonoBehaviour
         text.alignment = alignment;
         text.color = color;
         text.raycastTarget = false;
-        text.enableWordWrapping = true;
+        text.textWrappingMode = TextWrappingModes.Normal;
 
         return text;
     }
@@ -3019,8 +3041,18 @@ public class ToolSupplyShopStandalone : MonoBehaviour
     private bool WasOpenKeyPressed()
     {
 #if ENABLE_INPUT_SYSTEM
-        return Keyboard.current != null &&
-               Keyboard.current.f8Key
+        if (Keyboard.current == null)
+            return false;
+
+        string inputSystemKeyName =
+            GetInputSystemKeyName(testOpenKey);
+
+        return Enum.TryParse(
+                   inputSystemKeyName,
+                   true,
+                   out Key inputSystemKey) &&
+               inputSystemKey != Key.None &&
+               Keyboard.current[inputSystemKey]
                    .wasPressedThisFrame;
 #else
         return Input.GetKeyDown(
@@ -3029,7 +3061,7 @@ public class ToolSupplyShopStandalone : MonoBehaviour
 #endif
     }
 
-    private bool WasEscapePressed()
+    private static bool WasEscapePressed()
     {
 #if ENABLE_INPUT_SYSTEM
         return Keyboard.current != null &&
@@ -3042,6 +3074,40 @@ public class ToolSupplyShopStandalone : MonoBehaviour
         );
 #endif
     }
+
+#if ENABLE_INPUT_SYSTEM
+    private static string GetInputSystemKeyName(
+        KeyCode keyCode)
+    {
+        string keyName = keyCode.ToString();
+
+        if (keyName.StartsWith(
+                "Alpha",
+                StringComparison.Ordinal))
+        {
+            return "Digit" + keyName.Substring(5);
+        }
+
+        if (keyName.StartsWith(
+                "Keypad",
+                StringComparison.Ordinal))
+        {
+            return "Numpad" + keyName.Substring(6);
+        }
+
+        switch (keyCode)
+        {
+            case KeyCode.Return:
+                return nameof(Key.Enter);
+            case KeyCode.LeftControl:
+                return nameof(Key.LeftCtrl);
+            case KeyCode.RightControl:
+                return nameof(Key.RightCtrl);
+            default:
+                return keyName;
+        }
+    }
+#endif
 
     private void OnDisable()
     {
@@ -3090,3 +3156,5 @@ public class ToolSupplyShopStandaloneCard :
             visible ? 1f : 0f;
     }
 }
+
+#pragma warning restore S3903

@@ -32,7 +32,7 @@ public class SaveLoadNotificationUI : MonoBehaviour
 
     private IEnumerator HideAfterDelay()
     {
-        yield return new WaitForSeconds(showTime);
+        yield return new WaitForSecondsRealtime(showTime);
 
         if (panel != null)
             panel.SetActive(false);

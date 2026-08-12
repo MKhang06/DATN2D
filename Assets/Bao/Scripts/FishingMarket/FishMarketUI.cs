@@ -12,7 +12,7 @@ public class FishMarketUI : MonoBehaviour
     [Serializable]
     private sealed class FishPriceOverride
     {
-        public InventoryItemData fishItem;
+        public InventoryItemData fishItem = null;
 
         [Min(0.01f)]
         public float minimumMultiplier =
@@ -137,11 +137,24 @@ public class FishMarketUI : MonoBehaviour
 
     private bool isOpen;
     private bool subscribed;
+    private bool marketInitialized;
+    private bool transactionInProgress;
+    private bool marketPrefsDirty;
+    private bool configurationErrorLogged;
+    private InventoryManager subscribedInventoryManager;
+    private GameLockManager playerLockManager;
+    private float nextMaintenanceTime;
+    private long lastCountdownSeconds = long.MinValue;
+    private int lastDisplayedMoney = int.MinValue;
+    private bool cursorStateCaptured;
+
+    private const float MaintenanceInterval = 0.5f;
 
     public bool IsOpen => isOpen;
 
     private void Awake()
     {
+        ClampSettings();
         ResolveReferences();
         ResolveRootCanvasGroup();
 
@@ -170,13 +183,31 @@ public class FishMarketUI : MonoBehaviour
 
     private void OnDisable()
     {
+        if (isOpen ||
+            playerLockManager != null ||
+            cursorStateCaptured)
+            CloseShop();
+
         UnsubscribeInventory();
+        FlushMarketPrefs();
     }
 
     private void Update()
     {
-        UpdateMarketByElapsedTime();
-        UpdateCountdown();
+        if (Time.unscaledTime >= nextMaintenanceTime)
+        {
+            nextMaintenanceTime =
+                Time.unscaledTime +
+                MaintenanceInterval;
+
+            UpdateMarketByElapsedTime();
+
+            if (isOpen)
+            {
+                UpdateCountdown();
+                RefreshMoney();
+            }
+        }
 
         if (isOpen &&
             Input.GetKeyDown(closeKey))
@@ -188,20 +219,39 @@ public class FishMarketUI : MonoBehaviour
     public void OpenShop()
     {
         ResolveReferences();
-        InitializeMarket();
         SubscribeInventory();
+
+        if (!marketInitialized)
+            InitializeMarket();
+
+        if (!marketInitialized || root == null)
+        {
+            ShowMessage(
+                "Chợ cá chưa được cấu hình đầy đủ.",
+                false
+            );
+            return;
+        }
+
+        if (isOpen)
+        {
+            RefreshAllRows();
+            RefreshMoney(true);
+            UpdateCountdown(true);
+            return;
+        }
+
+        UpdateMarketByElapsedTime();
 
         isOpen = true;
         SetVisible(true);
+        CaptureCursorState();
 
         RefreshAllRows();
-        RefreshMoney();
+        RefreshMoney(true);
+        UpdateCountdown(true);
 
-        if (lockPlayerWhileOpen)
-        {
-            GameLockManager.Instance?.
-                LockPlayer();
-        }
+        AcquirePlayerLock();
 
         if (EventSystem.current != null)
         {
@@ -213,6 +263,8 @@ public class FishMarketUI : MonoBehaviour
     public void CloseShop()
     {
         if (!isOpen &&
+            playerLockManager == null &&
+            !cursorStateCaptured &&
             (root == null ||
              !root.activeSelf))
         {
@@ -222,11 +274,8 @@ public class FishMarketUI : MonoBehaviour
         isOpen = false;
         SetVisible(false);
 
-        if (lockPlayerWhileOpen)
-        {
-            GameLockManager.Instance?.
-                UnlockPlayer();
-        }
+        ReleasePlayerLock();
+        RestoreCursorState();
 
         if (EventSystem.current != null)
         {
@@ -238,6 +287,15 @@ public class FishMarketUI : MonoBehaviour
     private void InitializeMarket()
     {
         ResolveReferences();
+
+        if (root == null ||
+            content == null ||
+            rowPrefab == null)
+        {
+            LogConfigurationErrorOnce();
+            marketInitialized = false;
+            return;
+        }
 
         List<InventoryItemData> validFish =
             fishItems == null
@@ -266,8 +324,20 @@ public class FishMarketUI : MonoBehaviour
                 this
             );
 
+            marketInitialized = false;
             return;
         }
+
+        HashSet<InventoryItemData> validSet =
+            new HashSet<InventoryItemData>(validFish);
+
+        List<InventoryItemData> staleStates =
+            states.Keys
+                .Where(item => !validSet.Contains(item))
+                .ToList();
+
+        foreach (InventoryItemData staleItem in staleStates)
+            states.Remove(staleItem);
 
         foreach (InventoryItemData fishItem
                  in validFish)
@@ -284,8 +354,9 @@ public class FishMarketUI : MonoBehaviour
         }
 
         BuildRows(validFish);
+        marketInitialized = true;
         RefreshAllRows();
-        RefreshMoney();
+        FlushMarketPrefs();
     }
 
     private void BuildRows(
@@ -297,74 +368,76 @@ public class FishMarketUI : MonoBehaviour
             return;
         }
 
-        foreach (FishMarketRowUI row
-                 in rows.Values)
+        HashSet<InventoryItemData> validItems =
+            new HashSet<InventoryItemData>(fishItems);
+
+        List<InventoryItemData> staleRows =
+            rows
+                .Where(
+                    pair =>
+                        pair.Key == null ||
+                        pair.Value == null ||
+                        !validItems.Contains(pair.Key)
+                )
+                .Select(pair => pair.Key)
+                .ToList();
+
+        foreach (InventoryItemData staleItem in staleRows)
         {
-            if (row != null)
-                Destroy(row.gameObject);
+            if (staleItem != null &&
+                rows.TryGetValue(staleItem, out FishMarketRowUI staleRow) &&
+                staleRow != null)
+            {
+                Destroy(staleRow.gameObject);
+            }
+
+            rows.Remove(staleItem);
         }
 
-        rows.Clear();
-
-        foreach (InventoryItemData item
-                 in fishItems)
+        for (int index = 0;
+             index < fishItems.Count;
+             index++)
         {
+            InventoryItemData item = fishItems[index];
             int owned =
                 GetOwnedAmount(item);
 
-            if (showOnlyOwnedFish &&
-                owned <= 0)
+            if (!rows.TryGetValue(
+                    item,
+                    out FishMarketRowUI row) ||
+                row == null)
             {
-                continue;
-            }
-
-            FishMarketRowUI row =
-                Instantiate(
+                row = Instantiate(
                     rowPrefab,
                     content
                 );
 
-            row.gameObject.SetActive(true);
-            row.name =
-                "FishMarketRow_" +
-                item.ItemId;
+                row.name =
+                    "FishMarketRow_" +
+                    item.ItemId;
 
-            rows[item] = row;
-
-            row.Bind(
-                BuildRowView(item),
-                SellAllOfFish
-            );
-        }
-
-        Canvas.ForceUpdateCanvases();
-
-        if (content is RectTransform rect)
-        {
-            LayoutRebuilder
-                .ForceRebuildLayoutImmediate(
-                    rect
+                rows[item] = row;
+                row.Bind(
+                    BuildRowView(item),
+                    SellAllOfFish
                 );
+            }
+
+            row.transform.SetSiblingIndex(index);
+
+            bool shouldShow =
+                !showOnlyOwnedFish ||
+                owned > 0;
+
+            row.gameObject.SetActive(shouldShow);
         }
+
+        RebuildContentLayout();
     }
 
     private void RefreshAllRows()
     {
-        if (showOnlyOwnedFish)
-        {
-            List<InventoryItemData> visibleFish =
-                states.Keys
-                    .Where(item => item != null)
-                    .OrderBy(
-                        item =>
-                            item.DisplayName
-                    )
-                    .ToList();
-
-            BuildRows(visibleFish);
-            RefreshMoney();
-            return;
-        }
+        bool layoutChanged = false;
 
         foreach (
             KeyValuePair<
@@ -378,12 +451,27 @@ public class FishMarketUI : MonoBehaviour
                 continue;
             }
 
-            pair.Value.Refresh(
-                BuildRowView(pair.Key)
-            );
+            FishMarketRowView view =
+                BuildRowView(pair.Key);
+
+            bool shouldShow =
+                !showOnlyOwnedFish ||
+                view.OwnedAmount > 0;
+
+            if (pair.Value.gameObject.activeSelf != shouldShow)
+            {
+                pair.Value.gameObject.SetActive(shouldShow);
+                layoutChanged = true;
+            }
+
+            if (shouldShow)
+                pair.Value.Refresh(view);
         }
 
         RefreshMoney();
+
+        if (layoutChanged)
+            RebuildContentLayout();
     }
 
     private FishMarketRowView BuildRowView(
@@ -430,6 +518,9 @@ public class FishMarketUI : MonoBehaviour
     private void SellAllOfFish(
         InventoryItemData fishItem)
     {
+        if (transactionInProgress)
+            return;
+
         ResolveReferences();
 
         if (fishItem == null ||
@@ -485,11 +576,20 @@ public class FishMarketUI : MonoBehaviour
             return;
         }
 
+        double rawPayout =
+            state.currentPrice *
+            (double)amount;
+
         long payoutLong =
-            (long)Mathf.RoundToInt(
-                state.currentPrice *
-                amount
-            );
+            double.IsNaN(rawPayout) ||
+            double.IsInfinity(rawPayout) ||
+            rawPayout <= 0d ||
+            rawPayout > int.MaxValue
+                ? 0L
+                : (long)Math.Round(
+                    rawPayout,
+                    MidpointRounding.AwayFromZero
+                );
 
         if (payoutLong <= 0 ||
             payoutLong > int.MaxValue)
@@ -506,41 +606,92 @@ public class FishMarketUI : MonoBehaviour
         int payout =
             (int)payoutLong;
 
-        bool removed =
-            inventoryManager.RemoveItem(
-                fishItem,
-                amount,
-                out string reason
-            );
+        float moneyMultiplier =
+            CharacterPassiveManager.Instance != null
+                ? CharacterPassiveManager.Instance.MoneyMultiplier
+                : 1f;
 
-        if (!removed)
+        double creditedPayout =
+            payout *
+            Math.Max(0d, moneyMultiplier);
+
+        long expectedCredit =
+            !double.IsNaN(creditedPayout) &&
+            !double.IsInfinity(creditedPayout) &&
+            creditedPayout >= 0d &&
+            creditedPayout <= int.MaxValue
+                ? (long)Math.Round(
+                    (float)creditedPayout,
+                    MidpointRounding.ToEven
+                )
+                : 0L;
+
+        if (double.IsNaN(creditedPayout) ||
+            double.IsInfinity(creditedPayout) ||
+            expectedCredit <= 0L ||
+            expectedCredit > (long)int.MaxValue -
+                Mathf.Max(0, playerStats.Money))
         {
             ShowMessage(
-                string.IsNullOrWhiteSpace(
-                    reason)
-                    ? "Không thể lấy cá " +
-                      "khỏi túi."
-                    : reason,
+                "Số tiền sau thưởng vượt giới hạn cho phép.",
                 false
             );
-
             return;
         }
 
-        playerStats.AddMoney(payout);
+        transactionInProgress = true;
 
-        ShowMessage(
-            "Đã bán " +
-            fishItem.DisplayName +
-            " x" +
-            amount.ToString("N0") +
-            " và nhận $" +
-            payout.ToString("N0") +
-            ".",
-            true
-        );
+        try
+        {
+            bool removed =
+                inventoryManager.RemoveItem(
+                    fishItem,
+                    amount,
+                    out string reason
+                );
 
-        RefreshAllRows();
+            if (!removed)
+            {
+                ShowMessage(
+                    string.IsNullOrWhiteSpace(reason)
+                        ? "Không thể lấy cá khỏi túi."
+                        : reason,
+                    false
+                );
+                return;
+            }
+
+            int moneyBefore =
+                playerStats.Money;
+
+            playerStats.AddMoney(payout);
+
+            long creditedDifference =
+                (long)playerStats.Money -
+                moneyBefore;
+
+            int creditedAmount =
+                (int)Math.Min(
+                    int.MaxValue,
+                    Math.Max(0L, creditedDifference)
+                );
+
+            ShowMessage(
+                "Đã bán " +
+                fishItem.DisplayName +
+                " x" +
+                amount.ToString("N0") +
+                " và nhận $" +
+                creditedAmount.ToString("N0") +
+                ".",
+                true
+            );
+        }
+        finally
+        {
+            transactionInProgress = false;
+            RefreshAllRows();
+        }
     }
 
     private void ShowMessage(
@@ -568,6 +719,8 @@ public class FishMarketUI : MonoBehaviour
     private MarketState LoadOrCreateState(
         InventoryItemData item)
     {
+        double now = GetUnixTime();
+
         float basePrice =
             Mathf.Max(
                 1f,
@@ -588,6 +741,8 @@ public class FishMarketUI : MonoBehaviour
             PlayerPrefs.HasKey(
                 prefix + "_current"
             );
+
+        bool stateChanged = !hasSave;
 
         if (hasSave)
         {
@@ -618,7 +773,7 @@ public class FishMarketUI : MonoBehaviour
             state.lastUpdateUnix =
                 ReadDouble(
                     prefix + "_time",
-                    GetUnixTime()
+                    now
                 );
         }
         else
@@ -648,18 +803,49 @@ public class FishMarketUI : MonoBehaviour
                 );
 
             state.lastUpdateUnix =
-                GetUnixTime();
-
-            SaveState(state);
+                now;
         }
 
-        ApplyElapsedUpdates(state);
+        float sanitizedHistory3 =
+            SanitizePrice(item, state.historyPrice3, basePrice);
+        float sanitizedHistory2 =
+            SanitizePrice(item, state.historyPrice2, basePrice);
+        float sanitizedHistory1 =
+            SanitizePrice(item, state.historyPrice1, basePrice);
+        float sanitizedCurrent =
+            SanitizePrice(item, state.currentPrice, basePrice);
+
+        stateChanged |=
+            !Mathf.Approximately(state.historyPrice3, sanitizedHistory3) ||
+            !Mathf.Approximately(state.historyPrice2, sanitizedHistory2) ||
+            !Mathf.Approximately(state.historyPrice1, sanitizedHistory1) ||
+            !Mathf.Approximately(state.currentPrice, sanitizedCurrent);
+
+        state.historyPrice3 = sanitizedHistory3;
+        state.historyPrice2 = sanitizedHistory2;
+        state.historyPrice1 = sanitizedHistory1;
+        state.currentPrice = sanitizedCurrent;
+
+        if (double.IsNaN(state.lastUpdateUnix) ||
+            double.IsInfinity(state.lastUpdateUnix) ||
+            state.lastUpdateUnix <= 0d ||
+            state.lastUpdateUnix > now + priceUpdateInterval)
+        {
+            state.lastUpdateUnix = now;
+            stateChanged = true;
+        }
+
+        if (stateChanged)
+            SaveState(state);
+
+        ApplyElapsedUpdates(state, now);
         return state;
     }
 
     private void UpdateMarketByElapsedTime()
     {
         bool changed = false;
+        double now = GetUnixTime();
 
         foreach (MarketState state
                  in states.Values)
@@ -667,16 +853,22 @@ public class FishMarketUI : MonoBehaviour
             if (state == null)
                 continue;
 
-            if (ApplyElapsedUpdates(state))
+            if (ApplyElapsedUpdates(state, now))
                 changed = true;
         }
 
-        if (changed && isOpen)
+        if (!changed)
+            return;
+
+        FlushMarketPrefs();
+
+        if (isOpen)
             RefreshAllRows();
     }
 
     private bool ApplyElapsedUpdates(
-        MarketState state)
+        MarketState state,
+        double now)
     {
         if (state == null ||
             state.item == null)
@@ -684,27 +876,31 @@ public class FishMarketUI : MonoBehaviour
             return false;
         }
 
-        double now = GetUnixTime();
-
         double elapsed =
             now - state.lastUpdateUnix;
 
-        int periods =
-            Mathf.FloorToInt(
-                (float)(
-                    elapsed /
-                    priceUpdateInterval
-                )
-            );
-
-        if (periods <= 0)
+        if (elapsed < priceUpdateInterval)
             return false;
 
-        periods =
-            Mathf.Clamp(periods, 1, 24);
+        double rawPeriods =
+            Math.Floor(
+                elapsed /
+                priceUpdateInterval
+            );
+
+        long elapsedPeriods =
+            rawPeriods >= long.MaxValue
+                ? long.MaxValue
+                : (long)rawPeriods;
+
+        if (elapsedPeriods <= 0)
+            return false;
+
+        int simulatedPeriods =
+            (int)Math.Min(elapsedPeriods, 24L);
 
         for (int i = 0;
-             i < periods;
+             i < simulatedPeriods;
              i++)
         {
             state.historyPrice3 =
@@ -723,9 +919,13 @@ public class FishMarketUI : MonoBehaviour
                 );
         }
 
-        state.lastUpdateUnix +=
-            periods *
-            priceUpdateInterval;
+        state.lastUpdateUnix =
+            elapsedPeriods >= long.MaxValue ||
+            elapsedPeriods * (double)priceUpdateInterval > now
+                ? now
+                : state.lastUpdateUnix +
+                  elapsedPeriods *
+                  priceUpdateInterval;
 
         SaveState(state);
         return true;
@@ -775,6 +975,35 @@ public class FishMarketUI : MonoBehaviour
         return Mathf.Round(
                    candidate * 100f
                ) / 100f;
+    }
+
+    private float SanitizePrice(
+        InventoryItemData item,
+        float value,
+        float fallback)
+    {
+        if (float.IsNaN(value) ||
+            float.IsInfinity(value))
+        {
+            value = fallback;
+        }
+
+        float basePrice =
+            Mathf.Max(1f, item.SellPrice);
+
+        GetPriceRange(
+            item,
+            out float minimumMultiplier,
+            out float maximumMultiplier
+        );
+
+        value = Mathf.Clamp(
+            value,
+            basePrice * minimumMultiplier,
+            basePrice * maximumMultiplier
+        );
+
+        return Mathf.Round(value * 100f) / 100f;
     }
 
     private void GetPriceRange(
@@ -865,7 +1094,7 @@ public class FishMarketUI : MonoBehaviour
                 )
         );
 
-        PlayerPrefs.Save();
+        marketPrefsDirty = true;
     }
 
     private static double ReadDouble(
@@ -908,7 +1137,8 @@ public class FishMarketUI : MonoBehaviour
         return "FishMarket_" + id;
     }
 
-    private void UpdateCountdown()
+    private void UpdateCountdown(
+        bool force = false)
     {
         if (nextUpdateText == null ||
             states.Count == 0)
@@ -918,19 +1148,22 @@ public class FishMarketUI : MonoBehaviour
 
         double now = GetUnixTime();
 
-        double nextUpdate =
-            states.Values
-                .Where(
-                    state =>
-                        state != null
-                )
-                .Select(
-                    state =>
-                        state.lastUpdateUnix +
-                        priceUpdateInterval
-                )
-                .DefaultIfEmpty(now)
-                .Min();
+        double nextUpdate = double.MaxValue;
+
+        foreach (MarketState state in states.Values)
+        {
+            if (state == null)
+                continue;
+
+            nextUpdate = Math.Min(
+                nextUpdate,
+                state.lastUpdateUnix +
+                priceUpdateInterval
+            );
+        }
+
+        if (nextUpdate == double.MaxValue)
+            nextUpdate = now;
 
         double remaining =
             Math.Max(
@@ -938,21 +1171,34 @@ public class FishMarketUI : MonoBehaviour
                 nextUpdate - now
             );
 
-        TimeSpan time =
-            TimeSpan.FromSeconds(
-                remaining
-            );
+        long remainingSeconds =
+            (long)Math.Ceiling(remaining);
+
+        if (!force &&
+            remainingSeconds == lastCountdownSeconds)
+        {
+            return;
+        }
+
+        lastCountdownSeconds = remainingSeconds;
+
+        long hours = remainingSeconds / 3600L;
+        long minutes =
+            (remainingSeconds % 3600L) / 60L;
+        long seconds = remainingSeconds % 60L;
 
         nextUpdateText.text =
             "GIÁ MỚI SAU " +
-            time.ToString(
-                time.TotalHours >= 1d
-                    ? @"hh\:mm\:ss"
-                    : @"mm\:ss"
-            );
+            (hours > 0L
+                ? hours.ToString("00") + ":" +
+                  minutes.ToString("00") + ":" +
+                  seconds.ToString("00")
+                : minutes.ToString("00") + ":" +
+                  seconds.ToString("00"));
     }
 
-    private void RefreshMoney()
+    private void RefreshMoney(
+        bool force = false)
     {
         if (moneyText == null)
             return;
@@ -961,6 +1207,13 @@ public class FishMarketUI : MonoBehaviour
             playerStats != null
                 ? playerStats.Money
                 : 0;
+
+        money = Mathf.Max(0, money);
+
+        if (!force && money == lastDisplayedMoney)
+            return;
+
+        lastDisplayedMoney = money;
 
         moneyText.text =
             "TIỀN MẶT  <color=#55F6A9>$" +
@@ -996,8 +1249,17 @@ public class FishMarketUI : MonoBehaviour
 
     private void SubscribeInventory()
     {
-        if (subscribed ||
-            inventoryManager == null)
+        if (subscribed &&
+            subscribedInventoryManager ==
+                inventoryManager)
+        {
+            return;
+        }
+
+        if (subscribed)
+            UnsubscribeInventory();
+
+        if (inventoryManager == null)
         {
             return;
         }
@@ -1005,27 +1267,32 @@ public class FishMarketUI : MonoBehaviour
         inventoryManager.OnInventoryChanged +=
             HandleInventoryChanged;
 
+        subscribedInventoryManager =
+            inventoryManager;
         subscribed = true;
     }
 
     private void UnsubscribeInventory()
     {
-        if (!subscribed ||
-            inventoryManager == null)
-        {
+        if (!subscribed)
             return;
+
+        if (subscribedInventoryManager != null)
+        {
+            subscribedInventoryManager.OnInventoryChanged -=
+                HandleInventoryChanged;
         }
 
-        inventoryManager.OnInventoryChanged -=
-            HandleInventoryChanged;
-
+        subscribedInventoryManager = null;
         subscribed = false;
     }
 
     private void HandleInventoryChanged()
     {
-        if (isOpen)
-            RefreshAllRows();
+        if (!isOpen || transactionInProgress)
+            return;
+
+        RefreshAllRows();
     }
 
     private void ResolveRootCanvasGroup()
@@ -1082,6 +1349,133 @@ public class FishMarketUI : MonoBehaviour
         }
     }
 
+    private void AcquirePlayerLock()
+    {
+        if (!lockPlayerWhileOpen ||
+            playerLockManager != null)
+        {
+            return;
+        }
+
+        GameLockManager lockManager =
+            GameLockManager.Instance;
+
+        if (lockManager == null ||
+            lockManager.IsLocked)
+        {
+            return;
+        }
+
+        lockManager.LockPlayer();
+        playerLockManager = lockManager;
+    }
+
+    private void ReleasePlayerLock()
+    {
+        if (playerLockManager == null)
+            return;
+
+        playerLockManager.UnlockPlayer();
+        playerLockManager = null;
+    }
+
+    private void CaptureCursorState()
+    {
+        if (cursorStateCaptured)
+            return;
+
+        cursorStateCaptured = true;
+        CursorManager.EnsureCursorAvailable();
+    }
+
+    private void RestoreCursorState()
+    {
+        if (!cursorStateCaptured)
+            return;
+
+        cursorStateCaptured = false;
+        CursorManager.EnsureCursorAvailable();
+    }
+
+    private void RebuildContentLayout()
+    {
+        if (!(content is RectTransform rect))
+            return;
+
+        Canvas.ForceUpdateCanvases();
+        LayoutRebuilder.ForceRebuildLayoutImmediate(rect);
+    }
+
+    private void LogConfigurationErrorOnce()
+    {
+        if (configurationErrorLogged)
+            return;
+
+        configurationErrorLogged = true;
+        Debug.LogError(
+            "[FishMarket] Thiếu Root, Content hoặc Row Prefab. " +
+            "Hãy chạy Tools > Fishing > Rebuild Fish Market UI - Fix White.",
+            this
+        );
+    }
+
+    private void FlushMarketPrefs()
+    {
+        if (!marketPrefsDirty)
+            return;
+
+        PlayerPrefs.Save();
+        marketPrefsDirty = false;
+    }
+
+    private void ClampSettings()
+    {
+        priceUpdateInterval =
+            Mathf.Max(1f, priceUpdateInterval);
+        defaultVolatility =
+            Mathf.Clamp01(defaultVolatility);
+        defaultMinimumMultiplier =
+            Mathf.Max(0.01f, defaultMinimumMultiplier);
+        defaultMaximumMultiplier =
+            Mathf.Max(
+                defaultMinimumMultiplier,
+                defaultMaximumMultiplier
+            );
+
+        if (priceOverrides == null)
+            return;
+
+        foreach (FishPriceOverride entry in priceOverrides)
+        {
+            if (entry == null)
+                continue;
+
+            entry.minimumMultiplier =
+                Mathf.Max(0.01f, entry.minimumMultiplier);
+            entry.maximumMultiplier =
+                Mathf.Max(
+                    entry.minimumMultiplier,
+                    entry.maximumMultiplier
+                );
+        }
+    }
+
+    private void OnValidate()
+    {
+        ClampSettings();
+    }
+
+    private void OnApplicationPause(bool paused)
+    {
+        if (paused)
+            FlushMarketPrefs();
+    }
+
+    private void OnApplicationQuit()
+    {
+        FlushMarketPrefs();
+    }
+
     private static double GetUnixTime()
     {
         return DateTimeOffset.UtcNow
@@ -1090,7 +1484,10 @@ public class FishMarketUI : MonoBehaviour
 
     private void OnDestroy()
     {
+        ReleasePlayerLock();
+        RestoreCursorState();
         UnsubscribeInventory();
+        FlushMarketPrefs();
 
         if (closeButton != null)
         {
