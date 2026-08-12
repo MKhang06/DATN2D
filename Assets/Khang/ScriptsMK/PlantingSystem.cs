@@ -18,6 +18,12 @@ namespace Khang
 
         private Dictionary<Vector3Int, GameObject> plantedCrops = new Dictionary<Vector3Int, GameObject>();
 
+        public void SetSelectedCropIndex(int index)
+        {
+            if (cropPrefabs == null || cropPrefabs.Length == 0) return;
+            selectedCropIndex = Mathf.Clamp(index, 0, cropPrefabs.Length - 1);
+        }
+
         private void Awake()
         {
             mainCamera = Camera.main;
@@ -27,7 +33,6 @@ namespace Khang
         {
             HandleInputSelection();
 
-            // Click chuột trái để trồng
             if (Input.GetMouseButtonDown(0))
             {
                 TryPlantCrop();
@@ -41,34 +46,38 @@ namespace Khang
             if (Input.GetKeyDown(KeyCode.Alpha3)) selectedCropIndex = 2;
             if (Input.GetKeyDown(KeyCode.Alpha4)) selectedCropIndex = 3;
             if (Input.GetKeyDown(KeyCode.Alpha5)) selectedCropIndex = 4;
+
+            if (cropPrefabs != null && cropPrefabs.Length > 0)
+            {
+                selectedCropIndex = Mathf.Clamp(selectedCropIndex, 0, cropPrefabs.Length - 1);
+            }
+            else
+            {
+                selectedCropIndex = 0;
+            }
         }
 
         private void TryPlantCrop()
         {
-            // Bỏ qua nếu đang tương tác trên UI
             if (EventSystem.current != null && EventSystem.current.IsPointerOverGameObject()) return;
-
             if (farmTilemap == null || cropPrefabs == null || cropPrefabs.Length == 0) return;
-            if (selectedCropIndex >= cropPrefabs.Length || cropPrefabs[selectedCropIndex] == null) return;
+            if (selectedCropIndex < 0 || selectedCropIndex >= cropPrefabs.Length) return;
 
-            Vector3 mouseWorldPos = mainCamera.ScreenToWorldPoint(Input.mousePosition);
+            Vector3 mouseWorldPos = mainCamera != null
+                ? mainCamera.ScreenToWorldPoint(Input.mousePosition)
+                : Camera.main.ScreenToWorldPoint(Input.mousePosition);
+
             Vector3Int cellPosition = farmTilemap.WorldToCell(mouseWorldPos);
+            if (!farmTilemap.HasTile(cellPosition)) return;
 
-            if (farmTilemap.HasTile(cellPosition))
+            if (plantedCrops.TryGetValue(cellPosition, out var existingCrop) && existingCrop != null)
             {
-                // Dọn dẹp ô đất nếu cây đã bị thu hoạch/xóa
-                if (plantedCrops.ContainsKey(cellPosition) && plantedCrops[cellPosition] == null)
-                {
-                    plantedCrops.Remove(cellPosition);
-                }
-
-                if (!plantedCrops.ContainsKey(cellPosition))
-                {
-                    Vector3 spawnPosition = farmTilemap.GetCellCenterWorld(cellPosition);
-                    GameObject newCrop = Instantiate(cropPrefabs[selectedCropIndex], spawnPosition, Quaternion.identity);
-                    plantedCrops.Add(cellPosition, newCrop);
-                }
+                return;
             }
+
+            Vector3 spawnPosition = farmTilemap.GetCellCenterWorld(cellPosition);
+            GameObject newCrop = Instantiate(cropPrefabs[selectedCropIndex], spawnPosition, Quaternion.identity);
+            plantedCrops[cellPosition] = newCrop;
         }
     }
 }

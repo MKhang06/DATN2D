@@ -135,10 +135,10 @@ TextureImporter:
         serializedVersion: 2
         x: 0
         y: 0
-        width: 20
-        height: 40
-      alignment: 9
-      pivot: {x: 0.5, y: 0.12}
+        width: 18
+        height: 31
+      alignment: 0
+      pivot: {x: 0, y: 0}
       border: {x: 0, y: 0, z: 0, w: 0}
       customData: 
       outline: []
@@ -157,10 +157,10 @@ TextureImporter:
         serializedVersion: 2
         x: 20
         y: 0
-        width: 20
-        height: 40
-      alignment: 9
-      pivot: {x: 0.5, y: 0.12}
+        width: 18
+        height: 31
+      alignment: 0
+      pivot: {x: 0, y: 0}
       border: {x: 0, y: 0, z: 0, w: 0}
       customData: 
       outline: []
@@ -177,12 +177,12 @@ TextureImporter:
       name: blueberry_growth_2
       rect:
         serializedVersion: 2
-        x: 40
+        x: 41
         y: 0
-        width: 20
-        height: 40
-      alignment: 9
-      pivot: {x: 0.5, y: 0.12}
+        width: 17
+        height: 31
+      alignment: 0
+      pivot: {x: 0, y: 0}
       border: {x: 0, y: 0, z: 0, w: 0}
       customData: 
       outline: []
@@ -201,10 +201,10 @@ TextureImporter:
         serializedVersion: 2
         x: 60
         y: 0
-        width: 20
-        height: 40
-      alignment: 9
-      pivot: {x: 0.5, y: 0.12}
+        width: 38
+        height: 32
+      alignment: 0
+      pivot: {x: 0, y: 0}
       border: {x: 0, y: 0, z: 0, w: 0}
       customData: 
       outline: []
@@ -213,28 +213,6 @@ TextureImporter:
       bones: []
       spriteID: ad85a08a530a14b3d8e39042d762ab30
       internalID: 816233219
-      vertices: []
-      indices: 
-      edges: []
-      weights: []
-    - serializedVersion: 2
-      name: blueberry_growth_4
-      rect:
-        serializedVersion: 2
-        x: 80
-        y: 0
-        width: 20
-        height: 40
-      alignment: 9
-      pivot: {x: 0.5, y: 0.12}
-      border: {x: 0, y: 0, z: 0, w: 0}
-      customData: 
-      outline: []
-      physicsShape: []
-      tessellationDetail: 0
-      bones: []
-      spriteID: b0b9cdb66890a478496380f3516fbca9
-      internalID: -173135368
       vertices: []
       indices: 
       edges: []
@@ -257,7 +235,6 @@ TextureImporter:
       blueberry_growth_1: 1885931999
       blueberry_growth_2: -1817254309
       blueberry_growth_3: 816233219
-      blueberry_growth_4: -173135368
   mipmapLimitGroupName: 
   pSDRemoveMatte: 0
   userData: 

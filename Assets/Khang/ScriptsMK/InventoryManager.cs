@@ -9,9 +9,15 @@ namespace Khang
 
         [Header("Cấu Hình UI")]
         [SerializeField] private GameObject inventoryPanel;
-        [SerializeField] private Transform slotParent; 
+        [SerializeField] private Transform slotParent;
+
+        [Header("Phím tắt")]
+        [SerializeField] private KeyCode openKey = KeyCode.I;
+        [SerializeField] private KeyCode toggleKey = KeyCode.Tab;
 
         private List<InventorySlot> slots = new List<InventorySlot>();
+
+        public bool IsInventoryOpen => inventoryPanel != null && inventoryPanel.activeSelf;
 
         private void Awake()
         {
@@ -29,7 +35,7 @@ namespace Khang
         {
             if (slotParent != null)
             {
-                slots.AddRange(slotParent.GetComponentsInChildren<InventorySlot>());
+                slots.AddRange(slotParent.GetComponentsInChildren<InventorySlot>(true));
             }
 
             if (inventoryPanel != null)
@@ -40,8 +46,7 @@ namespace Khang
 
         private void Update()
         {
-            // Bấm phím I hoặc TAB để bật/tắt túi đồ
-            if (Input.GetKeyDown(KeyCode.I) || Input.GetKeyDown(KeyCode.Tab))
+            if (Input.GetKeyDown(openKey) || Input.GetKeyDown(toggleKey))
             {
                 ToggleInventory();
             }
@@ -49,17 +54,26 @@ namespace Khang
 
         public void ToggleInventory()
         {
-            if (inventoryPanel != null)
-            {
-                inventoryPanel.SetActive(!inventoryPanel.activeSelf);
-            }
+            if (inventoryPanel == null) return;
+            inventoryPanel.SetActive(!inventoryPanel.activeSelf);
+        }
+
+        public void OpenInventory()
+        {
+            if (inventoryPanel == null) return;
+            inventoryPanel.SetActive(true);
+        }
+
+        public void CloseInventory()
+        {
+            if (inventoryPanel == null) return;
+            inventoryPanel.SetActive(false);
         }
 
         public bool AddItem(ItemData item, int amount = 1)
         {
-            if (item == null) return false;
+            if (item == null || amount <= 0) return false;
 
-            // 1. Tìm ô đã có sẵn vật phẩm cùng loại để cộng dồn
             if (item.isStackable)
             {
                 foreach (var slot in slots)
@@ -72,7 +86,6 @@ namespace Khang
                 }
             }
 
-            // 2. Tìm ô trống đầu tiên để chèn vào
             foreach (var slot in slots)
             {
                 if (slot.IsEmpty)

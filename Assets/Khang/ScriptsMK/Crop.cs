@@ -13,6 +13,7 @@ namespace Khang
 
         private int currentStage = 0;
         private bool isFullyGrown = false;
+        private bool isHarvested = false;
         private SpriteRenderer spriteRenderer;
         private Coroutine growthCoroutine;
 
@@ -23,7 +24,6 @@ namespace Khang
 
         private void Start()
         {
-            // Tự động xếp lớp theo trục Y (Cây ở dưới đè cây ở trên)
             if (spriteRenderer != null)
             {
                 spriteRenderer.sortingOrder = Mathf.RoundToInt(-transform.position.y * 100);
@@ -35,30 +35,34 @@ namespace Khang
             {
                 growthCoroutine = StartCoroutine(GrowthRoutine());
             }
+            else
+            {
+                isFullyGrown = true;
+            }
         }
 
         private IEnumerator GrowthRoutine()
         {
-            while (currentStage < growthStages.Length - 1)
+            while (!isFullyGrown)
             {
                 yield return new WaitForSeconds(timePerStage);
                 currentStage++;
                 UpdateSprite();
 
-                if (currentStage == growthStages.Length - 1)
+                if (growthStages != null && currentStage >= growthStages.Length - 1)
                 {
+                    currentStage = growthStages.Length - 1;
                     isFullyGrown = true;
-                    break;
                 }
             }
         }
 
         private void UpdateSprite()
         {
-            if (growthStages != null && currentStage < growthStages.Length && spriteRenderer != null)
-            {
-                spriteRenderer.sprite = growthStages[currentStage];
-            }
+            if (spriteRenderer == null || growthStages == null || growthStages.Length == 0) return;
+
+            currentStage = Mathf.Clamp(currentStage, 0, growthStages.Length - 1);
+            spriteRenderer.sprite = growthStages[currentStage];
         }
 
         public void Harvest()
