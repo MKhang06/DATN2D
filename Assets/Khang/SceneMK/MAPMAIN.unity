@@ -24345,7 +24345,7 @@ MonoBehaviour:
   m_Intensity: 1
   m_LightVolumeIntensity: 1
   m_LightVolumeEnabled: 0
-  m_ApplyToSortingLayers: 00000000510e786dc7f104d9850e3896d76c9cbbfb78852b39c77d0e812b969da7ded5fbe97294a9a97a058f83bf78c669fa6d41b7cbdb633d961d50fb167e02b789e857
+  m_ApplyToSortingLayers: 00000000510e786dc7f104d9850e3896d76c9cbbfb78852b39c77d0e812b969da7ded5fbe97294a9a97a058f83bf78c669fa6d41b7cbdb633d961d50fb167e02b789e857df760ccf9d97283d93fb3bd02951963e
   m_LightCookieSprite: {fileID: 0}
   m_DeprecatedPointLightCookieSprite: {fileID: 0}
   m_LightOrder: 0
@@ -26437,6 +26437,7 @@ GameObject:
   serializedVersion: 6
   m_Component:
   - component: {fileID: 583669126}
+  - component: {fileID: 583669127}
   m_Layer: 0
   m_Name: Tree1
   m_TagString: Untagged
@@ -26575,6 +26576,19 @@ Transform:
   - {fileID: 682532692}
   m_Father: {fileID: 0}
   m_LocalEulerAnglesHint: {x: 0, y: 0, z: 0}
+--- !u!114 &583669127
+MonoBehaviour:
+  m_ObjectHideFlags: 0
+  m_CorrespondingSourceObject: {fileID: 0}
+  m_PrefabInstance: {fileID: 0}
+  m_PrefabAsset: {fileID: 0}
+  m_GameObject: {fileID: 583669125}
+  m_Enabled: 1
+  m_EditorHideFlags: 0
+  m_Script: {fileID: 11500000, guid: e4b03831746548c59c88cba84e3d7021, type: 3}
+  m_Name:
+  m_EditorClassIdentifier:
+  sourceTree: {fileID: 606317205}
 --- !u!1 &595324954
 GameObject:
   m_ObjectHideFlags: 0
@@ -27101,7 +27115,7 @@ MonoBehaviour:
   - "R\xECu"
   - Riu
   - Chop
-  interactionPrompt: {fileID: 1222416445}
+  interactionPrompt: {fileID: 0}
   createPromptAutomatically: 1
   promptLocalPosition: {x: 0, y: 1.35, z: 0}
   woodItem: {fileID: 11400000, guid: a98b0cea3d0de8f42b2c4a4fda5e28bc, type: 2}
@@ -606491,6 +606505,7 @@ GameObject:
   serializedVersion: 6
   m_Component:
   - component: {fileID: 1290172404}
+  - component: {fileID: 1290172405}
   m_Layer: 0
   m_Name: Tree2
   m_TagString: Untagged
@@ -606564,6 +606579,19 @@ Transform:
   - {fileID: 471841928}
   m_Father: {fileID: 0}
   m_LocalEulerAnglesHint: {x: 0, y: 0, z: 0}
+--- !u!114 &1290172405
+MonoBehaviour:
+  m_ObjectHideFlags: 0
+  m_CorrespondingSourceObject: {fileID: 0}
+  m_PrefabInstance: {fileID: 0}
+  m_PrefabAsset: {fileID: 0}
+  m_GameObject: {fileID: 1290172403}
+  m_Enabled: 1
+  m_EditorHideFlags: 0
+  m_Script: {fileID: 11500000, guid: e4b03831746548c59c88cba84e3d7021, type: 3}
+  m_Name:
+  m_EditorClassIdentifier:
+  sourceTree: {fileID: 606317205}
 --- !u!1 &1290830399
 GameObject:
   m_ObjectHideFlags: 0
@@ -609619,7 +609647,7 @@ MonoBehaviour:
   m_Intensity: 0
   m_LightVolumeIntensity: 1
   m_LightVolumeEnabled: 0
-  m_ApplyToSortingLayers: 00000000510e786dc7f104d9850e3896d76c9cbbfb78852b39c77d0e812b969da7ded5fbe97294a9a97a058f83bf78c669fa6d41b7cbdb633d961d50fb167e02b789e857
+  m_ApplyToSortingLayers: 00000000510e786dc7f104d9850e3896d76c9cbbfb78852b39c77d0e812b969da7ded5fbe97294a9a97a058f83bf78c669fa6d41b7cbdb633d961d50fb167e02b789e857df760ccf9d97283d93fb3bd02951963e
   m_LightCookieSprite: {fileID: 0}
   m_DeprecatedPointLightCookieSprite: {fileID: 0}
   m_LightOrder: 0
