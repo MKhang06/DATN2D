@@ -67,14 +67,17 @@ namespace Khang
 
         public void Harvest()
         {
-            if (!isFullyGrown) return;
+            if (!isFullyGrown || isHarvested) return;
+            if (cropItemData == null || InventoryManager.Instance == null) return;
 
-            // Thêm nông sản trực tiếp vào Túi Đồ
-            if (cropItemData != null && InventoryManager.Instance != null)
+            bool added = InventoryManager.Instance.AddItem(cropItemData, 1);
+            if (!added)
             {
-                InventoryManager.Instance.AddItem(cropItemData, 1);
+                Debug.LogWarning("Túi đồ đã đầy. Không thể thu hoạch nông sản.");
+                return;
             }
 
+            isHarvested = true;
             Destroy(gameObject);
         }
 

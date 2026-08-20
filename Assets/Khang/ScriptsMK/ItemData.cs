@@ -2,7 +2,7 @@ using UnityEngine;
 
 namespace Khang
 {
-    [CreateAssetMenu(fileName = "New Item", menuName = "Inventory/Item Data")]
+    [CreateAssetMenu(fileName = "ItemData_New", menuName = "Khang/Item Data")]
     public class ItemData : ScriptableObject
     {
         public string itemID;             // ID vật phẩm (VD: tomato, pumpkin)
