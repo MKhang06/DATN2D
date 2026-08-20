@@ -255,11 +255,20 @@ public class FishingSupplyShopNPCInteraction :
         if (other.CompareTag(playerTag))
             return true;
 
-        Transform root =
-            other.transform.root;
+        Transform current = other.transform.parent;
 
-        return root != null &&
-               root.CompareTag(playerTag);
+        while (current != null)
+        {
+            if (current.CompareTag(playerTag) ||
+                current.name == "Player")
+            {
+                return true;
+            }
+
+            current = current.parent;
+        }
+
+        return false;
     }
 
     private void SetPrompt(

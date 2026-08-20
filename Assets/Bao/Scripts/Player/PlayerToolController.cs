@@ -881,7 +881,7 @@ public class PlayerToolController : MonoBehaviour
         if (heldItemRoot == null)
         {
             Transform[] children =
-                transform.root
+                transform
                     .GetComponentsInChildren<
                         Transform
                     >(true);

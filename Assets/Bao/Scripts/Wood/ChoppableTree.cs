@@ -521,11 +521,23 @@ public class ChoppableTree : MonoBehaviour
             return true;
         }
 
-        return string.Equals(
-            other.transform.root.name,
-            "Player",
-            StringComparison.OrdinalIgnoreCase
-        );
+        Transform current = other.transform;
+
+        while (current != null)
+        {
+            if (string.Equals(
+                    current.name,
+                    "Player",
+                    StringComparison.OrdinalIgnoreCase
+                ))
+            {
+                return true;
+            }
+
+            current = current.parent;
+        }
+
+        return false;
     }
 
     private bool WasInteractPressed()
