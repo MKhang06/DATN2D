@@ -79,6 +79,8 @@ public class PlantingSystem : MonoBehaviour
 
                 // Lưu vết ô đất đã được trồng
                 plantedCrops.Add(cellPosition, newCrop);
+
+                GreenFieldQuestEvents.ReportCropPlanted();
             }
         }
     }

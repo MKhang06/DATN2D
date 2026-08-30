@@ -67,7 +67,7 @@
         "*.sln": "*.csproj",
         "*.slnx": "*.csproj"
     },
-    "dotnet.defaultSolution": "DATN2D.slnx",
+    "dotnet.defaultSolution": "DuAn.slnx",
     "cSpell.language": "en,vi",
     "cSpell.words": [
         "Behaviour",

@@ -393,6 +393,9 @@ public class FishingCatchResultUI : MonoBehaviour
         // Cộng trực tiếp vào tiền mặt.
         playerStats.AddMoney(cashReceived);
 
+        if (isFish)
+            GreenFieldQuestEvents.ReportFishSold();
+
         StopFishingAudio();
 
         if (FishingNotificationUI.Instance != null)

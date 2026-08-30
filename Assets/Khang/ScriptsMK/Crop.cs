@@ -61,6 +61,9 @@ public class Crop : MonoBehaviour
     {
         if (!isFullyGrown) return;
 
+        // Khóa ngay để không thể tính/nhả vật phẩm hai lần trước cuối frame.
+        isFullyGrown = false;
+
         if (growthCoroutine != null)
         {
             StopCoroutine(growthCoroutine);
@@ -71,6 +74,8 @@ public class Crop : MonoBehaviour
         {
             Instantiate(harvestDrop, transform.position, Quaternion.identity);
         }
+
+        GreenFieldQuestEvents.ReportCropHarvested();
 
         // Xóa cây khỏi ô ruộng
         Destroy(gameObject);
