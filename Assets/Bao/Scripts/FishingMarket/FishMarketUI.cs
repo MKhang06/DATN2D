@@ -676,6 +676,8 @@ public class FishMarketUI : MonoBehaviour
                     Math.Max(0L, creditedDifference)
                 );
 
+            GreenFieldQuestEvents.ReportFishSold(amount);
+
             ShowMessage(
                 "Đã bán " +
                 fishItem.DisplayName +

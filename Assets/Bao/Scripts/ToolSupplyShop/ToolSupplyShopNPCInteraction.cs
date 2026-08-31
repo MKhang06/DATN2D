@@ -53,11 +53,23 @@ public class ToolSupplyShopNPCInteraction : MonoBehaviour
 
     private bool IsPlayer(Collider2D other)
     {
-        return other != null &&
-               (
-                   other.CompareTag(playerTag) ||
-                   other.transform.root.name == "Player"
-               );
+        if (other == null)
+            return false;
+
+        if (other.CompareTag(playerTag))
+            return true;
+
+        Transform current = other.transform;
+
+        while (current != null)
+        {
+            if (current.name == "Player")
+                return true;
+
+            current = current.parent;
+        }
+
+        return false;
     }
 
     private void SetPrompt(bool visible)

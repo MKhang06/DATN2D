@@ -119,6 +119,7 @@ public class ChoppableTree : MonoBehaviour
     private Collider2D interactionTrigger;
     private SpriteRenderer[] cachedRenderers;
     private Collider2D[] cachedColliders;
+    private Coroutine interactionRoutine;
 
     public int RequiredSuccessfulHits =>
         Mathf.Max(1, requiredSuccessfulHits);
@@ -130,21 +131,7 @@ public class ChoppableTree : MonoBehaviour
     {
         ResolveReferences();
         CacheTreeComponents();
-        CreatePromptIfNeeded();
         SetPromptVisible(false);
-    }
-
-    private void Update()
-    {
-        if (treeCompleted ||
-            !playerInRange ||
-            WoodChopMinigameUI.Instance?.IsPlaying == true)
-        {
-            return;
-        }
-
-        if (WasInteractPressed())
-            TryStartMinigame();
     }
 
     private void OnTriggerEnter2D(Collider2D other)
@@ -155,7 +142,11 @@ public class ChoppableTree : MonoBehaviour
         playerInRange = true;
 
         if (!treeCompleted)
+        {
+            CreatePromptIfNeeded();
             SetPromptVisible(true);
+            StartInteractionPolling();
+        }
     }
 
     private void OnTriggerExit2D(Collider2D other)
@@ -165,6 +156,7 @@ public class ChoppableTree : MonoBehaviour
 
         playerInRange = false;
         SetPromptVisible(false);
+        StopInteractionPolling();
     }
 
     public void TryStartMinigame()
@@ -200,6 +192,51 @@ public class ChoppableTree : MonoBehaviour
 
         if (started)
             SetPromptVisible(false);
+    }
+
+    /// <summary>
+    /// Copies gameplay settings from a configured source tree while keeping
+    /// scene-object references local to this tree.
+    /// </summary>
+    public void CopySettingsFrom(ChoppableTree source)
+    {
+        if (source == null || source == this)
+            return;
+
+        requiredSuccessfulHits = source.requiredSuccessfulHits;
+        maximumMisses = source.maximumMisses;
+        minigameUI = source.minigameUI;
+
+        playerTag = source.playerTag;
+        requireAxeSelected = source.requireAxeSelected;
+        axeKeywords = source.axeKeywords != null
+            ? (string[])source.axeKeywords.Clone()
+            : Array.Empty<string>();
+
+        // A prompt belongs to one tree only. Sharing the source reference
+        // would make one tree hide/show an unrelated UI object.
+        interactionPrompt = null;
+        createPromptAutomatically = source.createPromptAutomatically;
+        promptLocalPosition = source.promptLocalPosition;
+
+        woodItem = source.woodItem;
+        fallbackWoodItemName = source.fallbackWoodItemName;
+        fallbackWoodIcon = source.fallbackWoodIcon;
+        minimumWoodReward = source.minimumWoodReward;
+        maximumWoodReward = source.maximumWoodReward;
+
+        chopTriggerName = source.chopTriggerName;
+        fallTriggerName = source.fallTriggerName;
+        destroyDelay = source.destroyDelay;
+        respawnTree = source.respawnTree;
+        respawnSeconds = source.respawnSeconds;
+
+        hitSound = source.hitSound;
+        successSound = source.successSound;
+        failSound = source.failSound;
+
+        ResolveReferences();
+        CacheTreeComponents();
     }
 
     public void NotifySuccessfulHit()
@@ -298,6 +335,7 @@ public class ChoppableTree : MonoBehaviour
         }
 
         treeCompleted = true;
+        StopInteractionPolling();
         PlaySound(successSound);
 
         if (treeAnimator != null &&
@@ -364,7 +402,44 @@ public class ChoppableTree : MonoBehaviour
         SetTreeVisible(true);
 
         if (playerInRange)
+        {
             SetPromptVisible(true);
+            StartInteractionPolling();
+        }
+    }
+
+    private IEnumerator WaitForInteractionRoutine()
+    {
+        while (playerInRange && !treeCompleted)
+        {
+            if (WoodChopMinigameUI.Instance?.IsPlaying != true &&
+                WasInteractPressed())
+            {
+                TryStartMinigame();
+            }
+
+            yield return null;
+        }
+
+        interactionRoutine = null;
+    }
+
+    private void StartInteractionPolling()
+    {
+        if (interactionRoutine == null)
+        {
+            interactionRoutine =
+                StartCoroutine(WaitForInteractionRoutine());
+        }
+    }
+
+    private void StopInteractionPolling()
+    {
+        if (interactionRoutine == null)
+            return;
+
+        StopCoroutine(interactionRoutine);
+        interactionRoutine = null;
     }
 
     private void SetTreeVisible(bool visible)
@@ -446,11 +521,23 @@ public class ChoppableTree : MonoBehaviour
             return true;
         }
 
-        return string.Equals(
-            other.transform.root.name,
-            "Player",
-            StringComparison.OrdinalIgnoreCase
-        );
+        Transform current = other.transform;
+
+        while (current != null)
+        {
+            if (string.Equals(
+                    current.name,
+                    "Player",
+                    StringComparison.OrdinalIgnoreCase
+                ))
+            {
+                return true;
+            }
+
+            current = current.parent;
+        }
+
+        return false;
     }
 
     private bool WasInteractPressed()

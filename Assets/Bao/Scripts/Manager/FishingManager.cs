@@ -523,6 +523,9 @@ public class FishingManager : MonoBehaviour
             return;
         }
 
+        if (fish.isFish)
+            GreenFieldQuestEvents.ReportFishCaught();
+
         PlaySound(catchSound);
         ShowCatchResult(fish);
     }

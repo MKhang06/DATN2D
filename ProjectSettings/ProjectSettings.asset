@@ -581,7 +581,9 @@ PlayerSettings:
   webGLWebAssemblyBigInt: 0
   webGLCloseOnQuit: 0
   webWasm2023: 0
-  scriptingDefineSymbols: {}
+  scriptingDefineSymbols:
+    1: DATN2D_PROJECT
+    Standalone: DATN2D_PROJECT
   additionalCompilerArguments: {}
   platformArchitecture: {}
   scriptingBackend:

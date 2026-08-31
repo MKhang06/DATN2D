@@ -3,81 +3,85 @@ using UnityEngine;
 using UnityEngine.EventSystems;
 using UnityEngine.Tilemaps;
 
-namespace Khang
+public class PlantingSystem : MonoBehaviour
 {
-    public class PlantingSystem : MonoBehaviour
+    [Header("Cấu Hình Tilemap")]
+    [SerializeField] private Tilemap farmTilemap;           // Kéo Tilemap 'FarmPlots' vào đây
+
+    [Header("Danh Sách 4 Cây Trồng")]
+    [Tooltip("Gồm 4 Prefab: 1-Bí ngô, 2-Cà tím, 3-Ớt, 4-Việt quất")]
+    [SerializeField] private GameObject[] cropPrefabs;      // Mảng chứa 4 loại cây
+
+    private int selectedCropIndex = 0;                      // Vị trí cây đang chọn (Mặc định: 0 - Bí ngô)
+    private Camera mainCamera;
+
+    // TỐI ƯU: Lưu danh sách tọa độ các ô đã trồng cây vào Dictionary (Nhanh và chính xác hơn kiểm tra Collider)
+    private Dictionary<Vector3Int, GameObject> plantedCrops = new Dictionary<Vector3Int, GameObject>();
+
+    private void Awake()
     {
-        [Header("Cấu Hình Tilemap")]
-        [SerializeField] private Tilemap farmTilemap;           // Tilemap 'FarmPlots'
+        // Cache camera chính từ đầu
+        mainCamera = Camera.main;
+    }
 
-        [Header("Danh Sách Các Prefab Cây Trồng")]
-        [SerializeField] private GameObject[] cropPrefabs;      // Mảng chứa các loại cây
+    private void Update()
+    {
+        // Chọn loại hạt giống bằng phím 1, 2, 3, 4
+        HandleInputSelection();
 
-        private int selectedCropIndex = 0;                      // Cây đang chọn
-        private Camera mainCamera;
-
-        private Dictionary<Vector3Int, GameObject> plantedCrops = new Dictionary<Vector3Int, GameObject>();
-
-        public void SetSelectedCropIndex(int index)
+        // Click chuột trái để trồng
+        if (Input.GetMouseButtonDown(0))
         {
-            if (cropPrefabs == null || cropPrefabs.Length == 0) return;
-            selectedCropIndex = Mathf.Clamp(index, 0, cropPrefabs.Length - 1);
+            TryPlantCrop();
+        }
+    }
+
+    private void HandleInputSelection()
+    {
+        if (Input.GetKeyDown(KeyCode.Alpha1)) selectedCropIndex = 0; // Bí ngô
+        if (Input.GetKeyDown(KeyCode.Alpha2)) selectedCropIndex = 1; // Cà tím
+        if (Input.GetKeyDown(KeyCode.Alpha3)) selectedCropIndex = 2; // Ớt
+        if (Input.GetKeyDown(KeyCode.Alpha4)) selectedCropIndex = 3; // Việt quất
+    }
+
+    private void TryPlantCrop()
+    {
+        // 1. Không trồng cây nếu người chơi đang bấm vào menu / nút UI
+        if (EventSystem.current != null && EventSystem.current.IsPointerOverGameObject())
+        {
+            return;
         }
 
-        private void Awake()
+        if (farmTilemap == null || cropPrefabs == null || cropPrefabs.Length == 0) return;
+        if (selectedCropIndex >= cropPrefabs.Length || cropPrefabs[selectedCropIndex] == null) return;
+
+        // 2. Chuyển vị trí chuột sang tọa độ ô lưới Tilemap
+        Vector3 mouseWorldPos = mainCamera.ScreenToWorldPoint(Input.mousePosition);
+        Vector3Int cellPosition = farmTilemap.WorldToCell(mouseWorldPos);
+
+        // 3. Kiểm tra ô click vào có phải là ô đất ruộng FarmPlots không
+        if (farmTilemap.HasTile(cellPosition))
         {
-            mainCamera = Camera.main;
-        }
-
-        private void Update()
-        {
-            HandleInputSelection();
-
-            if (Input.GetMouseButtonDown(0))
+            // Tự động dọn dẹp các cây đã bị xóa/thu hoạch khỏi danh sách lưu trữ
+            if (plantedCrops.ContainsKey(cellPosition) && plantedCrops[cellPosition] == null)
             {
-                TryPlantCrop();
-            }
-        }
-
-        private void HandleInputSelection()
-        {
-            if (Input.GetKeyDown(KeyCode.Alpha1)) selectedCropIndex = 0;
-            if (Input.GetKeyDown(KeyCode.Alpha2)) selectedCropIndex = 1;
-            if (Input.GetKeyDown(KeyCode.Alpha3)) selectedCropIndex = 2;
-            if (Input.GetKeyDown(KeyCode.Alpha4)) selectedCropIndex = 3;
-            if (Input.GetKeyDown(KeyCode.Alpha5)) selectedCropIndex = 4;
-
-            if (cropPrefabs != null && cropPrefabs.Length > 0)
-            {
-                selectedCropIndex = Mathf.Clamp(selectedCropIndex, 0, cropPrefabs.Length - 1);
-            }
-            else
-            {
-                selectedCropIndex = 0;
-            }
-        }
-
-        private void TryPlantCrop()
-        {
-            if (EventSystem.current != null && EventSystem.current.IsPointerOverGameObject()) return;
-            if (farmTilemap == null || cropPrefabs == null || cropPrefabs.Length == 0) return;
-            if (selectedCropIndex < 0 || selectedCropIndex >= cropPrefabs.Length) return;
-
-            Vector3 mouseWorldPos = mainCamera != null
-                ? mainCamera.ScreenToWorldPoint(Input.mousePosition)
-                : Camera.main.ScreenToWorldPoint(Input.mousePosition);
-
-            Vector3Int cellPosition = farmTilemap.WorldToCell(mouseWorldPos);
-            if (!farmTilemap.HasTile(cellPosition)) return;
-
-            if (plantedCrops.TryGetValue(cellPosition, out var existingCrop) && existingCrop != null)
-            {
-                return;
+                plantedCrops.Remove(cellPosition);
             }
 
-            Vector3 spawnPosition = farmTilemap.GetCellCenterWorld(cellPosition);
-            GameObject newCrop = Instantiate(cropPrefabs[selectedCropIndex], spawnPosition, Quaternion.identity);
-            plantedCrops[cellPosition] = newCrop;
+            // 4. Nếu ô đất này trống chưa trồng cây nào
+            if (!plantedCrops.ContainsKey(cellPosition))
+            {
+                // Lấy tọa độ chính giữa ô vuông đất
+                Vector3 spawnPosition = farmTilemap.GetCellCenterWorld(cellPosition);
+                
+                // Sinh ra cây trồng mới
+                GameObject newCrop = Instantiate(cropPrefabs[selectedCropIndex], spawnPosition, Quaternion.identity);
+
+                // Lưu vết ô đất đã được trồng
+                plantedCrops.Add(cellPosition, newCrop);
+
+                GreenFieldQuestEvents.ReportCropPlanted();
+            }
         }
     }
 }
