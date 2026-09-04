@@ -59,6 +59,7 @@ namespace GreenField.UI
         private int currentResolutionIndex;
         private bool isFullscreen;
         private bool isVSyncEnabled;
+        private bool isStartingGame;
 
         [RuntimeInitializeOnLoadMethod(RuntimeInitializeLoadType.BeforeSceneLoad)]
         private static void ApplySavedSettingsOnStartup()
@@ -122,11 +123,25 @@ namespace GreenField.UI
 
         public void StartNewGame()
         {
-            if (!CanLoadGameplayScene())
+            if (isStartingGame ||
+                !CanLoadGameplayScene())
+            {
                 return;
+            }
 
-            SaveManager.BeginNewGame();
-            SceneManager.LoadScene(farmSceneName, LoadSceneMode.Single);
+            isStartingGame = true;
+            SetMenuButtonsInteractable(false);
+
+            GreenFieldIntroCutscene cutscene =
+                GreenFieldIntroCutscene.Create(transform);
+
+            if (cutscene == null)
+            {
+                FinishStartingNewGame();
+                return;
+            }
+
+            cutscene.Play(FinishStartingNewGame);
         }
 
         public void ContinueGame()
@@ -548,6 +563,23 @@ namespace GreenField.UI
                     button.interactable = hasSave;
                 }
             }
+        }
+
+        private void SetMenuButtonsInteractable(bool interactable)
+        {
+            Button[] buttons = GetComponentsInChildren<Button>(true);
+
+            foreach (Button button in buttons)
+            {
+                if (button != null)
+                    button.interactable = interactable;
+            }
+        }
+
+        private void FinishStartingNewGame()
+        {
+            SaveManager.BeginNewGame();
+            SceneManager.LoadScene(farmSceneName, LoadSceneMode.Single);
         }
 
         private bool CanLoadGameplayScene()

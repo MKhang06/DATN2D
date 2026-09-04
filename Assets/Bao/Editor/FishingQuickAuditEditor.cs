@@ -1059,7 +1059,7 @@ public static class FishingQuickAuditEditor
             value =
                 property.type.Contains(
                     "GameObject")
-                    ? found.gameObject
+                    ? (UnityEngine.Object)found.gameObject
                     : found;
         }
         else

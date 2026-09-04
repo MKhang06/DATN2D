@@ -1,5 +1,6 @@
 using System.Collections.Generic;
 using UnityEngine;
+using UnityEngine.SceneManagement;
 
 [DefaultExecutionOrder(-100)]
 [DisallowMultipleComponent]
@@ -77,6 +78,42 @@ public sealed class WorldSceneOrganizer2D : MonoBehaviour
         public Transform Anchor;
         public int LocalOrderOffset;
         public bool UseAnchorPosition;
+    }
+
+    [RuntimeInitializeOnLoadMethod(
+        RuntimeInitializeLoadType.BeforeSceneLoad
+    )]
+    private static void RegisterSceneLoadHandler()
+    {
+        SceneManager.sceneLoaded -= HandleSceneLoaded;
+        SceneManager.sceneLoaded += HandleSceneLoaded;
+    }
+
+    private static void HandleSceneLoaded(
+        Scene scene,
+        LoadSceneMode mode)
+    {
+        PlayerController player =
+            FindFirstObjectByType<PlayerController>(
+                FindObjectsInactive.Include
+            );
+
+        if (player == null || player.gameObject.scene != scene)
+            return;
+
+        WorldSceneOrganizer2D existing =
+            FindFirstObjectByType<WorldSceneOrganizer2D>(
+                FindObjectsInactive.Include
+            );
+
+        if (existing != null && existing.gameObject.scene == scene)
+            return;
+
+        GameObject organizer =
+            new GameObject("World Scene Organizer 2D");
+
+        SceneManager.MoveGameObjectToScene(organizer, scene);
+        organizer.AddComponent<WorldSceneOrganizer2D>();
     }
 
     private void Awake()
@@ -172,9 +209,23 @@ public sealed class WorldSceneOrganizer2D : MonoBehaviour
         string originalLayer)
     {
         bool actorLayer = IsActorLayer(originalLayer);
-        Transform anchor = actorLayer
-            ? FindActorAnchor(renderer.transform)
-            : renderer.transform;
+        Transform anchor;
+
+        if (originalLayer == "NPC")
+        {
+            Rigidbody2D npcBody =
+                renderer.GetComponentInParent<Rigidbody2D>();
+
+            anchor = npcBody != null
+                ? npcBody.transform
+                : renderer.transform;
+        }
+        else
+        {
+            anchor = actorLayer
+                ? FindActorAnchor(renderer.transform)
+                : renderer.transform;
+        }
 
         return new SortEntry
         {

@@ -71,6 +71,9 @@ internal static class MapMainHierarchyOrganizerEditor
 
     private static void OrganizeLoadedMapMain()
     {
+        if (EditorApplication.isPlayingOrWillChangePlaymode)
+            return;
+
         Scene scene = SceneManager.GetActiveScene();
 
         if (scene.IsValid() &&
@@ -83,6 +86,9 @@ internal static class MapMainHierarchyOrganizerEditor
 
     private static void OrganizeScene(Scene scene, bool saveScene)
     {
+        if (EditorApplication.isPlayingOrWillChangePlaymode)
+            return;
+
         GameObject[] groups = new GameObject[GroupNames.Length];
         bool changed = false;
 
