@@ -23,6 +23,20 @@ namespace Khang
             UpdateSlotUI();
         }
 
+        // Trừ bớt vật phẩm khi sử dụng/trồng cây
+        public void RemoveAmount(int amount = 1)
+        {
+            currentQuantity -= amount;
+            if (currentQuantity <= 0)
+            {
+                ClearSlot();
+            }
+            else
+            {
+                UpdateSlotUI();
+            }
+        }
+
         public void ClearSlot()
         {
             currentItem = null;

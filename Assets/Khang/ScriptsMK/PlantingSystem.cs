@@ -2,86 +2,97 @@ using System.Collections.Generic;
 using UnityEngine;
 using UnityEngine.EventSystems;
 using UnityEngine.Tilemaps;
+using Khang;
 
 public class PlantingSystem : MonoBehaviour
 {
     [Header("Cấu Hình Tilemap")]
     [SerializeField] private Tilemap farmTilemap;           // Kéo Tilemap 'FarmPlots' vào đây
 
-    [Header("Danh Sách 4 Cây Trồng")]
-    [Tooltip("Gồm 4 Prefab: 1-Bí ngô, 2-Cà tím, 3-Ớt, 4-Việt quất")]
-    [SerializeField] private GameObject[] cropPrefabs;      // Mảng chứa 4 loại cây
+    [Header("Danh Sách Dự Phòng (Nếu ItemData chưa gắn Prefab)")]
+    [Tooltip("Thứ tự: 0-Bí ngô, 1-Cà tím, 2-Ớt, 3-Việt quất")]
+    [SerializeField] private GameObject[] cropPrefabs;
 
-    private int selectedCropIndex = 0;                      // Vị trí cây đang chọn (Mặc định: 0 - Bí ngô)
     private Camera mainCamera;
-
-    // TỐI ƯU: Lưu danh sách tọa độ các ô đã trồng cây vào Dictionary (Nhanh và chính xác hơn kiểm tra Collider)
     private Dictionary<Vector3Int, GameObject> plantedCrops = new Dictionary<Vector3Int, GameObject>();
 
     private void Awake()
     {
-        // Cache camera chính từ đầu
         mainCamera = Camera.main;
     }
 
     private void Update()
     {
-        // Chọn loại hạt giống bằng phím 1, 2, 3, 4
-        HandleInputSelection();
-
-        // Click chuột trái để trồng
+        // Click chuột trái để gieo trồng theo ô Hotbar đang chọn
         if (Input.GetMouseButtonDown(0))
         {
             TryPlantCrop();
         }
     }
 
-    private void HandleInputSelection()
-    {
-        if (Input.GetKeyDown(KeyCode.Alpha1)) selectedCropIndex = 0; // Bí ngô
-        if (Input.GetKeyDown(KeyCode.Alpha2)) selectedCropIndex = 1; // Cà tím
-        if (Input.GetKeyDown(KeyCode.Alpha3)) selectedCropIndex = 2; // Ớt
-        if (Input.GetKeyDown(KeyCode.Alpha4)) selectedCropIndex = 3; // Việt quất
-    }
-
     private void TryPlantCrop()
     {
-        // 1. Không trồng cây nếu người chơi đang bấm vào menu / nút UI
-        if (EventSystem.current != null && EventSystem.current.IsPointerOverGameObject())
-        {
-            return;
-        }
+        // 1. Nếu click trúng UI thì không trồng
+        if (EventSystem.current != null && EventSystem.current.IsPointerOverGameObject()) return;
+        if (farmTilemap == null) return;
 
-        if (farmTilemap == null || cropPrefabs == null || cropPrefabs.Length == 0) return;
-        if (selectedCropIndex >= cropPrefabs.Length || cropPrefabs[selectedCropIndex] == null) return;
+        // 2. Lấy ô đang chọn từ Hotbar của InventoryManager
+        if (InventoryManager.Instance == null) return;
+        InventorySlot currentSlot = InventoryManager.Instance.SelectedSlot;
 
-        // 2. Chuyển vị trí chuột sang tọa độ ô lưới Tilemap
+        if (currentSlot == null || currentSlot.IsEmpty || currentSlot.Item == null) return;
+
+        // 3. Nhận diện Prefab cây trồng từ ItemData
+        GameObject cropToPlant = GetCropPrefab(currentSlot.Item);
+        if (cropToPlant == null) return; // Không phải hạt giống (VD: là rìu/cuốc) -> Không gieo
+
+        // 4. Chuyển vị trí chuột sang ô Tilemap
         Vector3 mouseWorldPos = mainCamera.ScreenToWorldPoint(Input.mousePosition);
         Vector3Int cellPosition = farmTilemap.WorldToCell(mouseWorldPos);
 
-        // 3. Kiểm tra ô click vào có phải là ô đất ruộng FarmPlots không
         if (farmTilemap.HasTile(cellPosition))
         {
-            // Tự động dọn dẹp các cây đã bị xóa/thu hoạch khỏi danh sách lưu trữ
+            // Dọn dẹp cây cũ đã bị thu hoạch
             if (plantedCrops.ContainsKey(cellPosition) && plantedCrops[cellPosition] == null)
             {
                 plantedCrops.Remove(cellPosition);
             }
 
-            // 4. Nếu ô đất này trống chưa trồng cây nào
+            // Nếu ô đất còn trống
             if (!plantedCrops.ContainsKey(cellPosition))
             {
-                // Lấy tọa độ chính giữa ô vuông đất
                 Vector3 spawnPosition = farmTilemap.GetCellCenterWorld(cellPosition);
-                
-                // Sinh ra cây trồng mới
-                GameObject newCrop = Instantiate(cropPrefabs[selectedCropIndex], spawnPosition, Quaternion.identity);
+                GameObject newCrop = Instantiate(cropToPlant, spawnPosition, Quaternion.identity);
 
-                // Lưu vết ô đất đã được trồng
                 plantedCrops.Add(cellPosition, newCrop);
+
+                // Trừ 1 hạt giống khỏi Hotbar
+                currentSlot.RemoveAmount(1);
 
                 GreenFieldQuestEvents.ReportCropPlanted();
             }
         }
+    }
+
+    // Cơ chế thông minh: Tự tìm Prefab từ ItemData hoặc so khớp tên
+    private GameObject GetCropPrefab(ItemData item)
+    {
+        if (item == null) return null;
+
+        // Ưu tiên 1: Lấy trực tiếp từ trường cropPrefab trong ItemData
+        if (item.cropPrefab != null) return item.cropPrefab;
+
+        // Ưu tiên 2: Tự động so khớp theo tên với danh sách cropPrefabs
+        if (cropPrefabs != null && cropPrefabs.Length > 0)
+        {
+            string id = (item.itemID + " " + item.itemName + " " + item.name).ToLower();
+
+            if (id.Contains("pumpkin") || id.Contains("bi")) return cropPrefabs[0];
+            if (cropPrefabs.Length > 1 && (id.Contains("eggplant") || id.Contains("tim"))) return cropPrefabs[1];
+            if (cropPrefabs.Length > 2 && (id.Contains("pepper") || id.Contains("papper") || id.Contains("ot"))) return cropPrefabs[2];
+            if (cropPrefabs.Length > 3 && (id.Contains("blue") || id.Contains("quat"))) return cropPrefabs[3];
+        }
+
+        return null;
     }
 }
