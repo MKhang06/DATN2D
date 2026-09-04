@@ -11,9 +11,10 @@ namespace Khang
         [SerializeField] private Tilemap farmTilemap;           // Tilemap 'FarmPlots'
 
         [Header("Danh Sách Các Prefab Cây Trồng")]
-        [SerializeField] private GameObject[] cropPrefabs;      // Mảng chứa các loại cây
+        [Tooltip("Thứ tự: 0-Bí ngô (Z), 1-Cà tím (X), 2-Ớt (C), 3-Việt quất (V)")]
+        [SerializeField] private GameObject[] cropPrefabs;
 
-        private int selectedCropIndex = 0;                      // Cây đang chọn
+        private int selectedCropIndex = 0;
         private Camera mainCamera;
 
         private Dictionary<Vector3Int, GameObject> plantedCrops = new Dictionary<Vector3Int, GameObject>();
@@ -41,11 +42,11 @@ namespace Khang
 
         private void HandleInputSelection()
         {
-            if (Input.GetKeyDown(KeyCode.Alpha1)) selectedCropIndex = 0;
-            if (Input.GetKeyDown(KeyCode.Alpha2)) selectedCropIndex = 1;
-            if (Input.GetKeyDown(KeyCode.Alpha3)) selectedCropIndex = 2;
-            if (Input.GetKeyDown(KeyCode.Alpha4)) selectedCropIndex = 3;
-            if (Input.GetKeyDown(KeyCode.Alpha5)) selectedCropIndex = 4;
+            // Chọn mầm cây bằng phím Z, X, C, V
+            if (Input.GetKeyDown(KeyCode.Z)) selectedCropIndex = 0;
+            if (Input.GetKeyDown(KeyCode.X)) selectedCropIndex = 1;
+            if (Input.GetKeyDown(KeyCode.C)) selectedCropIndex = 2;
+            if (Input.GetKeyDown(KeyCode.V)) selectedCropIndex = 3;
 
             if (cropPrefabs != null && cropPrefabs.Length > 0)
             {
@@ -61,7 +62,7 @@ namespace Khang
         {
             if (EventSystem.current != null && EventSystem.current.IsPointerOverGameObject()) return;
             if (farmTilemap == null || cropPrefabs == null || cropPrefabs.Length == 0) return;
-            if (selectedCropIndex < 0 || selectedCropIndex >= cropPrefabs.Length) return;
+            if (selectedCropIndex < 0 || selectedCropIndex >= cropPrefabs.Length || cropPrefabs[selectedCropIndex] == null) return;
 
             Vector3 mouseWorldPos = mainCamera != null
                 ? mainCamera.ScreenToWorldPoint(Input.mousePosition)
