@@ -13,6 +13,6 @@ MonoBehaviour:
   m_Name: ShopItem_MobeyMonoLine
   m_EditorClassIdentifier: 
   equipmentData: {fileID: 11400000, guid: 28583397c82e9c84296fd094d903902f, type: 2}
-  price: 400
+  price: 650
   amountPerPurchase: 1
   requiredPlayerLevel: 3

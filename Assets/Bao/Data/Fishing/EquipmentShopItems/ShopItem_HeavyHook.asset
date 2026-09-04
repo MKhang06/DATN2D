@@ -13,6 +13,6 @@ MonoBehaviour:
   m_Name: ShopItem_HeavyHook
   m_EditorClassIdentifier: 
   equipmentData: {fileID: 11400000, guid: 664b9a24201f995499244cee5f68f4cc, type: 2}
-  price: 900
+  price: 1500
   amountPerPurchase: 1
   requiredPlayerLevel: 6

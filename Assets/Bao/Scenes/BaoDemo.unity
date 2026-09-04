@@ -59403,7 +59403,7 @@ GameObject:
   - component: {fileID: 2022227258}
   - component: {fileID: 2022227260}
   - component: {fileID: 2022227261}
-  m_Layer: 0
+  m_Layer: 4
   m_Name: Water
   m_TagString: Untagged
   m_Icon: {fileID: 0}
@@ -60255,7 +60255,7 @@ CompositeCollider2D:
   m_CompositeOperation: 0
   m_CompositeOrder: 0
   m_Offset: {x: 0, y: 0}
-  m_GeometryType: 0
+  m_GeometryType: 1
   m_GenerationType: 0
   m_EdgeRadius: 0
   m_ColliderPaths:
@@ -64379,7 +64379,7 @@ PrefabInstance:
       objectReference: {fileID: 0}
     - target: {fileID: 3964385454645102578, guid: 0b13ecfbe49197747ade198e011f0b5e, type: 3}
       propertyPath: Money
-      value: 1
+      value: 600
       objectReference: {fileID: 0}
     - target: {fileID: 3964385454645102578, guid: 0b13ecfbe49197747ade198e011f0b5e, type: 3}
       propertyPath: CurrentXP
@@ -65066,12 +65066,12 @@ MonoBehaviour:
   waterLayer:
     serializedVersion: 2
     m_Bits: 16
-  waterCheckRadius: 0.35
+  waterCheckRadius: 0.55
   fishingEnergyCost: 8
-  waitMin: 2
-  waitMax: 6
-  baseFishChance: 55
-  noBaitPenalty: 20
+  waitMin: 5
+  waitMax: 16
+  baseFishChance: 68
+  noBaitPenalty: 18
   fishLoots:
   - itemName: "C\xE1 H\u1ED3i Nh\u1ECF"
     icon: {fileID: 4864474330649768578, guid: 2bd5fff46156e7944901035971334d6d, type: 3}
@@ -65203,8 +65203,8 @@ MonoBehaviour:
   reelSpeedPerLevel: 0.2
   hookLevel: 1
   hookFishChanceBonus: 0
-  currentBaitName: "Giun \u0110\u1EA5t"
-  baitFishChanceBonus: 15
+  currentBaitName:
+  baitFishChanceBonus: 0
   basicEquipmentIgnoresSkill: 1
   showDebugLogs: 1
 --- !u!114 &9113155354489064561

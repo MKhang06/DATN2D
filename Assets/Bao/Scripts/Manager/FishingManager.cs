@@ -49,21 +49,43 @@ public class FishingManager : MonoBehaviour
     [SerializeField] private GameObject bobberObject;
     [SerializeField] private GameObject biteIconObject;
     [SerializeField] private GameObject splashObject;
+    [Tooltip("Có thể để trống. Game sẽ tự tạo bóng cá từ icon của cá.")]
+    [SerializeField] private GameObject fishShadowObject;
+    [Tooltip("Điểm thu phao về. Có thể để trống để dùng vị trí Player.")]
+    [SerializeField] private Transform rodTipPoint;
 
     [Header("Water Check")]
     [SerializeField] private LayerMask waterLayer;
-    [SerializeField] private float waterCheckRadius = 0.35f;
+    [SerializeField, Min(0.05f)] private float waterCheckRadius = 0.55f;
 
     [Header("Energy")]
     [SerializeField] private float fishingEnergyCost = 8f;
 
     [Header("Wait Time")]
-    [SerializeField] private float waitMin = 2f;
-    [SerializeField] private float waitMax = 5f;
+    [SerializeField, Min(0f)] private float waitMin = 5f;
+    [SerializeField, Min(0f)] private float waitMax = 16f;
+    [SerializeField, Min(1f)] private float maxWaitDuration = 30f;
+
+    [Header("Fish Approach")]
+    [SerializeField, Min(0.1f)] private float fishApproachDuration = 1.6f;
+    [SerializeField, Min(0.1f)] private float fishShadowStartDistance = 2.6f;
+    [SerializeField, Min(0f)] private float fishShadowDepthOffset = 0.38f;
+    [SerializeField, Min(0.05f)] private float fishShadowWorldWidth = 0.85f;
+    [SerializeField] private Color fishShadowColor =
+        new Color(0.015f, 0.12f, 0.16f, 0.48f);
+
+    [Header("Nibble Animation")]
+    [SerializeField, Min(1)] private int minNibbleCount = 2;
+    [SerializeField, Min(1)] private int maxNibbleCount = 4;
+    [SerializeField, Min(0.01f)] private float nibbleDipDistance = 0.11f;
+    [SerializeField, Min(0.01f)] private float nibbleMoveDuration = 0.12f;
+    [SerializeField, Min(0f)] private float nibblePauseMin = 0.18f;
+    [SerializeField, Min(0f)] private float nibblePauseMax = 0.42f;
+    [SerializeField, Min(0.05f)] private float autoRetractDuration = 0.45f;
 
     [Header("Chance")]
-    [SerializeField] private float baseFishChance = 55f;
-    [SerializeField] private float noBaitPenalty = 20f;
+    [SerializeField] private float baseFishChance = 68f;
+    [SerializeField] private float noBaitPenalty = 18f;
 
     [Header("Loot")]
     [SerializeField] private FishingLoot[] fishLoots;
@@ -87,6 +109,10 @@ public class FishingManager : MonoBehaviour
     private float currentMaxDepth;
 
     private FishingLoot currentLoot;
+    private Collider2D currentWaterCollider;
+    private SpriteRenderer fishShadowRenderer;
+    private Vector3 bobberDefaultScale = Vector3.one;
+    private bool bobberDefaultsCached;
 
     private void Awake()
     {
@@ -102,10 +128,47 @@ public class FishingManager : MonoBehaviour
             inventoryManager = InventoryManager.Instance;
 
         FindNotificationUI();
+        CacheBobberDefaults();
+        FindRodTipPoint();
         HideFishingObjects();
     }
 
+    private void OnDisable()
+    {
+        if (!isFishing)
+            return;
+
+        isFishing = false;
+        currentLoot = null;
+        currentWaterCollider = null;
+
+        HideFishingObjects();
+
+        if (fishingBarUI != null)
+            fishingBarUI.Hide();
+
+        GameLockManager.Instance?.UnlockPlayer();
+    }
+
     public void TryStartFishing()
+    {
+        if (cam == null)
+            cam = Camera.main;
+
+        if (cam == null)
+        {
+            Debug.LogWarning("Không tìm thấy Camera Main.");
+            return;
+        }
+
+        Vector3 mouseWorldPos =
+            cam.ScreenToWorldPoint(Input.mousePosition);
+
+        mouseWorldPos.z = 0f;
+        TryStartFishingAt(mouseWorldPos);
+    }
+
+    public void TryStartFishingAt(Vector3 castWorldPosition)
     {
         if (isFishing)
             return;
@@ -128,31 +191,17 @@ public class FishingManager : MonoBehaviour
             return;
         }
 
-        if (cam == null)
-            cam = Camera.main;
+        castWorldPosition.z = 0f;
 
-        if (cam == null)
-        {
-            Debug.LogWarning("Không tìm thấy Camera Main.");
-            return;
-        }
-
-        Vector3 mouseWorldPos =
-            cam.ScreenToWorldPoint(Input.mousePosition);
-
-        mouseWorldPos.z = 0f;
-
-        Collider2D hit = Physics2D.OverlapCircle(
-            mouseWorldPos,
-            waterCheckRadius,
-            waterLayer
-        );
+        Collider2D hit = FindWaterCollider(castWorldPosition);
 
         if (hit == null)
         {
             Debug.Log("Phải quăng cần ở khu vực nước.");
             return;
         }
+
+        currentWaterCollider = hit;
 
         FishingWaterZone zone =
             hit.GetComponentInParent<FishingWaterZone>();
@@ -166,7 +215,7 @@ public class FishingManager : MonoBehaviour
             zoneDepth
         );
 
-        fishingPos = mouseWorldPos;
+        fishingPos = castWorldPosition;
         isFishing = true;
 
         GameLockManager.Instance?.LockPlayer();
@@ -182,6 +231,42 @@ public class FishingManager : MonoBehaviour
         {
             OnDepthSelected(currentMaxDepth * 0.5f);
         }
+    }
+
+    private Collider2D FindWaterCollider(Vector3 castWorldPosition)
+    {
+        if (waterLayer.value == 0)
+            waterLayer = LayerMask.GetMask("Water");
+
+        Collider2D[] hits = Physics2D.OverlapCircleAll(
+            castWorldPosition,
+            Mathf.Max(0.05f, waterCheckRadius),
+            waterLayer
+        );
+
+        Collider2D nearest = null;
+        float nearestDistance = float.MaxValue;
+
+        foreach (Collider2D candidate in hits)
+        {
+            if (candidate == null || !candidate.enabled)
+                continue;
+
+            Vector2 closestPoint =
+                candidate.ClosestPoint(castWorldPosition);
+
+            float distance = Vector2.SqrMagnitude(
+                closestPoint - (Vector2)castWorldPosition
+            );
+
+            if (distance >= nearestDistance)
+                continue;
+
+            nearestDistance = distance;
+            nearest = candidate;
+        }
+
+        return nearest;
     }
 
     private void OnDepthSelected(float depth)
@@ -226,20 +311,63 @@ public class FishingManager : MonoBehaviour
         if (bobberObject != null)
         {
             bobberObject.transform.position = fishingPos;
+            ResetBobberVisual();
             bobberObject.SetActive(true);
         }
 
-        yield return new WaitForSeconds(
-            Random.Range(waitMin, waitMax)
+        float castStartedAt = Time.time;
+        bool baitAvailable = gearStats.HasBait;
+
+        currentLoot = RollLoot(
+            selectedDepth,
+            baitAvailable
         );
+
+        if (currentLoot == null)
+        {
+            yield return WaitAndAutoRetract(castStartedAt);
+            yield break;
+        }
+
+        if (baitAvailable)
+            gearStats.TryConsumeBait();
+
+        float minimumDelay = Mathf.Max(0f, waitMin);
+        float maximumDelay = Mathf.Max(minimumDelay, waitMax);
+        float preBiteBudget = GetPreBiteAnimationBudget(currentLoot.isFish);
+        float latestApproachStart = Mathf.Max(
+            0f,
+            maxWaitDuration - preBiteBudget
+        );
+
+        float encounterDelay = Mathf.Min(
+            Random.Range(minimumDelay, maximumDelay),
+            latestApproachStart
+        );
+
+        yield return new WaitForSeconds(encounterDelay);
 
         if (!isFishing)
             yield break;
 
-        bool baitUsed = false;
+        if (currentLoot.isFish)
+        {
+            if (fishingBarUI != null)
+                fishingBarUI.ShowFishApproaching();
 
-        if (gearStats.HasBait)
-            baitUsed = gearStats.TryConsumeBait();
+            yield return AnimateFishApproach(currentLoot);
+
+            if (!isFishing)
+                yield break;
+        }
+
+        if (fishingBarUI != null)
+            fishingBarUI.ShowNibbling();
+
+        yield return AnimateNibbleSequence();
+
+        if (!isFishing)
+            yield break;
 
         if (biteIconObject != null)
         {
@@ -250,11 +378,7 @@ public class FishingManager : MonoBehaviour
         }
 
         PlaySound(biteSound);
-
-        currentLoot = RollLoot(
-            selectedDepth,
-            baitUsed
-        );
+        HideFishShadow();
 
         if (fishingBarUI != null &&
             currentLoot != null)
@@ -279,19 +403,6 @@ public class FishingManager : MonoBehaviour
             biteIconObject.SetActive(false);
 
         /*
-         * Thả dây nhưng không câu được cá
-         * hoặc vật phẩm nào.
-         */
-        if (currentLoot == null)
-        {
-            FailFishing(
-                "Không câu được cá hoặc vật phẩm nào."
-            );
-
-            yield break;
-        }
-
-        /*
          * Câu được vật phẩm rác thì không mở
          * minigame kéo cá.
          */
@@ -305,6 +416,350 @@ public class FishingManager : MonoBehaviour
          * Câu được cá thì bắt đầu minigame kéo cá.
          */
         StartFishBattle(currentLoot);
+    }
+
+    private float GetPreBiteAnimationBudget(bool isFish)
+    {
+        int nibbleCount = Mathf.Max(
+            minNibbleCount,
+            maxNibbleCount
+        );
+
+        float nibbleBudget = nibbleCount *
+            (nibbleMoveDuration * 2f +
+             Mathf.Max(nibblePauseMin, nibblePauseMax));
+
+        return nibbleBudget +
+               (isFish ? fishApproachDuration : 0f) +
+               0.5f;
+    }
+
+    private IEnumerator WaitAndAutoRetract(float castStartedAt)
+    {
+        float elapsed = Time.time - castStartedAt;
+        float remaining = Mathf.Max(
+            0f,
+            maxWaitDuration - elapsed
+        );
+
+        if (remaining > 0f)
+            yield return new WaitForSeconds(remaining);
+
+        if (!isFishing)
+            yield break;
+
+        if (fishingBarUI != null)
+            fishingBarUI.ShowAutoRetract();
+
+        PlaySound(reelSound);
+        yield return AnimateAutoRetract();
+
+        if (!isFishing)
+            yield break;
+
+        const string timeoutMessage =
+            "Đã chờ 30 giây nhưng không có cá cắn câu. Cần câu đã tự thu lại.";
+
+        Debug.Log(timeoutMessage);
+        NotifyFishingTimedOut(timeoutMessage);
+        CleanupFishing();
+    }
+
+    private IEnumerator AnimateFishApproach(FishingLoot fish)
+    {
+        if (!PrepareFishShadow(fish))
+            yield break;
+
+        float direction = Random.value < 0.5f
+            ? -1f
+            : 1f;
+
+        Vector3 target =
+            fishingPos +
+            Vector3.down * fishShadowDepthOffset;
+
+        target = ClampToCurrentWater(target);
+
+        Vector3 start = ClampToCurrentWater(
+            target +
+            Vector3.right * direction * fishShadowStartDistance
+        );
+
+        if (Vector3.Distance(start, target) < 0.3f)
+        {
+            direction *= -1f;
+            start = ClampToCurrentWater(
+                target +
+                Vector3.right * direction * fishShadowStartDistance
+            );
+        }
+
+        fishShadowObject.transform.position = start;
+        SetFishShadowFacing(direction);
+        fishShadowObject.SetActive(true);
+
+        float duration = Mathf.Max(0.05f, fishApproachDuration);
+        float elapsed = 0f;
+
+        while (elapsed < duration && isFishing)
+        {
+            elapsed += Time.deltaTime;
+
+            float t = Mathf.Clamp01(elapsed / duration);
+            float eased = t * t * (3f - 2f * t);
+
+            Vector3 position = Vector3.Lerp(start, target, eased);
+            position.y += Mathf.Sin(eased * Mathf.PI) * 0.08f;
+            fishShadowObject.transform.position = position;
+
+            Color color = fishShadowColor;
+            color.a *= Mathf.SmoothStep(0f, 1f, Mathf.Clamp01(t * 3f));
+            fishShadowRenderer.color = color;
+
+            yield return null;
+        }
+
+        if (fishShadowObject != null)
+            fishShadowObject.transform.position = target;
+    }
+
+    private IEnumerator AnimateNibbleSequence()
+    {
+        if (bobberObject == null)
+        {
+            yield return new WaitForSeconds(0.6f);
+            yield break;
+        }
+
+        CacheBobberDefaults();
+
+        Vector3 basePosition = fishingPos;
+        int low = Mathf.Max(1, minNibbleCount);
+        int high = Mathf.Max(low, maxNibbleCount);
+        int count = Random.Range(low, high + 1);
+
+        for (int i = 0; i < count && isFishing; i++)
+        {
+            float strength = Random.Range(0.75f, 1.15f);
+            Vector3 dipPosition =
+                basePosition +
+                Vector3.down * nibbleDipDistance * strength;
+
+            yield return MoveBobber(
+                basePosition,
+                dipPosition,
+                nibbleMoveDuration
+            );
+
+            yield return MoveBobber(
+                dipPosition,
+                basePosition,
+                nibbleMoveDuration
+            );
+
+            if (!isFishing)
+                yield break;
+
+            float pause = Random.Range(
+                Mathf.Min(nibblePauseMin, nibblePauseMax),
+                Mathf.Max(nibblePauseMin, nibblePauseMax)
+            );
+
+            if (pause > 0f)
+                yield return new WaitForSeconds(pause);
+        }
+
+        if (!isFishing)
+            yield break;
+
+        Vector3 finalDip =
+            basePosition +
+            Vector3.down * nibbleDipDistance * 2.1f;
+
+        yield return MoveBobber(
+            basePosition,
+            finalDip,
+            nibbleMoveDuration * 0.8f
+        );
+
+        yield return MoveBobber(
+            finalDip,
+            basePosition,
+            nibbleMoveDuration * 0.65f
+        );
+
+        ResetBobberVisual();
+    }
+
+    private IEnumerator MoveBobber(
+        Vector3 from,
+        Vector3 to,
+        float duration)
+    {
+        if (bobberObject == null)
+            yield break;
+
+        duration = Mathf.Max(0.01f, duration);
+        float elapsed = 0f;
+
+        while (elapsed < duration && isFishing)
+        {
+            elapsed += Time.deltaTime;
+            float t = Mathf.Clamp01(elapsed / duration);
+            t = Mathf.SmoothStep(0f, 1f, t);
+
+            bobberObject.transform.position =
+                Vector3.Lerp(from, to, t);
+
+            float squash = 1f - Mathf.Sin(t * Mathf.PI) * 0.08f;
+            bobberObject.transform.localScale =
+                new Vector3(
+                    bobberDefaultScale.x * (2f - squash),
+                    bobberDefaultScale.y * squash,
+                    bobberDefaultScale.z
+                );
+
+            yield return null;
+        }
+
+        if (bobberObject != null)
+            bobberObject.transform.position = to;
+    }
+
+    private IEnumerator AnimateAutoRetract()
+    {
+        if (bobberObject == null)
+            yield break;
+
+        Vector3 start = bobberObject.transform.position;
+        Vector3 target = rodTipPoint != null
+            ? rodTipPoint.position
+            : playerStats != null
+                ? playerStats.transform.position + Vector3.up * 0.2f
+                : start;
+
+        float duration = Mathf.Max(0.05f, autoRetractDuration);
+        float elapsed = 0f;
+
+        while (elapsed < duration && isFishing)
+        {
+            elapsed += Time.deltaTime;
+            float t = Mathf.Clamp01(elapsed / duration);
+            float eased = 1f - Mathf.Pow(1f - t, 3f);
+
+            Vector3 position = Vector3.Lerp(start, target, eased);
+            position.y += Mathf.Sin(t * Mathf.PI) * 0.35f;
+            bobberObject.transform.position = position;
+
+            yield return null;
+        }
+
+        ResetBobberVisual();
+    }
+
+    private bool PrepareFishShadow(FishingLoot fish)
+    {
+        if (fish == null || fish.icon == null)
+            return false;
+
+        if (fishShadowObject == null)
+        {
+            fishShadowObject = new GameObject("Fish Shadow (Runtime)");
+            fishShadowObject.transform.SetParent(transform, true);
+        }
+
+        fishShadowRenderer =
+            fishShadowObject.GetComponentInChildren<SpriteRenderer>();
+
+        if (fishShadowRenderer == null)
+            fishShadowRenderer = fishShadowObject.AddComponent<SpriteRenderer>();
+
+        fishShadowRenderer.sprite = fish.icon;
+        fishShadowRenderer.color = fishShadowColor;
+
+        SpriteRenderer bobberRenderer = bobberObject != null
+            ? bobberObject.GetComponentInChildren<SpriteRenderer>()
+            : null;
+
+        if (bobberRenderer != null)
+        {
+            fishShadowRenderer.sortingLayerID =
+                bobberRenderer.sortingLayerID;
+            fishShadowRenderer.sortingOrder =
+                bobberRenderer.sortingOrder - 1;
+        }
+
+        float spriteWidth = Mathf.Max(
+            0.001f,
+            fish.icon.bounds.size.x
+        );
+
+        float scale = fishShadowWorldWidth / spriteWidth;
+        fishShadowObject.transform.localScale =
+            new Vector3(scale, scale * 0.62f, 1f);
+
+        return true;
+    }
+
+    private Vector3 ClampToCurrentWater(Vector3 position)
+    {
+        if (currentWaterCollider == null)
+            return position;
+
+        Vector2 clamped = currentWaterCollider.ClosestPoint(position);
+        return new Vector3(clamped.x, clamped.y, position.z);
+    }
+
+    private void SetFishShadowFacing(float approachDirection)
+    {
+        if (fishShadowObject == null)
+            return;
+
+        Vector3 scale = fishShadowObject.transform.localScale;
+        scale.x = Mathf.Abs(scale.x) *
+                  (approachDirection > 0f ? -1f : 1f);
+        fishShadowObject.transform.localScale = scale;
+    }
+
+    private void CacheBobberDefaults()
+    {
+        if (bobberObject == null || bobberDefaultsCached)
+            return;
+
+        bobberDefaultScale = bobberObject.transform.localScale;
+        bobberDefaultsCached = true;
+    }
+
+    private void ResetBobberVisual()
+    {
+        if (bobberObject == null)
+            return;
+
+        CacheBobberDefaults();
+        bobberObject.transform.localScale = bobberDefaultScale;
+    }
+
+    private void HideFishShadow()
+    {
+        if (fishShadowObject != null)
+            fishShadowObject.SetActive(false);
+    }
+
+    private void FindRodTipPoint()
+    {
+        if (rodTipPoint != null)
+            return;
+
+        Transform[] children = GetComponentsInChildren<Transform>(true);
+
+        foreach (Transform child in children)
+        {
+            if (child != null && child.name == "RodTipPoint")
+            {
+                rodTipPoint = child;
+                return;
+            }
+        }
     }
 
     private FishingLoot RollLoot(
@@ -577,6 +1032,7 @@ public class FishingManager : MonoBehaviour
     {
         isFishing = false;
         currentLoot = null;
+        currentWaterCollider = null;
 
         HideFishingObjects();
 
@@ -588,6 +1044,8 @@ public class FishingManager : MonoBehaviour
 
     private void HideFishingObjects()
     {
+        ResetBobberVisual();
+
         if (bobberObject != null)
             bobberObject.SetActive(false);
 
@@ -596,6 +1054,8 @@ public class FishingManager : MonoBehaviour
 
         if (splashObject != null)
             splashObject.SetActive(false);
+
+        HideFishShadow();
     }
 
     private void PlaySound(AudioClip clip)
@@ -669,6 +1129,7 @@ public class FishingManager : MonoBehaviour
     {
         isFishing = false;
         currentLoot = null;
+        currentWaterCollider = null;
 
         GameLockManager.Instance?.UnlockPlayer();
     }
@@ -710,6 +1171,26 @@ public class FishingManager : MonoBehaviour
         }
 
         notificationUI.ShowNoFish();
+    }
+
+    private void NotifyFishingTimedOut(string message)
+    {
+        FindNotificationUI();
+
+        if (notificationUI == null)
+        {
+            Debug.LogError(
+                "Không tìm thấy FishingNotificationUI trong Scene."
+            );
+
+            return;
+        }
+
+        notificationUI.ShowNotification(
+            message,
+            FishingNotificationUI.NotificationType.Warning,
+            title: "TỰ THU CẦN"
+        );
     }
 
     private void NotifyFishEscaped()

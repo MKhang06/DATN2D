@@ -240,7 +240,7 @@ public static class RebuildAllFishingDatabaseEditor
             "Bread",
             "bait_bread",
             "Bánh Mì",
-            10,
+            8,
             1
         ),
 
@@ -248,7 +248,7 @@ public static class RebuildAllFishingDatabaseEditor
             "Corn",
             "bait_corn",
             "Bắp Ngô",
-            15,
+            10,
             1
         ),
 
@@ -256,7 +256,7 @@ public static class RebuildAllFishingDatabaseEditor
             "Dough",
             "bait_dough",
             "Bột Nhão",
-            20,
+            12,
             1
         ),
 
@@ -264,7 +264,7 @@ public static class RebuildAllFishingDatabaseEditor
             "Crab",
             "bait_crab",
             "Cua",
-            100,
+            40,
             6,
             1,
             9f,
@@ -275,7 +275,7 @@ public static class RebuildAllFishingDatabaseEditor
             "SmallBaitFish",
             "bait_small_fish",
             "Cá Mồi Nhỏ",
-            80,
+            35,
             5,
             1,
             8f,
@@ -286,7 +286,7 @@ public static class RebuildAllFishingDatabaseEditor
             "TechnologyFeed",
             "bait_technology_feed",
             "Cám Công Nghệ",
-            200,
+            80,
             10,
             1,
             12f,
@@ -297,7 +297,7 @@ public static class RebuildAllFishingDatabaseEditor
             "Insect",
             "bait_insect",
             "Côn Trùng",
-            25,
+            12,
             2
         ),
 
@@ -305,7 +305,7 @@ public static class RebuildAllFishingDatabaseEditor
             "Earthworm",
             "bait_earthworm",
             "Giun Đất",
-            30,
+            15,
             2,
             1,
             7f,
@@ -316,7 +316,7 @@ public static class RebuildAllFishingDatabaseEditor
             "RedWorm",
             "bait_red_worm",
             "Giun Đỏ",
-            40,
+            20,
             3,
             1,
             7f,
@@ -327,7 +327,7 @@ public static class RebuildAllFishingDatabaseEditor
             "ArtificialLure",
             "bait_artificial_lure",
             "Mồi Giả",
-            300,
+            100,
             12,
             1,
             15f,
@@ -338,7 +338,7 @@ public static class RebuildAllFishingDatabaseEditor
             "Squid",
             "bait_squid",
             "Mực",
-            120,
+            50,
             7,
             1,
             10f,
@@ -349,7 +349,7 @@ public static class RebuildAllFishingDatabaseEditor
             "Mealworm",
             "bait_mealworm",
             "Sâu Bột",
-            50,
+            22,
             4
         ),
 
@@ -357,7 +357,7 @@ public static class RebuildAllFishingDatabaseEditor
             "Waxworm",
             "bait_waxworm",
             "Sâu Sáp",
-            65,
+            28,
             5
         ),
 
@@ -365,7 +365,7 @@ public static class RebuildAllFishingDatabaseEditor
             "FishMeat",
             "bait_fish_meat",
             "Thịt Cá",
-            110,
+            45,
             6,
             1,
             9f,
@@ -376,7 +376,7 @@ public static class RebuildAllFishingDatabaseEditor
             "TunaMeat",
             "bait_tuna_meat",
             "Thịt Cá Ngừ",
-            160,
+            65,
             8,
             1,
             11f,
@@ -387,7 +387,7 @@ public static class RebuildAllFishingDatabaseEditor
             "FishScraps",
             "bait_fish_scraps",
             "Thịt Cá Vụn",
-            70,
+            28,
             4
         ),
 
@@ -395,7 +395,7 @@ public static class RebuildAllFishingDatabaseEditor
             "Maggot",
             "bait_maggot",
             "Ấu Trùng Ruồi",
-            45,
+            18,
             3
         )
     };
@@ -407,8 +407,8 @@ public static class RebuildAllFishingDatabaseEditor
             "equipment_reel_callisto_xsr",
             "Callisto XSR",
             "Reel",
-            2500,
-            7
+            0,
+            1
         ),
 
         new EquipmentDefinition(
@@ -416,7 +416,7 @@ public static class RebuildAllFishingDatabaseEditor
             "equipment_line_braided_noodle",
             "Dây Dù Noodle",
             "Line",
-            700,
+            1000,
             4
         ),
 
@@ -425,7 +425,7 @@ public static class RebuildAllFishingDatabaseEditor
             "equipment_line_braided_lightning",
             "Dây Dù Tia Chớp",
             "Line",
-            1200,
+            2200,
             6
         ),
 
@@ -434,7 +434,7 @@ public static class RebuildAllFishingDatabaseEditor
             "equipment_line_braided_king",
             "Dây Dù Vua",
             "Line",
-            2000,
+            3200,
             8
         ),
 
@@ -443,7 +443,7 @@ public static class RebuildAllFishingDatabaseEditor
             "equipment_line_mobey_mono",
             "Dây Mobey Đơn",
             "Line",
-            400,
+            650,
             3
         ),
 
@@ -452,7 +452,7 @@ public static class RebuildAllFishingDatabaseEditor
             "equipment_line_mono_medium",
             "Dây Đơn Cỡ Vừa",
             "Line",
-            250,
+            400,
             2
         ),
 
@@ -461,17 +461,17 @@ public static class RebuildAllFishingDatabaseEditor
             "equipment_line_mono_cheap",
             "Dây Đơn Rẻ Tiền",
             "Line",
-            100,
+            0,
             1
         ),
 
         new EquipmentDefinition(
             "FeatherLight",
             "equipment_rod_feather_light",
-            "EQ_FeatherLight",
+            "Feather Light",
             "Rod",
-            1800,
-            5
+            0,
+            1
         ),
 
         new EquipmentDefinition(
@@ -479,7 +479,7 @@ public static class RebuildAllFishingDatabaseEditor
             "equipment_hook_6",
             "Móc Câu #6",
             "Hook",
-            150,
+            200,
             1
         ),
 
@@ -488,7 +488,7 @@ public static class RebuildAllFishingDatabaseEditor
             "equipment_hook_heavy",
             "Móc Câu Hạng Nặng",
             "Hook",
-            900,
+            1500,
             6
         ),
 
@@ -497,8 +497,8 @@ public static class RebuildAllFishingDatabaseEditor
             "equipment_hook_1",
             "Móc Câu #1",
             "Hook",
-            400,
-            3
+            0,
+            1
         )
     };
 

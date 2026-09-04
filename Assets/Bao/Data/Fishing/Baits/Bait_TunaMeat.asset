@@ -17,7 +17,7 @@ MonoBehaviour:
   description: 
   baitType: 0
   requiredLevel: 8
-  price: 160
+  price: 65
   amountPerPurchase: 1
   fishChanceBonus: 11
   rareFishChanceBonus: 4

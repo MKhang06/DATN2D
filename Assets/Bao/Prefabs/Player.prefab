@@ -5688,7 +5688,7 @@ Rigidbody2D:
     m_Bits: 0
   m_Interpolate: 0
   m_SleepingMode: 1
-  m_CollisionDetection: 0
+  m_CollisionDetection: 1
   m_Constraints: 4
 --- !u!114 &1320992098419959317
 MonoBehaviour:
@@ -5857,7 +5857,7 @@ MonoBehaviour:
   currentStamina: 100
   staminaDrainPerSecond: 15
   staminaRegenPerSecond: 2
-  Money: 9999999
+  Money: 600
   Level: 1
   CurrentXP: 0
   RequiredXP: 100

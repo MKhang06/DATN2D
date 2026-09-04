@@ -13,6 +13,6 @@ MonoBehaviour:
   m_Name: ShopItem_BraidedLineLightning
   m_EditorClassIdentifier: 
   equipmentData: {fileID: 11400000, guid: 9f5cf75b96a639347a9b592a36abb5b4, type: 2}
-  price: 1200
+  price: 2200
   amountPerPurchase: 1
   requiredPlayerLevel: 6

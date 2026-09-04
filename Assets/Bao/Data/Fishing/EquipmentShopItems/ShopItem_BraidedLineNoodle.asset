@@ -13,6 +13,6 @@ MonoBehaviour:
   m_Name: ShopItem_BraidedLineNoodle
   m_EditorClassIdentifier: 
   equipmentData: {fileID: 11400000, guid: 806388b802305e64ab94096fda86b866, type: 2}
-  price: 700
+  price: 1000
   amountPerPurchase: 1
   requiredPlayerLevel: 4

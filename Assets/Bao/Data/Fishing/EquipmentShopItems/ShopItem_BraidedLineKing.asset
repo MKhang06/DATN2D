@@ -13,6 +13,6 @@ MonoBehaviour:
   m_Name: ShopItem_BraidedLineKing
   m_EditorClassIdentifier: 
   equipmentData: {fileID: 11400000, guid: 83a3cad5f7dfe564395852fa23e969d5, type: 2}
-  price: 2000
+  price: 3200
   amountPerPurchase: 1
   requiredPlayerLevel: 8

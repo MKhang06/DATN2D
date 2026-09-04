@@ -63,7 +63,7 @@ public static class ToolShopStandaloneFinalEditor
                 "axe",
                 "Rìu",
                 "Dụng cụ dùng để chặt cây.",
-                180
+                300
             );
 
         InventoryItemData pickaxe =
@@ -71,7 +71,7 @@ public static class ToolShopStandaloneFinalEditor
                 "pickaxe",
                 "Cuốc chim",
                 "Dụng cụ dùng để khai thác đá.",
-                200
+                350
             );
 
         InventoryItemData sickle =
@@ -79,7 +79,7 @@ public static class ToolShopStandaloneFinalEditor
                 "sickle",
                 "Liềm",
                 "Dụng cụ dùng để thu hoạch.",
-                140
+                180
             );
 
         ToolShopItemData[] products =

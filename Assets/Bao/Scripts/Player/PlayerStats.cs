@@ -31,7 +31,7 @@ public class PlayerStats : MonoBehaviour
     private float staminaRegenPerSecond = 2f;
 
     [Header("Money")]
-    public int Money = 0;
+    public int Money = 600;
 
     [Header("XP")]
     public int Level = 1;

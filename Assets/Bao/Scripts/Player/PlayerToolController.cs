@@ -511,20 +511,37 @@ public class PlayerToolController : MonoBehaviour
             return;
         }
 
+        if (cam == null)
+            cam = Camera.main;
+
+        if (cam == null)
+        {
+            Debug.LogWarning(
+                "Không tìm thấy Camera Main để xác định điểm quăng câu."
+            );
+
+            return;
+        }
+
+        Vector3 castWorldPosition =
+            cam.ScreenToWorldPoint(Input.mousePosition);
+
+        castWorldPosition.z = 0f;
+
         if (toolAnimation != null)
         {
             toolAnimation.UseFishingRod(
                 () =>
                 {
                     fishingManager
-                        .TryStartFishing();
+                        .TryStartFishingAt(castWorldPosition);
                 }
             );
         }
         else
         {
             fishingManager
-                .TryStartFishing();
+                .TryStartFishingAt(castWorldPosition);
         }
     }
 

@@ -20,5 +20,5 @@ MonoBehaviour:
   stackMode: 0
   maxStack: 999
   uniqueOwnership: 0
-  buyPrice: 30
-  sellPrice: 15
+  buyPrice: 15
+  sellPrice: 7

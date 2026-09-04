@@ -13,6 +13,6 @@ MonoBehaviour:
   m_Name: ShopItem_Hook6
   m_EditorClassIdentifier: 
   equipmentData: {fileID: 11400000, guid: ea0ad23fcdacb5c4aaea39bd15e0b422, type: 2}
-  price: 150
+  price: 200
   amountPerPurchase: 1
   requiredPlayerLevel: 1

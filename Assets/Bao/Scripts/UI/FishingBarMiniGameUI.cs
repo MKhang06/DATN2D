@@ -188,6 +188,43 @@ public class FishingBarMiniGameUI : MonoBehaviour
         UpdateVisual();
     }
 
+    public void ShowFishApproaching()
+    {
+        state = State.WaitingBite;
+        ShowRoot();
+
+        if (statusText != null)
+            statusText.text = "CÓ BÓNG CÁ ĐANG TỚI...";
+
+        if (hintText != null)
+            hintText.text = "Giữ yên cần, cá đang tiến gần mồi.";
+    }
+
+    public void ShowNibbling()
+    {
+        state = State.WaitingBite;
+        ShowRoot();
+
+        if (statusText != null)
+            statusText.text = "CÁ ĐANG THỬ MỒI...";
+
+        if (hintText != null)
+            hintText.text = "Phao đang nhấp, chờ cá cắn hẳn.";
+    }
+
+    public void ShowAutoRetract()
+    {
+        state = State.WaitingBite;
+        ShowRoot();
+        HideFishIcon();
+
+        if (statusText != null)
+            statusText.text = "KHÔNG CÓ CÁ CẮN";
+
+        if (hintText != null)
+            hintText.text = "Đã đủ 30 giây - đang tự thu cần.";
+    }
+
     public void ShowFishBite(Sprite fishSprite)
     {
         if (fishIconRect != null)
