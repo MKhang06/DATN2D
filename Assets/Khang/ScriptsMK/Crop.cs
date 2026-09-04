@@ -78,6 +78,7 @@ namespace Khang
             }
 
             isHarvested = true;
+            global::GreenFieldQuestEvents.ReportCropHarvested();
             Destroy(gameObject);
         }
 

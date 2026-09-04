@@ -79,6 +79,7 @@ namespace Khang
             Vector3 spawnPosition = farmTilemap.GetCellCenterWorld(cellPosition);
             GameObject newCrop = Instantiate(cropPrefabs[selectedCropIndex], spawnPosition, Quaternion.identity);
             plantedCrops[cellPosition] = newCrop;
+            global::GreenFieldQuestEvents.ReportCropPlanted();
         }
     }
 }

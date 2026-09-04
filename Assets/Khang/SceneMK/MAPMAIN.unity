@@ -15739,7 +15739,7 @@ PrefabInstance:
       objectReference: {fileID: 0}
     - target: {fileID: 3964385454645102578, guid: 0b13ecfbe49197747ade198e011f0b5e, type: 3}
       propertyPath: Money
-      value: 1
+      value: 600
       objectReference: {fileID: 0}
     - target: {fileID: 3964385454645102578, guid: 0b13ecfbe49197747ade198e011f0b5e, type: 3}
       propertyPath: CurrentXP
@@ -16128,8 +16128,8 @@ MonoBehaviour:
   reelSpeedPerLevel: 0.2
   hookLevel: 1
   hookFishChanceBonus: 0
-  currentBaitName: "Giun \u0110\u1EA5t"
-  baitFishChanceBonus: 15
+  currentBaitName:
+  baitFishChanceBonus: 0
   basicEquipmentIgnoresSkill: 1
   showDebugLogs: 0
 --- !u!114 &367349447
@@ -16177,10 +16177,10 @@ MonoBehaviour:
   waterLayer:
     serializedVersion: 2
     m_Bits: 16
-  waterCheckRadius: 0.35
+  waterCheckRadius: 0.55
   fishingEnergyCost: 8
-  waitMin: 2
-  waitMax: 6
+  waitMin: 5
+  waitMax: 16
   maxWaitDuration: 30
   fishApproachDuration: 1.6
   fishShadowStartDistance: 2.6
@@ -16194,8 +16194,8 @@ MonoBehaviour:
   nibblePauseMin: 0.18
   nibblePauseMax: 0.42
   autoRetractDuration: 0.45
-  baseFishChance: 55
-  noBaitPenalty: 20
+  baseFishChance: 68
+  noBaitPenalty: 18
   fishLoots:
   - itemName: "C\xE1 H\u1ED3i Nh\u1ECF"
     icon: {fileID: 4864474330649768578, guid: 2bd5fff46156e7944901035971334d6d, type: 3}
@@ -708165,7 +708165,7 @@ CompositeCollider2D:
   m_CompositeOperation: 0
   m_CompositeOrder: 0
   m_Offset: {x: 0, y: 0}
-  m_GeometryType: 0
+  m_GeometryType: 1
   m_GenerationType: 0
   m_EdgeRadius: 0
   m_ColliderPaths:
