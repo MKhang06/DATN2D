@@ -11,7 +11,7 @@ GameObject:
   - component: {fileID: 5942134381239785736}
   - component: {fileID: 4949202042633393070}
   m_Layer: 0
-  m_Name: Item_Pumpkin
+  m_Name: Item_Pumpkinn
   m_TagString: Untagged
   m_Icon: {fileID: 0}
   m_NavMeshLayer: 0
