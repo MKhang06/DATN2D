@@ -50,16 +50,16 @@ public sealed class WorldSceneOrganizer2D : MonoBehaviour
     };
 
     [SerializeField, Range(0.1f, 1f)]
-    private float solidWidthRatio = 0.62f;
+    private float solidWidthRatio = 0.42f;
 
     [SerializeField, Range(0.05f, 0.5f)]
-    private float solidHeightRatio = 0.16f;
+    private float solidHeightRatio = 0.1f;
 
     [SerializeField, Min(0.05f)]
-    private float minimumSolidHeight = 0.2f;
+    private float minimumSolidHeight = 0.14f;
 
     [SerializeField, Min(0.05f)]
-    private float maximumSolidHeight = 1.1f;
+    private float maximumSolidHeight = 0.55f;
 
     private readonly HashSet<string> sortableLayers =
         new HashSet<string>();
@@ -75,6 +75,7 @@ public sealed class WorldSceneOrganizer2D : MonoBehaviour
     private sealed class SortEntry
     {
         public SpriteRenderer Renderer;
+        public SpriteRenderer DepthRenderer;
         public Transform Anchor;
         public int LocalOrderOffset;
         public bool UseAnchorPosition;
@@ -191,7 +192,12 @@ public sealed class WorldSceneOrganizer2D : MonoBehaviour
 
             if ((solidLayers.Contains(originalLayer) ||
                  isChoppableTree) &&
-                EnsureSolidFootprint(renderer))
+                EnsureSolidFootprint(
+                    renderer,
+                    entry.DepthRenderer,
+                    originalLayer,
+                    isChoppableTree
+                ))
             {
                 colliderCount++;
             }
@@ -230,6 +236,9 @@ public sealed class WorldSceneOrganizer2D : MonoBehaviour
         return new SortEntry
         {
             Renderer = renderer,
+            DepthRenderer = actorLayer
+                ? renderer
+                : FindVisualRootRenderer(renderer),
             Anchor = anchor,
             LocalOrderOffset = GetLocalOrderOffset(
                 originalLayer,
@@ -243,7 +252,7 @@ public sealed class WorldSceneOrganizer2D : MonoBehaviour
     {
         float groundY = entry.UseAnchorPosition
             ? entry.Anchor.position.y
-            : entry.Renderer.bounds.min.y;
+            : entry.DepthRenderer.bounds.min.y;
 
         int order =
             Mathf.RoundToInt(-groundY * sortingOrdersPerUnit) +
@@ -253,16 +262,19 @@ public sealed class WorldSceneOrganizer2D : MonoBehaviour
             Mathf.Clamp(order, short.MinValue, short.MaxValue);
     }
 
-    private bool EnsureSolidFootprint(SpriteRenderer renderer)
+    private bool EnsureSolidFootprint(
+        SpriteRenderer renderer,
+        SpriteRenderer depthRenderer,
+        string originalLayer,
+        bool isChoppableTree)
     {
+        // Một cây/nhà có thể gồm nhiều sprite con. Chỉ sprite gốc được giữ
+        // hitbox vật lý để tránh collider chồng lên nhau và chặn quá xa.
+        if (renderer != depthRenderer)
+            return false;
+
         Collider2D[] localColliders =
             renderer.GetComponents<Collider2D>();
-
-        foreach (Collider2D collider in localColliders)
-        {
-            if (collider != null && !collider.isTrigger)
-                return false;
-        }
 
         Collider2D[] parentColliders =
             renderer.GetComponentsInParent<Collider2D>(true);
@@ -281,27 +293,115 @@ public sealed class WorldSceneOrganizer2D : MonoBehaviour
             return false;
 
         Bounds spriteBounds = renderer.sprite.bounds;
-        float width = Mathf.Max(
-            0.15f,
-            spriteBounds.size.x * solidWidthRatio
+        Vector2 footprint = CalculateFootprint(
+            spriteBounds,
+            originalLayer,
+            isChoppableTree
         );
-        float height = Mathf.Clamp(
-            spriteBounds.size.y * solidHeightRatio,
-            minimumSolidHeight,
-            maximumSolidHeight
+        Vector2 offset = new Vector2(
+            spriteBounds.center.x,
+            spriteBounds.min.y + footprint.y * 0.5f
         );
+
+        foreach (Collider2D collider in localColliders)
+        {
+            if (collider == null || collider.isTrigger)
+                continue;
+
+            ResizeCollider(collider, footprint, offset);
+            return false;
+        }
 
         BoxCollider2D solidCollider =
             renderer.gameObject.AddComponent<BoxCollider2D>();
 
         solidCollider.isTrigger = false;
-        solidCollider.size = new Vector2(width, height);
-        solidCollider.offset = new Vector2(
-            spriteBounds.center.x,
-            spriteBounds.min.y + height * 0.5f
-        );
+        solidCollider.size = footprint;
+        solidCollider.offset = offset;
 
         return true;
+    }
+
+    private Vector2 CalculateFootprint(
+        Bounds spriteBounds,
+        string originalLayer,
+        bool isChoppableTree)
+    {
+        float width;
+        float height;
+
+        if (originalLayer == "NPC")
+        {
+            width = Mathf.Clamp(spriteBounds.size.x * 0.3f, 0.38f, 0.56f);
+            height = Mathf.Clamp(spriteBounds.size.y * 0.11f, 0.24f, 0.38f);
+        }
+        else if (isChoppableTree || IsTreeLayer(originalLayer))
+        {
+            width = Mathf.Clamp(spriteBounds.size.x * 0.28f, 0.42f, 1.25f);
+            height = Mathf.Clamp(spriteBounds.size.y * 0.07f, 0.2f, 0.46f);
+        }
+        else if (IsBuildingLayer(originalLayer))
+        {
+            width = Mathf.Clamp(spriteBounds.size.x * 0.72f, 0.6f, 5f);
+            height = Mathf.Clamp(spriteBounds.size.y * 0.1f, 0.3f, 0.75f);
+        }
+        else
+        {
+            width = Mathf.Max(0.15f, spriteBounds.size.x * solidWidthRatio);
+            height = Mathf.Clamp(
+                spriteBounds.size.y * solidHeightRatio,
+                minimumSolidHeight,
+                maximumSolidHeight
+            );
+        }
+
+        return new Vector2(width, height);
+    }
+
+    private static void ResizeCollider(
+        Collider2D collider,
+        Vector2 size,
+        Vector2 offset)
+    {
+        if (collider is BoxCollider2D box)
+        {
+            box.size = size;
+            box.offset = offset;
+        }
+        else if (collider is CapsuleCollider2D capsule)
+        {
+            capsule.direction = size.x >= size.y
+                ? CapsuleDirection2D.Horizontal
+                : CapsuleDirection2D.Vertical;
+            capsule.size = size;
+            capsule.offset = offset;
+        }
+        else if (collider is CircleCollider2D circle)
+        {
+            circle.radius = Mathf.Min(size.x, size.y) * 0.5f;
+            circle.offset = offset;
+        }
+    }
+
+    private static SpriteRenderer FindVisualRootRenderer(
+        SpriteRenderer renderer)
+    {
+        SpriteRenderer root = renderer;
+        Transform current = renderer.transform.parent;
+
+        while (current != null)
+        {
+            SpriteRenderer parentRenderer =
+                current.GetComponent<SpriteRenderer>();
+
+            if (parentRenderer == null)
+                break;
+
+            root = parentRenderer;
+            current = current.parent;
+        }
+
+        return root;
     }
 
     private bool ShouldUpdateWhileMoving(
@@ -352,6 +452,16 @@ public sealed class WorldSceneOrganizer2D : MonoBehaviour
                layerName == "Arm" ||
                layerName == "hair" ||
                layerName == "NPC";
+    }
+
+    private static bool IsTreeLayer(string layerName)
+    {
+        return layerName == "Tree" || layerName == "tree";
+    }
+
+    private static bool IsBuildingLayer(string layerName)
+    {
+        return layerName == "Building" || layerName == "house";
     }
 
     private static int GetLocalOrderOffset(

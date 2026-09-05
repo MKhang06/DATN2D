@@ -35,6 +35,13 @@ public class ChoppableTreeGroupSetup : MonoBehaviour
             if (treeRenderer == null)
                 continue;
 
+            // Sprite con (gốc cây/rễ) chỉ là một phần hình của cùng một cây.
+            // Không biến nó thành cây tương tác riêng hoặc thêm collider riêng.
+            Transform parent = treeRenderer.transform.parent;
+
+            if (parent != null && parent.GetComponent<SpriteRenderer>() != null)
+                continue;
+
             GameObject treeObject = treeRenderer.gameObject;
 
             if (treeObject == sourceTree.gameObject)

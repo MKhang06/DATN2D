@@ -16,8 +16,8 @@ public class PlayerController : MonoBehaviour
 
     [Header("Water Blocking")]
     [SerializeField] private LayerMask waterLayer;
-    [SerializeField, Min(0.05f)] private float waterPathStep = 0.2f;
-    [SerializeField, Min(0.01f)] private float waterFootInset = 0.08f;
+    [SerializeField, Min(0.05f)] private float waterPathStep = 0.12f;
+    [SerializeField, Min(0.01f)] private float waterFootInset = 0.03f;
 
     public bool canMove = true;
 

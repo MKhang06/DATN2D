@@ -20,6 +20,11 @@ public class InventorySlotUI : MonoBehaviour,
     private Canvas parentCanvas;
     private Image dragIcon;
 
+    private void Awake()
+    {
+        ConfigureSelectedFrame();
+    }
+
     public void Init(
         InventoryManager.SlotArea area,
         int index,
@@ -28,6 +33,23 @@ public class InventorySlotUI : MonoBehaviour,
         slotArea = area;
         slotIndex = index;
         parentCanvas = canvas;
+        ConfigureSelectedFrame();
+    }
+
+    private void ConfigureSelectedFrame()
+    {
+        if (selectedFrame == null)
+            return;
+
+        Image frameImage = selectedFrame.GetComponent<Image>();
+
+        if (frameImage == null || frameImage.sprite != null)
+            return;
+
+        // Khung chọn trong scene là một Image không có sprite. Giữ một lớp
+        // xanh rất nhẹ để không che icon/ô trống, còn Shadow tạo viền xanh.
+        frameImage.color = new Color(0.15f, 0.85f, 0.35f, 0.08f);
+        frameImage.raycastTarget = false;
     }
 
     public void SetSlot(
